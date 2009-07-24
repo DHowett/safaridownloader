@@ -327,12 +327,12 @@ static id $createButton(id self, SEL sel, id description)
   
   if (tag == 17) // portrait buton
   {
-    [ret setImage:[UIImage imageWithContentsOfFile:@"/var/mobile/Library/SafariDownloads/images/Download.png"]];
+    [ret setImage:[UIImage imageNamed:@"Download.png"]];
     [ret addTarget:downloader action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
   }
   else if (tag == 18) // landscape button
   {
-    [ret setImage:[UIImage imageWithContentsOfFile:@"/var/mobile/Library/SafariDownloads/images/DownloadSmall.png"]];
+    [ret setImage:[UIImage imageNamed:@"DownloadSmall.png"]];
     [ret addTarget:downloader action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
   }
   else if (tag == 66) // portrait spacer
