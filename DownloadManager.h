@@ -16,6 +16,7 @@
   UITableView*      _tableView;
   NSArray*          _mimeTypes;
   NSMutableArray*   _currentDownloads;
+  NSMutableArray*   _finishedDownloads;
   NSOperationQueue* _downloadQueue;
 }
 

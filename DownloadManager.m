@@ -12,7 +12,7 @@
 @implementation DownloadManager
 
 #pragma mark -
-#pragma mark Singleton Methods
+#pragma mark Singleton Methods/*{{{*/
 static id sharedManager = nil;
 
 + (void)initialize  {
@@ -37,6 +37,7 @@ static id sharedManager = nil;
   _tableView.dataSource = self;
   self.view = _tableView; 
   _currentDownloads = [NSMutableArray new];
+  _finishedDownloads = [NSMutableArray new];
   _downloadQueue = [NSOperationQueue new];
   [_downloadQueue setMaxConcurrentOperationCount:5];
   _mimeTypes = [[NSArray alloc] initWithObjects: // eventually have these loaded from prefs on disk
@@ -102,8 +103,8 @@ static id sharedManager = nil;
   return self;
 }
 
-#pragma mark -
-#pragma mark Filetype Support Management
+#pragma mark -/*}}}*/
+#pragma mark Filetype Support Management/*{{{*/
 
 - (BOOL)supportedRequest:(NSURLRequest *)request
             withMimeType:(NSString *)mimeType
@@ -153,8 +154,8 @@ static id sharedManager = nil;
   return NO;
 }
 
-#pragma mark -
-#pragma mark Persistent Storage
+#pragma mark -/*}}}*/
+#pragma mark Persistent Storage/*{{{*/
 
 - (void)saveData
 {
@@ -162,8 +163,8 @@ static id sharedManager = nil;
   //[NSKeyedArchiver archiveRootObject:_currentDownloads toFile:DL_ARCHIVE_PATH]; 
 }
 
-#pragma mark -
-#pragma mark Download Management
+#pragma mark -/*}}}*/
+#pragma mark Download Management/*{{{*/
 
 - (SafariDownload *)downloadWithURL:(NSURL*)url
 {
@@ -183,8 +184,12 @@ static id sharedManager = nil;
     [_downloadQueue addOperation:op];
     [op release];
     [_currentDownloads insertObject:download atIndex:0];
-    [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:0 inSection:0]] 
-                      withRowAnimation:UITableViewRowAnimationFade];
+    if(_currentDownloads.count == 1) {
+      [_tableView insertSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+    } else {
+      [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
+                        withRowAnimation:UITableViewRowAnimationFade];
+    }
     return YES;
   }
   return NO;
@@ -250,9 +255,15 @@ static id sharedManager = nil;
       NSLog(@"exception caught attempting to cancel operation"); 
     }
     
+    int idx = [_currentDownloads indexOfObject:download];
     [_currentDownloads removeObject:download];
-    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:index inSection:0]] 
-                      withRowAnimation:UITableViewRowAnimationFade];
+
+    if (_currentDownloads.count == 0) {
+      [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+    } else {
+      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:idx inSection:0]]
+                                                 withRowAnimation:UITableViewRowAnimationFade];
+    }
   }
   return NO;
 }
@@ -290,8 +301,8 @@ static id sharedManager = nil;
   return cell;
 }
 
-#pragma mark -
-#pragma mark SafariDownloadDelegate Methods
+#pragma mark -/*}}}*/
+#pragma mark SafariDownloadDelegate Methods/*{{{*/
 
 - (void)downloadDidBegin:(SafariDownload*)download
 {
@@ -313,9 +324,22 @@ static id sharedManager = nil;
   NSUInteger row = [_currentDownloads indexOfObject:download];
   [_currentDownloads removeObject:download];
 
-  [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]] 
-                    withRowAnimation:UITableViewRowAnimationFade]; 
-  
+  if (_currentDownloads.count == 0) {
+    [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+  } else {
+    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
+                                               withRowAnimation:UITableViewRowAnimationFade];
+  }
+
+  [_finishedDownloads addObject:download];
+
+  if (_currentDownloads.count > 0) {
+    [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_finishedDownloads.count-1 inSection:1]]
+                                               withRowAnimation:UITableViewRowAnimationFade];
+  } else {
+    [_tableView reloadData];
+  }
+
   [self saveData];
 }
 
@@ -332,8 +356,8 @@ static id sharedManager = nil;
   cell.detailTextLabel.text = @"Download Failed";
 }
 
-#pragma mark -
-#pragma mark UIViewController Methods
+#pragma mark -/*}}}*/
+#pragma mark UIViewController Methods/*{{{*/
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
@@ -355,21 +379,48 @@ static id sharedManager = nil;
   [super viewDidUnload]; 
 }
 
-#pragma mark -
-#pragma mark UITableView methods
+#pragma mark -/*}}}*/
+#pragma mark UITableView methods/*{{{*/
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-  return 1;
+  if(_currentDownloads.count > 0) {
+    return 2;
+  } else {
+    return 1;
+  }
+}
+
+- (NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+  if(tableView.numberOfSections == 2 && section == 0) {
+    return @"Active Downloads";
+  } else {
+    return @"Finished Downloads";
+  }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  return [_currentDownloads count];
+  if(tableView.numberOfSections == 2 && section == 0) {
+    return [_currentDownloads count];
+  } else {
+    return [_finishedDownloads count];
+  }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   
   static NSString *CellIdentifier = @"DownloadCell";
+  BOOL finished = NO;
+  SafariDownload *download;
   
+  if(tableView.numberOfSections == 2 && indexPath.section == 0) {
+    download = [_currentDownloads objectAtIndex:indexPath.row];
+    finished = NO;
+  } else {
+    CellIdentifier = @"FinishedDownloadCell";
+    download = [_finishedDownloads objectAtIndex:indexPath.row];
+    finished = YES;
+  }
+
   UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) 
   {
@@ -381,8 +432,6 @@ static id sharedManager = nil;
     progressView.tag = kProgressViewTag;
     [cell addSubview:progressView];
   }
-  
-  SafariDownload *download = [_currentDownloads objectAtIndex:indexPath.row];
   
   // Set up the cell...
   cell.imageView.image = [UIImage imageNamed:download.icon];
@@ -409,22 +458,27 @@ static id sharedManager = nil;
   return YES;
 }
 
-- (NSString *)tableView:(UITableView *)table titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
+- (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if (indexPath.section == 0)
+  if (tableView.numberOfSections == 2 && indexPath.section == 0)
     return @"Cancel"; 
   else // local files
-    return @"Delete";
+    return @"Clear";
 }
 
 // Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-  
   if (editingStyle == UITableViewCellEditingStyleDelete) {
-    [self cancelDownload:[_currentDownloads objectAtIndex:indexPath.row]];
+    if (tableView.numberOfSections == 2 && indexPath.section == 0)
+      [self cancelDownload:[_currentDownloads objectAtIndex:indexPath.row]];
+    else {
+      [_finishedDownloads removeObjectAtIndex:indexPath.row];
+      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
+                        withRowAnimation:UITableViewRowAnimationFade];
+    }
   }
 }
-
+/*}}}*/
 @end
 
 // vim:filetype=objc:ts=2:sw=2:expandtab
