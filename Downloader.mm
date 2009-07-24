@@ -8,17 +8,30 @@
 #import "Safari/Application.h"
 #import "WebPolicyDelegate.h"
 #import "DownloadManager.h"
+#import "UIKitExtra/UIToolbarButton.h"
+#import "Safari/BrowserController.h"
+#import "Safari/BrowserButtonBar.h"
+#import <QuartzCore/QuartzCore.h>
 
+// Numerical and Structural String Formatting Macros
+#define iF(i) [NSString stringWithFormat:@"%d", i]
+#define fF(f) [NSString stringWithFormat:@"%.2f", f]
+#define bF(b) [NSString stringWithFormat:@"%@", b ? @"true" : @"false"]
+#define sF(inset) NSStringFromUIEdgeInsets(inset)
 
 @class Downloader;
 static Downloader *downloader = nil;
 
-@protocol RenamedMethods
-- (void)WV$setPolicyDelegate:(id)delegate;
-- (void)AP$applicationDidFinishLaunching:(id)application;
+@class BrowserButtonBar;
+@interface BrowserButtonBar (mine)
+- (NSArray*)buttonItems;
+- (void)setButtonItems:(NSArray *)its;
+- (void)showButtonGroup:(int)group withDuration:(double)duration;
+- (void)registerButtonGroup:(int)group withButtons:(int*)buttons withCount:(int)count;
+- (id)$$createButtonWithDescription:(id)description;
 @end
 
-static UIWebDocumentView<RenamedMethods> *docView = nil;
+static UIWebDocumentView *docView = nil;
 
 @interface Downloader : NSObject <UIAlertViewDelegate>
 {
@@ -28,12 +41,6 @@ static UIWebDocumentView<RenamedMethods> *docView = nil;
 - (void)downloadFile:(NSString *)file;
 
 @end
-
-void omfg(const void *k, const void *i, void *c) {
-  int key = (int)k;
-  int *v = (int*)i;
-  NSLog(@"%p = %x %x %x", v, v[0], v[1], v[2]);
-}
 
 @implementation Downloader
 
@@ -55,71 +62,42 @@ static UINavigationController *controller = nil;
   [super dealloc]; 
 }
 
-- (void)applicationDidFinishLaunching
+- (void)loadCustomToolbar
 {
   Class BrowserController = objc_getClass("BrowserController");
   Class BrowserButtonBar = objc_getClass("BrowserButtonBar");
-  //    Class BrowserButtonBar = objc_getClass("BrowserButtonBar");
-  NSLog(@"BrowserController: %@", [BrowserController sharedBrowserController]);
-
   BrowserController *bcont = [BrowserController sharedBrowserController];
-
-//  Ivar buttonBarIvar = object_getInstanceVariable(bcont, "_buttonBar", NULL);
-//  UIToolbar* buttonBar = (UIToolbar*)object_getIvar(bcont, buttonBarIvar);
   BrowserButtonBar *buttonBar = MSHookIvar<BrowserButtonBar *>(bcont, "_buttonBar");
-  NSLog(@"buttonBar: %@", buttonBar);
   CFMutableDictionaryRef _groups = MSHookIvar<CFMutableDictionaryRef>(buttonBar, "_groups");
   int cg = MSHookIvar<int>(buttonBar, "_currentButtonGroup");
-  NSLog(@"Current Button Group: %d", cg);
-  //CFShow(_groups);
-
-//  NSLog(@"%@", _groups);
-/*
-  NSArray* items = [buttonBar items];
-  NSMutableArray* mutItems = [items mutableCopy];
-  [items release];
-  NSLog(@"current items: %@", mutItems); */
-//  UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemOrganize target:self action:@selector(showDownloadManager)];
-  //[buttonBar createButtonWithDescription:@"Downloads"];
-//  +(id)imageButtonItemWithName:(id)name tag:(int)tag action:(SEL)action target:(id)target
-  // The reallocs here ARE correct. UIKit uses malloc when it first sets these.
-/*  int *oldPortraitGroup = (int*)CFDictionaryGetValue(_groups, (void*)1); // {{{
-  int *oldLandscapeGroup = (int*)CFDictionaryGetValue(_groups, (void*)2);
-  int *newPortraitGroup = (int*)realloc(oldPortraitGroup, oldPortraitGroup[0]+2 * sizeof(int));
-  int *newLandscapeGroup = (int*)realloc(oldLandscapeGroup, oldLandscapeGroup[0]+2 * sizeof(int));
-  newPortraitGroup[0] = 6; newPortraitGroup[5] = 17; newPortraitGroup[6] = 3;
-  newLandscapeGroup[0] = 6; newLandscapeGroup[5] = 18; newLandscapeGroup[6] = 4;
-  CFDictionarySetValue(_groups, (void*)1, (void*)newPortraitGroup);
-  CFDictionarySetValue(_groups, (void*)2, (void*)newLandscapeGroup); */ // }}}
   NSArray *_buttonItems = [buttonBar buttonItems];
-
-//  id x = [BrowserButtonBar imageButtonItemWithName:@"NavDownloads.png" tag:17 action:@selector(showDownloadManager) target:self];
-//  id y = [BrowserButtonBar imageButtonItemWithName:@"NavDownloadsSmall.png" tag:18 action:@selector(showDownloadManager) target:self];
-  id x = [BrowserButtonBar imageButtonItemWithName:@"NavDownloads.png" tag:17 action:nil target:nil];
-  id y = [BrowserButtonBar imageButtonItemWithName:@"NavDownloadsSmall.png" tag:18 action:nil target:nil];
+  
+  id x = [BrowserButtonBar imageButtonItemWithName:@"NavBookmarks.png" tag:17 action:nil target:nil];
+  id y = [BrowserButtonBar imageButtonItemWithName:@"NavBookmarksSmall.png" tag:18 action:nil target:nil];
+  
+  id spacer1 = [BrowserButtonBar imageButtonItemWithName:@"spacer" tag:66 action:nil target:nil];
+  id spacer2 = [BrowserButtonBar imageButtonItemWithName:@"spacer" tag:67 action:nil target:nil];
+  
   NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
   [mutButtonItems addObject:x];
   [mutButtonItems addObject:y];
+  [mutButtonItems addObject:spacer1];
+  [mutButtonItems addObject:spacer2];
   [buttonBar setButtonItems:mutButtonItems];
   [mutButtonItems release];
-
-  int portraitGroup[] = {5, 7, 15, 1, 17, 3};
-  int landscapeGroup[] = {6, 8, 16, 2, 18, 4};
-  int *oldPortraitGroup = (int*)CFDictionaryGetValue(_groups, (void*)1);
-  int *oldLandscapeGroup = (int*)CFDictionaryGetValue(_groups, (void*)2);
+  
+  int portraitGroup[]  = {5, 66, 7, 66, 15, 66, 1, 66, 17, 66, 3};
+  int landscapeGroup[] = {6, 67, 8, 67, 16, 67, 2, 67, 18, 67, 4};
+  
   CFDictionaryRemoveValue(_groups, (void*)1);
   CFDictionaryRemoveValue(_groups, (void*)2);
-  free(oldPortraitGroup); free(oldLandscapeGroup);
-  [buttonBar registerButtonGroup:1 withButtons:portraitGroup withCount:6];
-  [buttonBar registerButtonGroup:2 withButtons:landscapeGroup withCount:6];
-/*  [mutItems addObject:item];
-  [buttonBar setItems:[mutItems copy]];
-  NSLog(@"new items: %@", [buttonBar items]);
-  [mutItems release];*/
-//  [buttonBar addSubview:[item createViewForToolbar:buttonBar]];
+  
+  [buttonBar registerButtonGroup:1 withButtons:portraitGroup withCount:11];
+  [buttonBar registerButtonGroup:2 withButtons:landscapeGroup withCount:11];
+  
+  if (cg == 1 || cg == 2)
+    [buttonBar showButtonGroup:cg withDuration:0]; // duration appears to either be ignored or is somehow related to animations
 }
-
-#pragma mark Download Manager UI Control /* {{{ */
 
 - (void)showDownloadManager
 {
@@ -127,20 +105,46 @@ static UINavigationController *controller = nil;
   controller = [[UINavigationController alloc] initWithRootViewController:[DownloadManager sharedManager]];
   UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(hideDownloadManager)];
   dlManager.navigationItem.leftBarButtonItem = doneItemButton;
+  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" style:UIBarButtonItemStyleBordered target:nil action:nil];
+  dlManager.navigationItem.rightBarButtonItem = cancelButton;
+  dlManager.navigationItem.rightBarButtonItem.enabled = NO;
   dlManager.navigationItem.title = @"Downloads";
   [controller setNavigationBarHidden:NO];
+  //  [controller setToolbarHidden:NO]; // decide whether we really want this or not
+  CATransition *animation = [CATransition animation];
+  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+  [animation setType:kCATransitionPush];
+  [animation setSubtype:kCATransitionFromTop];
+  [animation setDuration:0.3];
+  [animation setFillMode:kCAFillModeForwards];
+  [animation setRemovedOnCompletion:YES];
+  [[[controller view] layer] addAnimation:animation forKey:@"pushUp"];
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
   [keyWindow addSubview:[controller view]];
 }
 
-- (void)hideDownloadManager
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
 {
-  NSLog(@"removing view: %@", [controller view]);
   [[controller view] removeFromSuperview];
 }
 
-#pragma mark - /* }}} */
-#pragma mark Download Management /* {{{ */
+- (void)hideDownloadManager
+{
+  CATransition *animation = [CATransition animation];
+  [animation setDelegate:self];
+  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+  [animation setType:kCATransitionPush];
+  [animation setSubtype:kCATransitionFromBottom];
+  [animation setDuration:0.4];
+  [animation setFillMode:kCAFillModeForwards];
+  [animation setDelegate:self];
+  [animation setEndProgress:1.0];
+  [[[controller view] layer] addAnimation:animation forKey:@"pushUp"];
+  [[controller view] setFrame:CGRectOffset(controller.view.frame, 0, -controller.view.frame.size.height)];
+}
+
+#pragma mark -
+#pragma mark Download Management/*{{{*/
 
 - (void)queryUserForDownloadWithRequest:(NSURLRequest *)request
 {  
@@ -154,7 +158,7 @@ static UINavigationController *controller = nil;
                                        otherButtonTitles:nil];
   [lulz addButtonWithTitle:@"Yes"];
   
-  NSString *impr = @"/var/mobile/Media/SafariDownloader/images";
+  NSString *impr = @"/var/mobile/Library/SafariDownloads/images";
   NSString *icn = [[filename pathExtension] stringByAppendingString:@".png"];
   NSLog(@"trying path: %@", [impr stringByAppendingPathComponent:icn]);
   if (![[NSFileManager defaultManager] 
@@ -202,8 +206,8 @@ static UINavigationController *controller = nil;
   _currentRequest = nil;
 }
 
-#pragma mark - /* }}} */
-#pragma mark WebKit WebPolicyDelegate Methods /* {{{ */
+#pragma mark -/*}}}*/
+#pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
 
 - (void) webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)action 
          request:(NSURLRequest *)request 
@@ -288,118 +292,84 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 
 @end
 
-#pragma mark - /* }}} */
-#pragma mark Renamed Methods /* {{{ */
+#pragma mark -/*}}}*/
+#pragma mark Renamed Methods/*{{{*/
+
+@protocol ApplicationAdditions
+- (void)$$applicationDidFinishLaunching:(UIApplication *)app;
+@end
+
+@protocol WebViewAdditions
+- (void)$$setPolicyDelegate:(id)delegate;
+@end
+
+@protocol UIToolbarButtonAdditions
+- (UIToolbarButton*)$$hitTest:(CGPoint)point withEvent:(UIEvent*)event;
+- (void)$$setFrame:(CGRect)frm;
+@end
 
 @class WebView;
-static void _setPolDel(WebView<RenamedMethods> *self, SEL sel, id delegate)
+static void $setPolicyDelegate(WebView<WebViewAdditions> *self, SEL sel, id delegate)
 {
-  NSLog(@"WANTS TO SET delegate: %@", delegate);
-  [self WV$setPolicyDelegate:downloader];
+  [self $$setPolicyDelegate:downloader];
 }
 
-@class Application;
-static void _appLaunchedAwesome(Application<RenamedMethods> *self, SEL sel, id application) {
-  [self AP$applicationDidFinishLaunching:application];
-  [downloader applicationDidFinishLaunching];
+static void $finishLaunching(Application<ApplicationAdditions> *self, SEL sel, UIApplication* app)
+{
+  [self $$applicationDidFinishLaunching:app]; 
+  [downloader loadCustomToolbar];
 }
 
-#pragma mark - /* }}} */
-
-#include <DHHookCommon.h>
-HOOK(BrowserButtonBar, registerButtonGroup$withButtons$withCount$, void, int group, int *buttons, int count) {
-  CALL_ORIG(BrowserButtonBar, registerButtonGroup$withButtons$withCount$, group, buttons, count);
-  NSLog(@"registerButtonGroup:%d withButtons:%d withCount:%d", group, buttons, count);
-  int i = 0;
-  for(i = 0; i <count; i++) {
-    NSLog(@"rbg.. button %d is %d", i, buttons[i]);
+static id $createButton(id self, SEL sel, id description)
+{
+  UIToolbarButton* ret = [self $$createButtonWithDescription:description];
+  NSInteger tag = [[description objectForKey:@"UIButtonBarButtonTag"] intValue];
+  
+  if (tag == 17) // portrait buton
+  {
+    [ret setImage:[UIImage imageWithContentsOfFile:@"/var/mobile/Library/SafariDownloads/images/Download.png"]];
+    [ret addTarget:downloader action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
   }
+  else if (tag == 18) // landscape button
+  {
+    [ret setImage:[UIImage imageWithContentsOfFile:@"/var/mobile/Library/SafariDownloads/images/DownloadSmall.png"]];
+    [ret addTarget:downloader action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
+  }
+  else if (tag == 66) // portrait spacer
+    ret.frame = CGRectMake(ret.frame.origin.x, ret.frame.origin.y, 15, ret.frame.size.height);
+  else if (tag == 67) // landscape spacer
+    ret.frame = CGRectMake(ret.frame.origin.x, ret.frame.origin.y, 45, ret.frame.size.height);
+  return ret;
 }
+
+static id $hitTest(UIToolbarButton<UIToolbarButtonAdditions> * self, SEL sel, CGPoint point, id event)
+{
+  if ([self tag] == 66 || [self tag] == 67)
+    return nil;
+  return [self $$hitTest:point withEvent:event]; 
+}
+
+static void $setFrame(UIToolbarButton<UIToolbarButtonAdditions> * self, SEL sel, CGRect frame)
+{
+  if (self.tag == 17)
+    [self $$setFrame:CGRectOffset(frame, 3, 0)];
+  else if (self.tag == 18)
+    [self $$setFrame:CGRectOffset(frame, 8, 0)];
+  else
+    [self $$setFrame:frame];
+}
+
+#pragma mark -/*}}}*/
 
 extern "C" void DownloaderInitialize() {	
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
-  
   downloader = [[Downloader alloc] init];
-  MSHookMessage(NSClassFromString(@"WebView"), @selector(setPolicyDelegate:), (IMP)&_setPolDel, "WV$");
-  MSHookMessage(objc_getClass("Application"), @selector(applicationDidFinishLaunching:), (IMP)&_appLaunchedAwesome, "AP$");
-  GET_CLASS(BrowserButtonBar);
-  HOOK_MESSAGE_F(BrowserButtonBar, registerButtonGroup:withButtons:withCount:, registerButtonGroup$withButtons$withCount$);
-
+  MSHookMessage(NSClassFromString(@"WebView"), @selector(setPolicyDelegate:), (IMP)&$setPolicyDelegate, "$$");
+  MSHookMessage(NSClassFromString(@"Application"), @selector(applicationDidFinishLaunching:), (IMP)&$finishLaunching, "$$");
+  MSHookMessage(NSClassFromString(@"BrowserButtonBar"), @selector(createButtonWithDescription:), (IMP)&$createButton, "$$");
+  MSHookMessage(NSClassFromString(@"UIToolbarButton"), @selector(hitTest:withEvent:), (IMP)&$hitTest, "$$");
+  MSHookMessage(NSClassFromString(@"UIToolbarButton"), @selector(setFrame:), (IMP)&$setFrame, "$$");
   [pool release];
 }
-
-/* Deprecated Hooks {{{
- 
- @protocol RenamedMethods
- - (id)DL$init;
- - (void)DL$setupWithURL:(NSURL*)url;
- - (void)DL$loadURL:(NSURL*)url;
- - (void)WF$loadRequest:(NSURLRequest *)req;
- - (void)DL$loadRequest:(NSURLRequest *)req;
- - (void)DL$loadHTMLString:(id)string baseURL:(id)url;
- - (void)DL$loadData:(id)data MIMEType:(id)type textEncodingName:(id)name baseURL:(id)url;
- - (void)DL$goToAddress:(id)address fromAddressView:(id)addressView;
- - (void)DL$start:(id)start;
- - (void)RC$reachabilityChanged:(id)changed;
- @end
- 
-//    MSHookMessage(NSClassFromString(@"BrowserController"), @selector(loadURL:userDriven:), (IMP)&_loadURL, "DL$");
-//    MSHookMessage(NSClassFromString(@"BrowserController"), @selector(setupWithURL:), (IMP)&_setup, "DL$");
-//    MSHookMessage(NSClassFromString(@"TabDocument"), @selector(_reachabilityChanged:), (IMP)&$reachabilityChanged, "RC$");
-//    MSHookMessage(NSClassFromString(@"UIWebDocumentView"), @selector(loadRequest:), (IMP)&_loadreq, "DL$");
-//    MSHookMessage(NSClassFromString(@"UIWebDocumentView"), @selector(loadData:MIMEType:textEncodingName:baseURL:), (IMP)&_loadData, "DL$");
-//    MSHookMessage(NSClassFromString(@"PageLoad"), @selector(initWithURL:), (IMP)&_initWURL, "DL$");
-//    MSHookMessage(NSClassFromString(@"PageLoad"), @selector(start:), (IMP)&_start, "DL$");
- 
-static void _setup(BrowserController<RenamedMethods> *self, SEL sel, NSURL *url)
-{
- NSLog(@"SETUPWITHURL CALLED! URL: %@", url);
- [self DL$setupWithURL:url];
-}
- 
-static void _loadreq(UIWebDocumentView<RenamedMethods> *self, SEL sel, NSURLRequest *req)
-{
- NSLog(@"loading request: %@", [[req URL] absoluteString]);
- docView = [self retain];
- [self stopLoading:nil];
-}
- 
-static void _loadData(UIWebDocumentView<RenamedMethods> *self, SEL sel, NSData *data, NSString *MIMEType, NSString *textEncodingName, NSURL *baseURL)
-{
- NSLog(@"Data:%@\nMIMEType:%@\ntextEncodingName:%@\nbaseURL:%@", data, MIMEType, textEncodingName, baseURL);
- [self DL$loadData:data MIMEType:MIMEType textEncodingName:textEncodingName baseURL:baseURL];
-}
- 
-static void _goto(BrowserController<RenamedMethods> *self, SEL sel, id address, id view)
-{
- NSLog(@"GOTOADDRESS: %@ FROMVIEW: %@", address, view);
- [self DL$goToAddress:address fromAddressView:view];
-}
- 
-static void _load2(WebFrame<RenamedMethods> *self, SEL sel, NSURLRequest *req)
-{
- NSLog(@"GOTOADDRESS: %@", req);
- [self WF$loadRequest:req];
-} 
- 
-static id _initWURL(PageLoad<RenamedMethods> *self, SEL sel, NSURL *url)
-{
- NSLog(@"PAGELOAD: %@ - INITWITHURL ZOMG CALLED! URL: %@", self, url);
- return nil;
-}
- 
-static void _start(PageLoad<RenamedMethods> *self, SEL sel, id wut)
-{
- NSLog(@"PAGELOAD: %@ - Start! CALLED! %@", self, wut);
- [self DL$start:wut];
-}
- 
-static void $reachabilityChanged(id self, SEL sel, id wut)
-{
- NSLog(@"reachabilityChanged CALLED! %@ - val: %@", self, wut);
- [self RC$reachabilityChanged:wut];
-}
-
-}}} */
 
 // vim:filetype=objc:ts=2:sw=2:expandtab

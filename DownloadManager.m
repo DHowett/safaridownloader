@@ -36,7 +36,7 @@ static id sharedManager = nil;
   _tableView.delegate = self;
   _tableView.dataSource = self;
   self.view = _tableView; 
-  
+  _currentDownloads = [NSMutableArray new];
   _downloadQueue = [NSOperationQueue new];
   [_downloadQueue setMaxConcurrentOperationCount:5];
   _mimeTypes = [[NSArray alloc] initWithObjects: // eventually have these loaded from prefs on disk
@@ -177,7 +177,6 @@ static id sharedManager = nil;
 
 // everything eventually goes through this method
 - (BOOL)addDownload:(SafariDownload *)download {
-  NSLog(@"addDownload");
   if (![_currentDownloads containsObject:download]) 
   {
     DownloadOperation *op = [[DownloadOperation alloc] initWithDelegate:download];
@@ -374,11 +373,12 @@ static id sharedManager = nil;
   UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) 
   {
-    cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue2 reuseIdentifier:CellIdentifier] autorelease];
+    cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier] autorelease];
     cell.opaque = YES;
     cell.backgroundColor = [UIColor whiteColor];
     UIProgressView *progressView = [[[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault] autorelease];
     progressView.frame = CGRectMake(5, 45, _tableView.frame.size.width - 10, 8);
+    progressView.tag = kProgressViewTag;
     [cell addSubview:progressView];
   }
   
@@ -395,7 +395,7 @@ static id sharedManager = nil;
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  return 58; 
+  return 89; 
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -427,3 +427,4 @@ static id sharedManager = nil;
 
 @end
 
+// vim:filetype=objc:ts=2:sw=2:expandtab

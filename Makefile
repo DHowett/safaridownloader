@@ -12,8 +12,8 @@ STRIP=$(PREFIX)strip
 CODESIGN_ALLOCATE=$(PREFIX)codesign_allocate
 export CC CXX STRIP CODESIGN_ALLOCATE
 
-LDFLAGS:=-lobjc -framework Foundation -framework UIKit -framework CoreFoundation \
-	-multiply_defined suppress -dynamiclib -init _DownloaderInitialize -Wall \
+LDFLAGS:=-lobjc -framework Foundation -framework UIKit -framework CoreFoundation -framework QuartzCore \
+	-framework CoreGraphics -multiply_defined suppress -dynamiclib -init _DownloaderInitialize -Wall \
 	-Werror -lsubstrate -lobjc -ObjC++ -fobjc-exceptions -fobjc-call-cxx-cdtors $(LDFLAGS)
 
 ifdef DEBUG
@@ -21,11 +21,11 @@ DEBUG_CFLAGS=-DDEBUG -ggdb
 STRIP=/bin/true
 endif
 
-CFLAGS:=-include Downloader_Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include -I./YouTubeApp -I./YouTube
+CFLAGS:=-include Downloader_Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include
 export FRAMEWORKDIR
 export CFLAGS
 
-OFILES=Downloader.o DownloadManager.o DownloadOperation.o SafariDownload.o
+OFILES=Downloader.o DownloadManager.o DownloadOperation.o SafariDownload.o #BaseCell.o Cell.o
 
 TARGET=Downloader.dylib
 
