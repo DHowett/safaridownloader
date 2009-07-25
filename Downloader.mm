@@ -381,10 +381,10 @@ HOOK(UIToolbarButton, setFrame$, void, CGRect frame) {
     CALL_ORIG(UIToolbarButton, setFrame$, frame);
 }
 
-HOOK(BrowserController, _panelForType$, id, int type) {
+HOOK(BrowserController, _panelForPanelType$, id, int type) {
   if(type == 44)
     return panel;
-  return CALL_ORIG(BrowserController, _panelForType$, type);
+  return CALL_ORIG(BrowserController, _panelForPanelType$, type);
 }
 
 #pragma mark -/*}}}*/
@@ -406,7 +406,7 @@ extern "C" void DownloaderInitialize() {
   HOOK_MESSAGE_F(UIToolbarButton, setFrame:, setFrame$);
 
   GET_CLASS(BrowserController);
-  HOOK_MESSAGE_F(BrowserController, _panelForType:, _panelForType$);
+  HOOK_MESSAGE_F(BrowserController, _panelForPanelType:, _panelForPanelType$);
   [pool release];
 }
 
