@@ -41,6 +41,7 @@
 {
   NSLog(@"FILENAME SUGGESTED: %@", filename);
   [download setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", filename] allowOverwrite:YES];
+  [_delegate setFilename:filename];
 }
 
 - (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)resp

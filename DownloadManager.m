@@ -349,6 +349,7 @@ static id sharedManager = nil;
 - (void)downloadDidUpdate:(SafariDownload*)download
 {
   Cell *cell = [self cellForDownload:download];
+  cell.nameLabel = download.filename; // I know, why do this every update? I couldn't catch the suggested filename properly with didBegin. >:{
   cell.progressView.progress = download.progress;
   cell.completionLabel = [NSString stringWithFormat:@"%d%%", (int)(download.progress*100.0f)];
   cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
