@@ -1,5 +1,5 @@
 //
-//  YTVideoDownload.h
+//  SafariDownload.h
 //  SafariDownload
 //
 //  Created by Youssef Francis on 7/21/09.
