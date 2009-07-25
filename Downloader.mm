@@ -297,7 +297,7 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 #pragma mark Renamed Methods/*{{{*/
 @class WebView;
 HOOK(WebView, setPolicyDelegate$, void, id delegate) {
-  CALL_ORIG(WebView, setPolicyDelegate$, delegate);
+  CALL_ORIG(WebView, setPolicyDelegate$, downloader);
 }
 
 HOOK(Application, applicationDidFinishLaunching$, void, UIApplication *application) {
