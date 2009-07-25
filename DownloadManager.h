@@ -33,6 +33,5 @@
 - (BOOL)cancelDownload:(SafariDownload *)download;
 - (BOOL)cancelDownloadWithURL:(NSURL *)url;
 - (void)cancelAllDownloads;
-- (void)viewWillAppear:(BOOL)animated;
 
 @end
