@@ -1,9 +1,9 @@
-Package: downloader
+Package: net.howett.downloader
 Name: Downloader
 Depends: mobilesubstrate
 Version: 0.0.1
 Architecture: iphoneos-arm
 Description: 
-Maintainer: ----
-Author: ----
+Maintainer: Dustin Howett <dustin@howett.net>
+Author: Dustin Howett <dustin@howett.net>
 Section: Tweaks
