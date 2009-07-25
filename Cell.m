@@ -15,7 +15,7 @@ static UIFont *progressFont = nil;
 @synthesize finished, nameLabel, progressView, speedLabel, progressLabel;
 
 + (void)initialize {
-	if(self == [BaseCell class]) {
+	if(self == [Cell class]) {
 		filenameFont = [[UIFont boldSystemFontOfSize:14] retain];
 		speedFont = [[UIFont systemFontOfSize:12] retain];
     progressFont = [[UIFont boldSystemFontOfSize:13] retain];
@@ -107,30 +107,30 @@ static UIFont *progressFont = nil;
 		userColor = [UIColor grayColor];
 	}
 
-  if(self.editing) offset = 30.0f;
+  //if(self.editing) offset = 30.0f;
 	if(self.showingDeleteConfirmation) deleteButtonMargin = 50.0f;
 
 	[backgroundColor set];
 	CGContextFillRect(context, r);
 	
 	[textColor set];
-	NSString *authorString = nameLabel;
-	CGSize authSize = [authorString sizeWithFont:usernameFont forWidth:(190-(deleteButtonMargin+offset)) lineBreakMode:UILineBreakModeTailTruncation];
-	CGRect authorRect = CGRectMake(110 + offset, 12, authSize.width, authSize.height);
+	NSString *filenameString = nameLabel;
+	CGSize filenameSize = [filenameString sizeWithFont:filenameFont forWidth:(190-(deleteButtonMargin+offset)) lineBreakMode:UILineBreakModeTailTruncation];
+	CGRect filenameRect = CGRectMake(110 + offset, 12, filenameSize.width, filenameSize.height);
 	
-	[authorString drawInRect:authorRect withFont:usernameFont lineBreakMode:UILineBreakModeTailTruncation];
+	[filenameString drawInRect:filenameRect withFont:filenameFont lineBreakMode:UILineBreakModeTailTruncation];
 	
 	[userColor set];
 	NSString *bString = progressLabel;
-	CGSize bSize = [bString sizeWithFont:usernameFont forWidth:(200-(deleteButtonMargin + offset)) lineBreakMode:UILineBreakModeTailTruncation];
+	CGSize bSize = [bString sizeWithFont:progressFont forWidth:(200-(deleteButtonMargin + offset)) lineBreakMode:UILineBreakModeTailTruncation];
 	CGRect bRect = CGRectMake(110 + offset, 46, bSize.width, bSize.height);
 	CGRect timeRect = CGRectMake(110 + offset, 61, 190 - deleteButtonMargin - offset, 15);
 	
-  [bString drawInRect:bRect withFont:textFont lineBreakMode:UILineBreakModeTailTruncation];
+  [bString drawInRect:bRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation];
 	
-	[timeLabel drawInRect:timeRect withFont:infoFont];
+//	[timeLabel drawInRect:timeRect withFont:infoFont];
 	
-  [thumbView drawAtPoint:CGPointMake(8+offset, 8)];
+//  [thumbView drawAtPoint:CGPointMake(8+offset, 8)];*/
 //	[thumbView drawInRect:CGRectMake(0, 0, 100, 88)];
 }
 

@@ -25,7 +25,7 @@ CFLAGS:=-include Downloader_Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORK
 export FRAMEWORKDIR
 export CFLAGS
 
-OFILES=Downloader.o DownloadManager.o DownloadOperation.o SafariDownload.o #BaseCell.o Cell.o
+OFILES=Downloader.o DownloadManager.o DownloadOperation.o SafariDownload.o BaseCell.o Cell.o
 
 TARGET=Downloader.dylib
 

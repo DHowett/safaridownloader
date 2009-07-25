@@ -99,6 +99,7 @@ static UINavigationController *controller = nil;
     [buttonBar showButtonGroup:cg withDuration:0]; // duration appears to either be ignored or is somehow related to animations
 }
 
+#pragma mark Download Manager UI Stuff/*{{{*/
 - (void)showDownloadManager
 {
   DownloadManager* dlManager = [DownloadManager sharedManager];
@@ -143,7 +144,7 @@ static UINavigationController *controller = nil;
   [[controller view] setFrame:CGRectOffset(controller.view.frame, 0, -controller.view.frame.size.height)];
 }
 
-#pragma mark -
+#pragma mark -/*}}}*/
 #pragma mark Download Management/*{{{*/
 
 - (void)queryUserForDownloadWithRequest:(NSURLRequest *)request
@@ -289,10 +290,9 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
   
   [listener use];
 }
-
+#pragma mark -/*}}}*/
 @end
 
-#pragma mark -/*}}}*/
 #pragma mark Renamed Methods/*{{{*/
 
 @protocol ApplicationAdditions

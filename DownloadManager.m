@@ -7,6 +7,7 @@
 //
 
 #import "DownloadManager.h"
+#import "Cell.h"
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
 
 @implementation DownloadManager
@@ -294,10 +295,10 @@ static id sharedManager = nil;
   [_downloadQueue cancelAllOperations];
 }
 
-- (UITableViewCell*)cellForDownload:(SafariDownload*)download
+- (Cell*)cellForDownload:(SafariDownload*)download
 {
   NSUInteger row = [_currentDownloads indexOfObject:download];
-  UITableViewCell *cell = [_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
+  Cell *cell = (Cell*)[_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
   return cell;
 }
 
@@ -306,20 +307,20 @@ static id sharedManager = nil;
 
 - (void)downloadDidBegin:(SafariDownload*)download
 {
-  UITableViewCell *cell = [self cellForDownload:download];
-  cell.detailTextLabel.text = @"Downloading...";
+  Cell *cell = [self cellForDownload:download];
+  cell.progressLabel = @"Downloading...";
 }
 
 - (void)downloadDidFinish:(SafariDownload*)download
 {
   NSLog(@"downloadDidFinish");
-  UITableViewCell *cell = [self cellForDownload:download];
+  Cell *cell = [self cellForDownload:download];
   
   if (cell == nil) {
     return;
   }
   
-  cell.detailTextLabel.text = @"Download Complete";
+  cell.progressLabel = @"Download Complete";
   
   NSUInteger row = [_currentDownloads indexOfObject:download];
   [_currentDownloads removeObject:download];
@@ -345,15 +346,15 @@ static id sharedManager = nil;
 
 - (void)downloadDidUpdate:(SafariDownload*)download
 {
-  UITableViewCell *cell = [self cellForDownload:download];
-  progressViewForCell(cell).progress = download.progress;
-  cell.detailTextLabel.text = [NSString stringWithFormat:@"%.1fKB/sec", download.speed];
+  Cell *cell = [self cellForDownload:download];
+  cell.progressView.progress = download.progress;
+  cell.progressLabel = [NSString stringWithFormat:@"Downloading (%.1fKB/sec)", download.speed];
 }
 
 - (void)downloadDidFail:(SafariDownload*)download
 {
-  UITableViewCell *cell = [self cellForDownload:download];
-  cell.detailTextLabel.text = @"Download Failed";
+  Cell *cell = [self cellForDownload:download];
+  cell.progressLabel = @"Download Failed";
 }
 
 #pragma mark -/*}}}*/
@@ -421,23 +422,22 @@ static id sharedManager = nil;
     finished = YES;
   }
 
-  UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  Cell *cell = (Cell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) 
   {
-    cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier] autorelease];
-    cell.opaque = YES;
-    cell.backgroundColor = [UIColor whiteColor];
-    UIProgressView *progressView = [[[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault] autorelease];
-    progressView.frame = CGRectMake(5, 45, _tableView.frame.size.width - 10, 8);
-    progressView.tag = kProgressViewTag;
-    [cell addSubview:progressView];
+    cell = [[[Cell alloc] initWithFrame:CGRectZero reuseIdentifier:CellIdentifier] autorelease];
   }
   
   // Set up the cell...
+  cell.finished = finished;
   cell.imageView.image = [UIImage imageNamed:download.icon];
-	cell.textLabel.text  = download.filename;
-  cell.detailTextLabel.text = [NSString stringWithFormat:@"%.1fKB/sec", download.speed];
-  progressViewForCell(cell).progress = download.progress;
+	cell.nameLabel = download.filename;
+  if(!finished) {
+    cell.progressLabel = [NSString stringWithFormat:@"Downloading (%.1fKB/sec)", download.speed];
+    cell.progressView.progress = download.progress;
+  } else {
+    cell.progressLabel = @"Download Complete";
+  }
   
   return cell;
 }
