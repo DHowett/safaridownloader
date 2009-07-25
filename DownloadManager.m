@@ -19,13 +19,66 @@ static id sharedManager = nil;
 + (void)initialize  {
   if (self == [DownloadManager class])
   {
-    sharedManager = [[self alloc] initWithStyle:UITableViewStylePlain];
+    sharedManager = [[self alloc] init];
   }
 }
 
 + (id)sharedManager
 {
   return sharedManager;
+}
+
+- (id)init {
+  if([self initWithStyle:UITableViewStylePlain] != nil) {
+    _currentDownloads = [NSMutableArray new];
+    _finishedDownloads = [NSMutableArray new];
+    _downloadQueue = [NSOperationQueue new];
+    [_downloadQueue setMaxConcurrentOperationCount:5];
+    _mimeTypes = [[NSArray alloc] initWithObjects: // eventually have these loaded from prefs on disk
+                  @"image/jpeg",
+                  @"image/jpg",
+                  @"image/png",
+                  @"image/tga",
+                  @"image/targa",
+                  @"image/tiff",
+                  @"text/plain",
+                  @"application/text",
+                  @"application/pdf",
+                  @"text/pdf",
+                  @"application/msword",
+                  @"application/doc",
+                  @"appl/text",
+                  @"application/winword",
+                  @"application/word",
+                  @"text/xml",
+                  @"application/xml",
+                  @"application/msexcel",
+                  @"application/x-msexcel",
+                  @"application/x-ms-excel",
+                  @"application/vnd.ms-excel",
+                  @"application/x-excel",
+                  @"application/x-dos_ms_excel",
+                  @"application/xls",
+                  @"application/x-xls",
+                  @"zz-application/zz-winassoc-xls",
+                  @"application/mspowerpoint",
+                  @"application/ms-powerpoint",
+                  @"application/mspowerpnt",
+                  @"application/vnd-mspowerpoint",
+                  @"application/vnd.ms-powerpoint",
+                  @"application/powerpoint",
+                  @"application/x-powerpoint",
+                  @"application/x-mspowerpoint",
+                  @"application/octet-stream",
+                  @"application/bin",
+                  @"applicaiton/binary",
+                  @"application/x-msdownload",
+                  @"application/x-deb",
+                  @"application/zip",
+                  @"video/quicktime",
+                  nil];  
+  }
+  return self;
 }
 
 - (void)loadView
@@ -38,53 +91,6 @@ static id sharedManager = nil;
   _tableView.dataSource = self;
   _tableView.rowHeight = 56;
   self.view = _tableView; 
-  _currentDownloads = [NSMutableArray new];
-  _finishedDownloads = [NSMutableArray new];
-  _downloadQueue = [NSOperationQueue new];
-  [_downloadQueue setMaxConcurrentOperationCount:5];
-  _mimeTypes = [[NSArray alloc] initWithObjects: // eventually have these loaded from prefs on disk
-                @"image/jpeg",
-                @"image/jpg",
-                @"image/png",
-                @"image/tga",
-                @"image/targa",
-                @"image/tiff",
-                @"text/plain",
-                @"application/text",
-                @"application/pdf",
-                @"text/pdf",
-                @"application/msword",
-                @"application/doc",
-                @"appl/text",
-                @"application/winword",
-                @"application/word",
-                @"text/xml",
-                @"application/xml",
-                @"application/msexcel",
-                @"application/x-msexcel",
-                @"application/x-ms-excel",
-                @"application/vnd.ms-excel",
-                @"application/x-excel",
-                @"application/x-dos_ms_excel",
-                @"application/xls",
-                @"application/x-xls",
-                @"zz-application/zz-winassoc-xls",
-                @"application/mspowerpoint",
-                @"application/ms-powerpoint",
-                @"application/mspowerpnt",
-                @"application/vnd-mspowerpoint",
-                @"application/vnd.ms-powerpoint",
-                @"application/powerpoint",
-                @"application/x-powerpoint",
-                @"application/x-mspowerpoint",
-                @"application/octet-stream",
-                @"application/bin",
-                @"applicaiton/binary",
-                @"application/x-msdownload",
-                @"application/x-deb",
-                @"application/zip",
-                @"video/quicktime",
-                nil];  
 }
 
 - (id)copyWithZone:(NSZone *)zone {
