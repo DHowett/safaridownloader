@@ -12,6 +12,7 @@
 #import "Safari/BrowserController.h"
 #import "Safari/BrowserButtonBar.h"
 #import <QuartzCore/QuartzCore.h>
+#import <DHHookCommon.h>
 
 // Numerical and Structural String Formatting Macros
 #define iF(i) [NSString stringWithFormat:@"%d", i]
@@ -294,35 +295,18 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 @end
 
 #pragma mark Renamed Methods/*{{{*/
-
-@protocol ApplicationAdditions
-- (void)$$applicationDidFinishLaunching:(UIApplication *)app;
-@end
-
-@protocol WebViewAdditions
-- (void)$$setPolicyDelegate:(id)delegate;
-@end
-
-@protocol UIToolbarButtonAdditions
-- (UIToolbarButton*)$$hitTest:(CGPoint)point withEvent:(UIEvent*)event;
-- (void)$$setFrame:(CGRect)frm;
-@end
-
 @class WebView;
-static void $setPolicyDelegate(WebView<WebViewAdditions> *self, SEL sel, id delegate)
-{
-  [self $$setPolicyDelegate:downloader];
+HOOK(WebView, setPolicyDelegate$, void, id delegate) {
+  CALL_ORIG(WebView, setPolicyDelegate$, delegate);
 }
 
-static void $finishLaunching(Application<ApplicationAdditions> *self, SEL sel, UIApplication* app)
-{
-  [self $$applicationDidFinishLaunching:app]; 
+HOOK(Application, applicationDidFinishLaunching$, void, UIApplication *application) {
+  CALL_ORIG(Application, applicationDidFinishLaunching$, application);
   [downloader loadCustomToolbar];
 }
 
-static id $createButton(id self, SEL sel, id description)
-{
-  UIToolbarButton* ret = [self $$createButtonWithDescription:description];
+HOOK(BrowserButtonBar, createButtonWithDescription$, id, id description) {
+  UIToolbarButton* ret = CALL_ORIG(BrowserButtonBar, createButtonWithDescription$, description);
   NSInteger tag = [[description objectForKey:@"UIButtonBarButtonTag"] intValue];
   
   if (tag == 17) // portrait buton
@@ -342,21 +326,19 @@ static id $createButton(id self, SEL sel, id description)
   return ret;
 }
 
-static id $hitTest(UIToolbarButton<UIToolbarButtonAdditions> * self, SEL sel, CGPoint point, id event)
-{
+HOOK(UIToolbarButton, hitTest$withEvent$, id, CGPoint point, id event) {
   if ([self tag] == 66 || [self tag] == 67)
     return nil;
-  return [self $$hitTest:point withEvent:event]; 
+  return CALL_ORIG(UIToolbarButton, hitTest$withEvent$, point, event); 
 }
 
-static void $setFrame(UIToolbarButton<UIToolbarButtonAdditions> * self, SEL sel, CGRect frame)
-{
+HOOK(UIToolbarButton, setFrame$, void, CGRect frame) {
   if (self.tag == 17)
-    [self $$setFrame:CGRectOffset(frame, 3, 0)];
+    CALL_ORIG(UIToolbarButton, setFrame$, CGRectOffset(frame, 3, 0));
   else if (self.tag == 18)
-    [self $$setFrame:CGRectOffset(frame, 8, 0)];
+    CALL_ORIG(UIToolbarButton, setFrame$, CGRectOffset(frame, 8, 0));
   else
-    [self $$setFrame:frame];
+    CALL_ORIG(UIToolbarButton, setFrame$, frame);
 }
 
 #pragma mark -/*}}}*/
@@ -364,11 +346,18 @@ static void $setFrame(UIToolbarButton<UIToolbarButtonAdditions> * self, SEL sel,
 extern "C" void DownloaderInitialize() {	
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
   downloader = [[Downloader alloc] init];
-  MSHookMessage(NSClassFromString(@"WebView"), @selector(setPolicyDelegate:), (IMP)&$setPolicyDelegate, "$$");
-  MSHookMessage(NSClassFromString(@"Application"), @selector(applicationDidFinishLaunching:), (IMP)&$finishLaunching, "$$");
-  MSHookMessage(NSClassFromString(@"BrowserButtonBar"), @selector(createButtonWithDescription:), (IMP)&$createButton, "$$");
-  MSHookMessage(NSClassFromString(@"UIToolbarButton"), @selector(hitTest:withEvent:), (IMP)&$hitTest, "$$");
-  MSHookMessage(NSClassFromString(@"UIToolbarButton"), @selector(setFrame:), (IMP)&$setFrame, "$$");
+  GET_CLASS(WebView);
+  HOOK_MESSAGE_F(WebView, setPolicyDelegate:, setPolicyDelegate$);
+
+  GET_CLASS(Application);
+  HOOK_MESSAGE_F(Application, applicationDidFinishLaunching:, applicationDidFinishLaunching$);
+
+  GET_CLASS(BrowserButtonBar);
+  HOOK_MESSAGE_F(BrowserButtonBar, createButtonWithDescription:, createButtonWithDescription$);
+
+  GET_CLASS(UIToolbarButton);
+  HOOK_MESSAGE_F(UIToolbarButton, hitTest:withEvent:, hitTest$withEvent$);
+  HOOK_MESSAGE_F(UIToolbarButton, setFrame:, setFrame$);
   [pool release];
 }
 
