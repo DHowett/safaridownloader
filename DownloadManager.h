@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "UIKitExtra/UIToolbarButton.h"
 #import "SafariDownload.h"
 
 #define kProgressViewTag 238823
@@ -18,6 +19,8 @@
   NSMutableArray*   _currentDownloads;
   NSMutableArray*   _finishedDownloads;
   NSOperationQueue* _downloadQueue;
+  UIToolbarButton*  _portraitDownloadButton;
+  UIToolbarButton*  _landscapeDownloadButton;
 }
 
 + (id)sharedManager;
@@ -33,5 +36,10 @@
 - (BOOL)cancelDownload:(SafariDownload *)download;
 - (BOOL)cancelDownloadWithURL:(NSURL *)url;
 - (void)cancelAllDownloads;
+
+// This seems hackish, but is for badging purposes.
+- (void)setPortraitDownloadButton:(id)portraitButton;
+- (void)setLandscapeDownloadButton:(id)landscapeButton;
+- (void)updateButtonBadges;
 
 @end

@@ -198,6 +198,7 @@ static id sharedManager = nil;
       [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
                         withRowAnimation:UITableViewRowAnimationFade];
     }
+    [self updateButtonBadges];
     return YES;
   }
   return NO;
@@ -272,6 +273,7 @@ static id sharedManager = nil;
       [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:idx inSection:0]]
                                                  withRowAnimation:UITableViewRowAnimationFade];
     }
+    [self updateButtonBadges];
   }
   return NO;
 }
@@ -348,6 +350,7 @@ static id sharedManager = nil;
   } else {
     [_tableView reloadData];
   }
+  [self updateButtonBadges];
 
   [self saveData];
 }
@@ -492,6 +495,21 @@ static id sharedManager = nil;
   }
 }
 /*}}}*/
+
+- (void)setPortraitDownloadButton:(id)portraitButton {
+  _portraitDownloadButton = portraitButton;
+}
+
+- (void)setLandscapeDownloadButton:(id)landscapeButton {
+  _landscapeDownloadButton = landscapeButton;
+}
+
+- (void)updateButtonBadges {
+  NSString *val = nil;
+  if(_currentDownloads.count > 0) val = [NSString stringWithFormat:@"%d", _currentDownloads.count];
+  [_portraitDownloadButton _setBadgeValue:val];
+  [_landscapeDownloadButton _setBadgeValue:val];
+}
 @end
 
 // vim:filetype=objc:ts=2:sw=2:expandtab

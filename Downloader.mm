@@ -313,11 +313,13 @@ HOOK(BrowserButtonBar, createButtonWithDescription$, id, id description) {
   {
     [ret setImage:[UIImage imageNamed:@"Download.png"]];
     [ret addTarget:downloader action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
+    [[DownloadManager sharedManager] setPortraitDownloadButton:ret];
   }
   else if (tag == 18) // landscape button
   {
     [ret setImage:[UIImage imageNamed:@"DownloadSmall.png"]];
     [ret addTarget:downloader action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
+    [[DownloadManager sharedManager] setLandscapeDownloadButton:ret];
   }
   else if (tag == 66) // portrait spacer
     ret.frame = CGRectMake(ret.frame.origin.x, ret.frame.origin.y, 15, ret.frame.size.height);
