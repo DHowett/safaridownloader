@@ -22,6 +22,7 @@
 
 @class Downloader;
 static Downloader *downloader = nil;
+static DownloadManagerPanel *panel = nil;
 
 @class BrowserButtonBar;
 @interface BrowserButtonBar (mine)
@@ -102,47 +103,84 @@ static UINavigationController *controller = nil;
 
 #pragma mark Download Manager UI Stuff/*{{{*/
 - (void)showDownloadManager
-{
+{  
+  if (!panel) {
+    panel = [[[DownloadManagerPanel alloc] init] autorelease]; // our rotation disabler
+  }
+  
+  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+  Class BrowserController = objc_getClass("BrowserController");
   DownloadManager* dlManager = [DownloadManager sharedManager];
-  controller = [[UINavigationController alloc] initWithRootViewController:[DownloadManager sharedManager]];
-  UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(hideDownloadManager)];
+  controller = [[UINavigationController alloc] initWithRootViewController:dlManager];
+  [[BrowserController sharedBrowserController] showBrowserPanelType:44];
+  
+  UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc]  initWithBarButtonSystemItem:UIBarButtonSystemItemDone 
+                                                                                   target:self 
+                                                                                   action:@selector(hideDownloadManager)];
   dlManager.navigationItem.leftBarButtonItem = doneItemButton;
-  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" style:UIBarButtonItemStyleBordered target:nil action:nil];
+  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
+                                                                   style:UIBarButtonItemStyleBordered 
+                                                                  target:nil 
+                                                                  action:nil];
+  
+  UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+  NSString *transition = kCATransitionFromTop;
+  if (orientation == UIDeviceOrientationLandscapeLeft)
+    transition = kCATransitionFromLeft;
+  else if (orientation == UIDeviceOrientationLandscapeRight)
+    transition = kCATransitionFromRight;
+  
   dlManager.navigationItem.rightBarButtonItem = cancelButton;
   dlManager.navigationItem.rightBarButtonItem.enabled = NO;
   dlManager.navigationItem.title = @"Downloads";
   [controller setNavigationBarHidden:NO];
-  //  [controller setToolbarHidden:NO]; // decide whether we really want this or not
   CATransition *animation = [CATransition animation];
   [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
   [animation setType:kCATransitionPush];
-  [animation setSubtype:kCATransitionFromTop];
+  [animation setSubtype:transition];
   [animation setDuration:0.3];
   [animation setFillMode:kCAFillModeForwards];
   [animation setRemovedOnCompletion:YES];
-  [[[controller view] layer] addAnimation:animation forKey:@"pushUp"];
-  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+  [[[controller view] layer] addAnimation:animation 
+                                   forKey:@"pushUp"];
+  
   [keyWindow addSubview:[controller view]];
+  [panel allowRotations:NO];
 }
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
 {
+  Class BrowserController = objc_getClass("BrowserController");
+  [[BrowserController sharedBrowserController] hideBrowserPanelType:44];
+  [panel allowRotations:YES];
   [[controller view] removeFromSuperview];
+  [controller release];
+  controller = nil;
 }
 
 - (void)hideDownloadManager
 {
+  UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+  NSString *transition = kCATransitionFromBottom;
+  if (orientation == UIDeviceOrientationLandscapeLeft)
+    transition = kCATransitionFromRight;
+  else if (orientation == UIDeviceOrientationLandscapeRight)
+    transition = kCATransitionFromLeft;
+  
   CATransition *animation = [CATransition animation];
   [animation setDelegate:self];
-  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+  [animation setTimingFunction:[CAMediaTimingFunction 
+                                functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
   [animation setType:kCATransitionPush];
-  [animation setSubtype:kCATransitionFromBottom];
+  [animation setSubtype:transition];
   [animation setDuration:0.4];
   [animation setFillMode:kCAFillModeForwards];
   [animation setDelegate:self];
   [animation setEndProgress:1.0];
-  [[[controller view] layer] addAnimation:animation forKey:@"pushUp"];
-  [[controller view] setFrame:CGRectOffset(controller.view.frame, 0, -controller.view.frame.size.height)];
+  [[[controller view] layer] addAnimation:animation 
+                                   forKey:@"pushUp"];
+  [[controller view] setFrame:CGRectOffset(controller.view.frame, 
+                                           0, -controller.view.frame.size.height)];
 }
 
 #pragma mark -/*}}}*/
@@ -343,6 +381,12 @@ HOOK(UIToolbarButton, setFrame$, void, CGRect frame) {
     CALL_ORIG(UIToolbarButton, setFrame$, frame);
 }
 
+HOOK(BrowserController, _panelForType$, id, int type) {
+  if(type == 44)
+    return panel;
+  return CALL_ORIG(BrowserController, _panelForType$, type);
+}
+
 #pragma mark -/*}}}*/
 
 extern "C" void DownloaderInitialize() {	
@@ -360,6 +404,9 @@ extern "C" void DownloaderInitialize() {
   GET_CLASS(UIToolbarButton);
   HOOK_MESSAGE_F(UIToolbarButton, hitTest:withEvent:, hitTest$withEvent$);
   HOOK_MESSAGE_F(UIToolbarButton, setFrame:, setFrame$);
+
+  GET_CLASS(BrowserController);
+  HOOK_MESSAGE_F(BrowserController, _panelForType:, _panelForType$);
   [pool release];
 }
 

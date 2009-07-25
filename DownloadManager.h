@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "SafariDownload.h"
-#import "BrowserPanel.h"
+#import "Safari/BrowserPanel.h"
 #import "UIKitExtra/UIToolbarButton.h"
 
 #define kProgressViewTag 238823
