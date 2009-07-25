@@ -6,12 +6,14 @@
 	UIProgressView *progressView;
 	NSString *nameLabel;
 	NSString *progressLabel;
-	NSString *speedLabel;
+	NSString *completionLabel;
+	NSString *sizeLabel;
 }
 
 @property (nonatomic, retain) NSString *nameLabel;
 @property (nonatomic, retain) NSString *progressLabel;
-@property (nonatomic, retain) NSString *speedLabel;
+@property (nonatomic, retain) NSString *completionLabel;
+@property (nonatomic, retain) NSString *sizeLabel;
 @property (nonatomic, retain) UIProgressView *progressView;
 @property (nonatomic, assign) BOOL finished;
 

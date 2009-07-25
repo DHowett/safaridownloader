@@ -36,6 +36,7 @@ static id sharedManager = nil;
   UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
   _tableView.delegate = self;
   _tableView.dataSource = self;
+  _tableView.rowHeight = 56;
   self.view = _tableView; 
   _currentDownloads = [NSMutableArray new];
   _finishedDownloads = [NSMutableArray new];
@@ -184,7 +185,7 @@ static id sharedManager = nil;
     DownloadOperation *op = [[DownloadOperation alloc] initWithDelegate:download];
     [_downloadQueue addOperation:op];
     [op release];
-    [_currentDownloads insertObject:download atIndex:0];
+    [_currentDownloads addObject:download];
     if(_currentDownloads.count == 1) {
       [_tableView insertSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
     } else {
@@ -309,6 +310,7 @@ static id sharedManager = nil;
 {
   Cell *cell = [self cellForDownload:download];
   cell.progressLabel = @"Downloading...";
+  cell.completionLabel = @"0%";
 }
 
 - (void)downloadDidFinish:(SafariDownload*)download
@@ -348,7 +350,9 @@ static id sharedManager = nil;
 {
   Cell *cell = [self cellForDownload:download];
   cell.progressView.progress = download.progress;
-  cell.progressLabel = [NSString stringWithFormat:@"Downloading (%.1fKB/sec)", download.speed];
+  cell.completionLabel = [NSString stringWithFormat:@"%d%%", (int)(download.progress*100.0f)];
+  cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
+  cell.sizeLabel = download.sizeString;
 }
 
 - (void)downloadDidFail:(SafariDownload*)download
@@ -432,6 +436,7 @@ static id sharedManager = nil;
   cell.finished = finished;
   cell.imageView.image = [UIImage imageNamed:download.icon];
 	cell.nameLabel = download.filename;
+  cell.sizeLabel = download.sizeString;
   if(!finished) {
     cell.progressLabel = [NSString stringWithFormat:@"Downloading (%.1fKB/sec)", download.speed];
     cell.progressView.progress = download.progress;
@@ -444,7 +449,8 @@ static id sharedManager = nil;
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  return 89; 
+  if(tableView.numberOfSections == 2 && indexPath.section == 0) return 79;
+  else return 56;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {

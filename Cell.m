@@ -9,10 +9,12 @@ ptr = sptr; \
 
 @implementation Cell
 
+#define HARD_LEFT_MARGIN 16
+
 static UIFont *filenameFont = nil;
 static UIFont *speedFont = nil;
 static UIFont *progressFont = nil;
-@synthesize finished, nameLabel, progressView, speedLabel, progressLabel;
+@synthesize finished, nameLabel, progressView, sizeLabel, progressLabel, completionLabel;
 
 + (void)initialize {
 	if(self == [Cell class]) {
@@ -25,8 +27,9 @@ static UIFont *progressFont = nil;
 - (void)prepareForReuse
 {
   self.nameLabel = nil;
-  self.speedLabel = nil;
+  self.sizeLabel = nil;
   self.progressLabel = nil;
+  self.completionLabel = nil;
   progressView.progress = 0.0;
 }
 
@@ -34,12 +37,16 @@ static UIFont *progressFont = nil;
 	RefreshCellSetter(nameLabel, s)
 }
 
-- (void)setSpeedLabel:(NSString *)s {
-	RefreshCellSetter(speedLabel, s)
+- (void)setSizeLabel:(NSString *)s {
+	RefreshCellSetter(sizeLabel, s)
 }
 
 - (void)setProgressLabel:(NSString *)s {
 	RefreshCellSetter(progressLabel, s)
+}
+
+- (void)setCompletionLabel:(NSString *)s {
+	RefreshCellSetter(completionLabel, s)
 }
 
 - (void)setFinished:(BOOL)x 
@@ -53,7 +60,7 @@ static UIFont *progressFont = nil;
 		}
 	} else {
     if(!progressView) {
-      progressView = [[UIProgressView alloc] initWithFrame:CGRectMake(110, 34, 190, 20)];
+      progressView = [[UIProgressView alloc] initWithFrame:CGRectMake(HARD_LEFT_MARGIN, 34, 320 - HARD_LEFT_MARGIN - 16, 20)];
       [self addSubview:progressView];
       [progressView release];
     }
@@ -65,9 +72,10 @@ static UIFont *progressFont = nil;
 - (void)dealloc 
 {
   [nameLabel release];
-  [speedLabel release];
+  [sizeLabel release];
   [progressLabel release];
 	[progressView release];
+  [completionLabel release];
   [super dealloc];
 }
 
@@ -75,9 +83,9 @@ static UIFont *progressFont = nil;
 	[super willTransitionToState:state];
 	if(!finished) {
 		if(state & UITableViewCellStateShowingDeleteConfirmationMask) {
-			[progressView setFrame:CGRectMake(110, 34, 140, 20)];
+			[progressView setFrame:CGRectMake(HARD_LEFT_MARGIN, 34, 320 - HARD_LEFT_MARGIN - 16 - 66, 20)];
 		} else {
-			[progressView setFrame:CGRectMake(110, 34, 190, 20)];
+			[progressView setFrame:CGRectMake(HARD_LEFT_MARGIN, 34, 320 - HARD_LEFT_MARGIN - 16, 20)];
 		}
 	}
 
@@ -108,25 +116,39 @@ static UIFont *progressFont = nil;
 	}
 
   //if(self.editing) offset = 30.0f;
-	if(self.showingDeleteConfirmation) deleteButtonMargin = 50.0f;
+	if(self.showingDeleteConfirmation) {
+    deleteButtonMargin = 50.0f;
+    if(!finished) deleteButtonMargin += 16.0f;
+  }
 
 	[backgroundColor set];
 	CGContextFillRect(context, r);
 	
 	[textColor set];
 	NSString *filenameString = nameLabel;
-	CGSize filenameSize = [filenameString sizeWithFont:filenameFont forWidth:(190-(deleteButtonMargin+offset)) lineBreakMode:UILineBreakModeTailTruncation];
-	CGRect filenameRect = CGRectMake(110 + offset, 12, filenameSize.width, filenameSize.height);
+	CGSize filenameSize = [filenameString sizeWithFont:filenameFont forWidth:(288-(deleteButtonMargin+offset)) lineBreakMode:UILineBreakModeTailTruncation];
+	CGRect filenameRect = CGRectMake(HARD_LEFT_MARGIN + offset, 12, filenameSize.width, filenameSize.height);
+	
+  CGSize completionSize = [sizeLabel sizeWithFont:progressFont forWidth:100 lineBreakMode:UILineBreakModeTailTruncation];
+	CGRect completionRect = CGRectMake(320 - HARD_LEFT_MARGIN - completionSize.width - deleteButtonMargin, 18, completionSize.width, completionSize.height);
 	
 	[filenameString drawInRect:filenameRect withFont:filenameFont lineBreakMode:UILineBreakModeTailTruncation];
-	
+
 	[userColor set];
+  [completionLabel drawInRect:completionRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation alignment:UITextAlignmentRight];
+
+  float progressBarHeightOffset = 0.0f;
+  if(!finished) progressBarHeightOffset = 18.0f;
+
 	NSString *bString = progressLabel;
 	CGSize bSize = [bString sizeWithFont:progressFont forWidth:(200-(deleteButtonMargin + offset)) lineBreakMode:UILineBreakModeTailTruncation];
-	CGRect bRect = CGRectMake(110 + offset, 46, bSize.width, bSize.height);
-	CGRect timeRect = CGRectMake(110 + offset, 61, 190 - deleteButtonMargin - offset, 15);
+	CGRect bRect = CGRectMake(HARD_LEFT_MARGIN + offset, 28 + progressBarHeightOffset, bSize.width, bSize.height);
+
+  CGSize sizeSize = [sizeLabel sizeWithFont:progressFont forWidth:100 lineBreakMode:UILineBreakModeTailTruncation];
+	CGRect sizeRect = CGRectMake(320 - HARD_LEFT_MARGIN - sizeSize.width - deleteButtonMargin, 28 + progressBarHeightOffset, sizeSize.width, sizeSize.height);
 	
   [bString drawInRect:bRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation];
+  [sizeLabel drawInRect:sizeRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation alignment:UITextAlignmentRight];
 	
 //	[timeLabel drawInRect:timeRect withFont:infoFont];
 	
