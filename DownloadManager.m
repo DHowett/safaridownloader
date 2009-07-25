@@ -10,6 +10,37 @@
 #import "Cell.h"
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
 
+static BOOL doRot = YES;
+
+@implementation DownloadManagerPanel
+
+- (void)allowRotations:(BOOL)allow {
+  _allowsRotations = allow;
+  doRot = allow;
+}
+
+-(BOOL) allowsRotation {
+  return _allowsRotations;
+}
+
+-(BOOL) pausesPages {
+  return NO;
+}
+
+-(int) panelType {
+  return 44;
+}
+
+-(int) panelState {
+  return 0;
+}
+
+-(NSString*)description {
+ return @"[DownloadManagerPanel]: Fake object that conforms to the browserpanel protocol, this allows us to block rotations successfully"; 
+}
+
+@end
+
 @implementation DownloadManager
 
 #pragma mark -
@@ -29,7 +60,8 @@ static id sharedManager = nil;
 }
 
 - (id)init {
-  if([self initWithStyle:UITableViewStylePlain] != nil) {
+  if([self initWithStyle:UITableViewStylePlain] != nil) 
+  {
     _currentDownloads = [NSMutableArray new];
     _finishedDownloads = [NSMutableArray new];
     _downloadQueue = [NSOperationQueue new];
@@ -124,7 +156,7 @@ static id sharedManager = nil;
   }
   else  // eventually have this read from a prefs array on disk
     if (// documents
-           [urlString hasSuffix:@".doc"]
+        [urlString hasSuffix:@".doc"]
         || [urlString hasSuffix:@".docx"]
         || [urlString hasSuffix:@".ppt"]
         || [urlString hasSuffix:@".pptx"]
@@ -209,7 +241,13 @@ static id sharedManager = nil;
     return NO;
   
   NSString *name = [[url absoluteString] lastPathComponent];
-  NSString *icon = [[name pathExtension] stringByAppendingString:@".png"];
+  NSString *icon = nil;
+  
+  if ([[NSFileManager defaultManager] fileExistsAtPath:[[NSBundle mainBundle] pathForResource:[name pathExtension] ofType:@"png"]])
+    icon = [[name pathExtension] stringByAppendingString:@".png"];
+  else
+    icon = @"unknown.png";
+  
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:[NSURLRequest requestWithURL:url]
                                                                 name:name
                                                                 icon:icon
@@ -221,7 +259,14 @@ static id sharedManager = nil;
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request {
   NSLog(@"addDownloadWithRequest: %@", request);
   NSString *name = [[[request URL] absoluteString] lastPathComponent];
-  NSString *icon = [[name pathExtension] stringByAppendingString:@".png"];
+  
+  NSString *icon = nil;
+  
+  if ([[NSFileManager defaultManager] fileExistsAtPath:[[NSBundle mainBundle] pathForResource:[name pathExtension] ofType:@"png"]])
+    icon = [[name pathExtension] stringByAppendingString:@".png"];
+  else
+    icon = @"unknown.png";
+  
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
                                                                 name:name
                                                                 icon:icon
@@ -244,7 +289,7 @@ static id sharedManager = nil;
     [download release];
   else
     return [self addDownload:download];
-
+  
   return NO;
 }
 
@@ -266,12 +311,12 @@ static id sharedManager = nil;
     
     int idx = [_currentDownloads indexOfObject:download];
     [_currentDownloads removeObject:download];
-
+    
     if (_currentDownloads.count == 0) {
       [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
     } else {
       [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:idx inSection:0]]
-                                                 withRowAnimation:UITableViewRowAnimationFade];
+                        withRowAnimation:UITableViewRowAnimationFade];
     }
     [self updateButtonBadges];
   }
@@ -287,15 +332,15 @@ static id sharedManager = nil;
 
 - (void)deleteDownload:(SafariDownload*)download
 {
-//  NSString *prefix = @"/var/mobile/Library/Downloads/YourTube";
-//  NSString *path = [prefix stringByAppendingPathComponent:download.filename];
-//  NSLog(@"removing file at path: %@", path);
-//  [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
-//  NSUInteger index = [_downloadedVideos indexOfObject:download];
-//  [_downloadedVideos removeObjectAtIndex:index];
-//  NSInteger section = [_tableView numberOfSections] - 1;
-//  [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:index inSection:section]] 
-//                    withRowAnimation:UITableViewRowAnimationFade]; 
+  //  NSString *prefix = @"/var/mobile/Library/Downloads/YourTube";
+  //  NSString *path = [prefix stringByAppendingPathComponent:download.filename];
+  //  NSLog(@"removing file at path: %@", path);
+  //  [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+  //  NSUInteger index = [_downloadedVideos indexOfObject:download];
+  //  [_downloadedVideos removeObjectAtIndex:index];
+  //  NSInteger section = [_tableView numberOfSections] - 1;
+  //  [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:index inSection:section]] 
+  //                    withRowAnimation:UITableViewRowAnimationFade]; 
 }
 
 - (void)cancelAllDownloads
@@ -334,31 +379,31 @@ static id sharedManager = nil;
   
   NSUInteger row = [_currentDownloads indexOfObject:download];
   [_currentDownloads removeObject:download];
-
+  
   if (_currentDownloads.count == 0) {
     [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
   } else {
     [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
-                                               withRowAnimation:UITableViewRowAnimationFade];
+                      withRowAnimation:UITableViewRowAnimationFade];
   }
-
+  
   [_finishedDownloads addObject:download];
-
+  
   if (_currentDownloads.count > 0) {
     [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_finishedDownloads.count-1 inSection:1]]
-                                               withRowAnimation:UITableViewRowAnimationFade];
+                      withRowAnimation:UITableViewRowAnimationFade];
   } else {
     [_tableView reloadData];
   }
   [self updateButtonBadges];
-
+  
   [self saveData];
 }
 
 - (void)downloadDidUpdate:(SafariDownload*)download
 {
   Cell *cell = [self cellForDownload:download];
-  cell.nameLabel = download.filename; // I know, why do this every update? I couldn't catch the suggested filename properly with didBegin. >:{
+  if (!cell.nameLabel) cell.nameLabel = download.filename; // I know, why do this every update? I couldn't catch the suggested filename properly with didBegin. >:{
   cell.progressView.progress = download.progress;
   cell.completionLabel = [NSString stringWithFormat:@"%d%%", (int)(download.progress*100.0f)];
   cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
@@ -435,7 +480,7 @@ static id sharedManager = nil;
     download = [_finishedDownloads objectAtIndex:indexPath.row];
     finished = YES;
   }
-
+  
   Cell *cell = (Cell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) 
   {
@@ -444,7 +489,7 @@ static id sharedManager = nil;
   
   // Set up the cell...
   cell.finished = finished;
-  cell.imageView.image = [UIImage imageNamed:download.icon];
+  cell.icon = [UIImage imageNamed:download.icon];
 	cell.nameLabel = download.filename;
   cell.sizeLabel = download.sizeString;
   if(!finished) {

@@ -7,13 +7,22 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "UIKitExtra/UIToolbarButton.h"
 #import "SafariDownload.h"
+#import "BrowserPanel.h"
+#import "UIKitExtra/UIToolbarButton.h"
 
 #define kProgressViewTag 238823
 #define progressViewForCell(cell) ((UIProgressView*)[cell viewWithTag:kProgressViewTag])
 
-@interface DownloadManager : UITableViewController <SafariDownloadDelegate, UITableViewDelegate, UITableViewDataSource> {
+@interface DownloadManagerPanel : NSObject <BrowserPanel>
+{
+  BOOL _allowsRotations; 
+}
+- (void)allowRotations:(BOOL)allow;
+@end
+
+//@class BrowserPanelViewController;
+@interface DownloadManager : UITableViewController <SafariDownloadDelegate> {
   UITableView*      _tableView;
   NSArray*          _mimeTypes;
   NSMutableArray*   _currentDownloads;
@@ -24,8 +33,6 @@
 }
 
 + (id)sharedManager;
-
-- (id)init;
 - (BOOL)supportedRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType;
 
@@ -41,5 +48,4 @@
 - (void)setPortraitDownloadButton:(id)portraitButton;
 - (void)setLandscapeDownloadButton:(id)landscapeButton;
 - (void)updateButtonBadges;
-
 @end
