@@ -1,6 +1,5 @@
 #import "Cell.h"
 
-// Tastiez Macro
 #define RefreshCellSetter(ptr, sptr) if(!sptr) { return; } \
 [sptr retain]; \
 [ptr release]; \
@@ -14,7 +13,7 @@ ptr = sptr; \
 static UIFont *filenameFont = nil;
 static UIFont *speedFont = nil;
 static UIFont *progressFont = nil;
-@synthesize finished, nameLabel, progressView, sizeLabel, progressLabel, completionLabel;
+@synthesize finished, nameLabel, progressView, sizeLabel, progressLabel, completionLabel, icon = _icon;
 
 + (void)initialize {
 	if(self == [Cell class]) {
@@ -47,6 +46,10 @@ static UIFont *progressFont = nil;
 
 - (void)setCompletionLabel:(NSString *)s {
 	RefreshCellSetter(completionLabel, s)
+}
+
+- (void)setIcon:(UIImage *)ic {
+  RefreshCellSetter(_icon, ic);
 }
 
 - (void)setFinished:(BOOL)x 
@@ -88,7 +91,7 @@ static UIFont *progressFont = nil;
 			[progressView setFrame:CGRectMake(HARD_LEFT_MARGIN, 34, 320 - HARD_LEFT_MARGIN - 16, 20)];
 		}
 	}
-
+  
 	[self setNeedsDisplay];
 }
 
@@ -104,7 +107,7 @@ static UIFont *progressFont = nil;
 	UIColor *userColor = nil;
   float offset = 0.0f;
 	float deleteButtonMargin = 0.0f;
-
+  
 	if(self.selected) {
 		textColor = [UIColor whiteColor];
 		backgroundColor = [UIColor clearColor];
@@ -114,46 +117,49 @@ static UIFont *progressFont = nil;
 		backgroundColor = [UIColor whiteColor];
 		userColor = [UIColor grayColor];
 	}
-
+  
   //if(self.editing) offset = 30.0f;
 	if(self.showingDeleteConfirmation) {
     deleteButtonMargin = 50.0f;
     if(!finished) deleteButtonMargin += 16.0f;
   }
-
+  
 	[backgroundColor set];
 	CGContextFillRect(context, r);
 	
+  [_icon drawAtPoint:CGPointMake(HARD_LEFT_MARGIN, 5)];
+  
 	[textColor set];
 	NSString *filenameString = nameLabel;
 	CGSize filenameSize = [filenameString sizeWithFont:filenameFont forWidth:(288-(deleteButtonMargin+offset)) lineBreakMode:UILineBreakModeTailTruncation];
-	CGRect filenameRect = CGRectMake(HARD_LEFT_MARGIN + offset, 12, filenameSize.width, filenameSize.height);
+	CGRect filenameRect = CGRectMake(HARD_LEFT_MARGIN + offset + _icon.size.width + 5, 12, filenameSize.width, filenameSize.height);
 	
   CGSize completionSize = [sizeLabel sizeWithFont:progressFont forWidth:100 lineBreakMode:UILineBreakModeTailTruncation];
 	CGRect completionRect = CGRectMake(320 - HARD_LEFT_MARGIN - completionSize.width - deleteButtonMargin, 18, completionSize.width, completionSize.height);
 	
 	[filenameString drawInRect:filenameRect withFont:filenameFont lineBreakMode:UILineBreakModeTailTruncation];
-
+  
 	[userColor set];
-  [completionLabel drawInRect:completionRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation alignment:UITextAlignmentRight];
-
-  float progressBarHeightOffset = 0.0f;
+  if (!finished) { // don't draw the progress % if this is a completed download
+    [completionLabel drawInRect:completionRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation alignment:UITextAlignmentRight];
+  }
+  
+  float progressBarHeightOffset = 5.0f;
   if(!finished) progressBarHeightOffset = 18.0f;
-
+  
 	NSString *bString = progressLabel;
 	CGSize bSize = [bString sizeWithFont:progressFont forWidth:(200-(deleteButtonMargin + offset)) lineBreakMode:UILineBreakModeTailTruncation];
 	CGRect bRect = CGRectMake(HARD_LEFT_MARGIN + offset, 28 + progressBarHeightOffset, bSize.width, bSize.height);
-
+  
   CGSize sizeSize = [sizeLabel sizeWithFont:progressFont forWidth:100 lineBreakMode:UILineBreakModeTailTruncation];
 	CGRect sizeRect = CGRectMake(320 - HARD_LEFT_MARGIN - sizeSize.width - deleteButtonMargin, 28 + progressBarHeightOffset, sizeSize.width, sizeSize.height);
 	
   [bString drawInRect:bRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation];
   [sizeLabel drawInRect:sizeRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation alignment:UITextAlignmentRight];
 	
-//	[timeLabel drawInRect:timeRect withFont:infoFont];
-	
-//  [thumbView drawAtPoint:CGPointMake(8+offset, 8)];*/
-//	[thumbView drawInRect:CGRectMake(0, 0, 100, 88)];
+  //	[timeLabel drawInRect:timeRect withFont:infoFont]; // :O zomg nowai
+  //  [thumbView drawAtPoint:CGPointMake(8+offset, 8)];*/
+  //	[thumbView drawInRect:CGRectMake(0, 0, 100, 88)];
 }
 
 @end
