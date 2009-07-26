@@ -85,7 +85,7 @@ complete    = _complete;
               speed:(float)spd
 {
   self.progress = prog; self.speed = spd;
-  [_delegate performSelectorOnMainThread:@selector(downloadDidUpdate:) withObject:self waitUntilDone:NO];
+  [_delegate performSelectorOnMainThread:@selector(downloadDidUpdate:) withObject:self waitUntilDone:YES];
 }
 
 - (void)setComplete:(BOOL)comp
