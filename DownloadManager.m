@@ -146,7 +146,8 @@ static id resourceBundle = nil;
 }
 
 - (UIImage *)iconForExtension:(NSString *)extension {
-  NSString *iconPath = [resourceBundle pathForResource:extension ofType:@"png" inDirectory:@"FileIcons"];
+  NSString *iconPath = nil;
+  if(extension && [extension length] > 0) iconPath = [resourceBundle pathForResource:extension ofType:@"png" inDirectory:@"FileIcons"];
   if(!iconPath) iconPath = [resourceBundle pathForResource:@"unknownfile" ofType:@"png"];
   return [UIImage imageWithContentsOfFile:iconPath];
 }
