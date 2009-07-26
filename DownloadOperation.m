@@ -62,6 +62,10 @@
   float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
 	float percentComplete=(float)(_bytes/expectedLength);
   [_delegate setProgress:percentComplete speed:avspd];
+  if (avspd > 100) { // throttle
+    NSUInteger sleepTime = 750000*((avspd-100)/600);
+    usleep(sleepTime);
+  }
 }
 
 - (void)download:(NSURLDownload *)download willResumeWithResponse:(NSURLResponse *)resp fromByte:(long long)startingByte;
@@ -204,7 +208,7 @@
   NSLog(@"Starting runloop");
   NSRunLoop *theRL = [NSRunLoop currentRunLoop];
   while (_keepAlive) {
-    [theRL runUntilDate:[NSDate dateWithTimeIntervalSinceNow:3]];
+    [theRL runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
   }
   NSLog(@"Terminating Runloop!");
 }
