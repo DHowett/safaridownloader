@@ -8,7 +8,7 @@ ptr = sptr; \
 
 @implementation DownloadCell
 
-#define HARD_LEFT_MARGIN 16
+#define SIDE_PADDING 16
 
 static UIFont *filenameFont = nil;
 static UIFont *speedFont = nil;
@@ -63,7 +63,7 @@ static UIFont *progressFont = nil;
 		}
 	} else {
     if(!progressView) {
-      progressView = [[UIProgressView alloc] initWithFrame:CGRectMake(HARD_LEFT_MARGIN, 34, 320 - HARD_LEFT_MARGIN - 16, 20)];
+      progressView = [[UIProgressView alloc] initWithFrame:CGRectMake(SIDE_PADDING, 34, 320 - SIDE_PADDING - 16, 20)];
       [self addSubview:progressView];
       [progressView release];
     }
@@ -84,14 +84,6 @@ static UIFont *progressFont = nil;
 
 - (void)willTransitionToState:(UITableViewCellStateMask)state {
 	[super willTransitionToState:state];
-	if(!finished) {
-		if(state & UITableViewCellStateShowingDeleteConfirmationMask) {
-			[progressView setFrame:CGRectMake(HARD_LEFT_MARGIN, 34, 320 - HARD_LEFT_MARGIN - 16 - 66, 20)];
-		} else {
-			[progressView setFrame:CGRectMake(HARD_LEFT_MARGIN, 34, 320 - HARD_LEFT_MARGIN - 16, 20)];
-		}
-	}
-  
 	[self setNeedsDisplay];
 }
 
@@ -107,6 +99,7 @@ static UIFont *progressFont = nil;
 	UIColor *userColor = nil;
   float offset = 0.0f;
 	float deleteButtonMargin = 0.0f;
+  float cellWidth = r.size.width;
   
 	if(self.selected) {
 		textColor = [UIColor whiteColor];
@@ -127,15 +120,17 @@ static UIFont *progressFont = nil;
 	[backgroundColor set];
 	CGContextFillRect(context, r);
 	
-  [_icon drawAtPoint:CGPointMake(HARD_LEFT_MARGIN, 7)];
+  [_icon drawAtPoint:CGPointMake(SIDE_PADDING, 7)];
   
 	[textColor set];
 	NSString *filenameString = nameLabel;
-	CGSize filenameSize = [filenameString sizeWithFont:filenameFont forWidth:(288-(deleteButtonMargin+offset)) lineBreakMode:UILineBreakModeTailTruncation];
-	CGRect filenameRect = CGRectMake(HARD_LEFT_MARGIN + offset + _icon.size.width + 5, 9, filenameSize.width, filenameSize.height);
+	CGSize filenameSize = [filenameString sizeWithFont:filenameFont
+                                            forWidth:(cellWidth - (2 * SIDE_PADDING) - (deleteButtonMargin+offset) - (_icon.size.width + 5))
+                                       lineBreakMode:UILineBreakModeTailTruncation];
+	CGRect filenameRect = CGRectMake(SIDE_PADDING + offset + _icon.size.width + 5, 9, filenameSize.width, filenameSize.height);
 	
   CGSize completionSize = [sizeLabel sizeWithFont:progressFont forWidth:100 lineBreakMode:UILineBreakModeTailTruncation];
-	CGRect completionRect = CGRectMake(320 - HARD_LEFT_MARGIN - completionSize.width - deleteButtonMargin, 18, completionSize.width, completionSize.height);
+	CGRect completionRect = CGRectMake(cellWidth - SIDE_PADDING - completionSize.width - deleteButtonMargin, 18, completionSize.width, completionSize.height);
 	
 	[filenameString drawInRect:filenameRect withFont:filenameFont lineBreakMode:UILineBreakModeTailTruncation];
   
@@ -149,14 +144,15 @@ static UIFont *progressFont = nil;
   
 	NSString *bString = progressLabel;
 	CGSize bSize = [bString sizeWithFont:progressFont forWidth:(200-(deleteButtonMargin + offset)) lineBreakMode:UILineBreakModeTailTruncation];
-	CGRect bRect = CGRectMake(HARD_LEFT_MARGIN + offset, 28 + progressBarHeightOffset, bSize.width, bSize.height);
+	CGRect bRect = CGRectMake(SIDE_PADDING + offset, 28 + progressBarHeightOffset, bSize.width, bSize.height);
   
   CGSize sizeSize = [sizeLabel sizeWithFont:progressFont forWidth:100 lineBreakMode:UILineBreakModeTailTruncation];
-	CGRect sizeRect = CGRectMake(320 - HARD_LEFT_MARGIN - sizeSize.width - deleteButtonMargin, 28 + progressBarHeightOffset, sizeSize.width, sizeSize.height);
+	CGRect sizeRect = CGRectMake(cellWidth - SIDE_PADDING - sizeSize.width - deleteButtonMargin, 28 + progressBarHeightOffset, sizeSize.width, sizeSize.height);
 	
   [bString drawInRect:bRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation];
   [sizeLabel drawInRect:sizeRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation alignment:UITextAlignmentRight];
 	
+  [progressView setFrame:CGRectMake(SIDE_PADDING, 34, cellWidth - SIDE_PADDING - 16 - (deleteButtonMargin + offset), 20)];
   //	[timeLabel drawInRect:timeRect withFont:infoFont]; // :O zomg nowai
   //  [thumbView drawAtPoint:CGPointMake(8+offset, 8)];*/
   //	[thumbView drawInRect:CGRectMake(0, 0, 100, 88)];

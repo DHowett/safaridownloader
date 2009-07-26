@@ -496,7 +496,7 @@ static id resourceBundle = nil;
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if(tableView.numberOfSections == 2 && indexPath.section == 0) return 79;
+  if(tableView.numberOfSections == 2 && indexPath.section == 0) return 75;
   else return 56;
 }
 
