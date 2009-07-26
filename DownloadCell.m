@@ -1,4 +1,4 @@
-#import "Cell.h"
+#import "DownloadCell.h"
 
 #define RefreshCellSetter(ptr, sptr) if(!sptr) { return; } \
 [sptr retain]; \
@@ -6,7 +6,7 @@
 ptr = sptr; \
 [self setNeedsDisplay];
 
-@implementation Cell
+@implementation DownloadCell
 
 #define HARD_LEFT_MARGIN 16
 
@@ -16,7 +16,7 @@ static UIFont *progressFont = nil;
 @synthesize finished, nameLabel, progressView, sizeLabel, progressLabel, completionLabel, icon = _icon;
 
 + (void)initialize {
-	if(self == [Cell class]) {
+	if(self == [DownloadCell class]) {
 		filenameFont = [[UIFont boldSystemFontOfSize:14] retain];
 		speedFont = [[UIFont systemFontOfSize:12] retain];
     progressFont = [[UIFont boldSystemFontOfSize:13] retain];

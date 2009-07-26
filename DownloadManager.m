@@ -7,7 +7,7 @@
 //
 
 #import "DownloadManager.h"
-#import "Cell.h"
+#import "DownloadCell.h"
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
 
 static BOOL doRot = YES;
@@ -340,10 +340,10 @@ static id resourceBundle = nil;
   [_downloadQueue cancelAllOperations];
 }
 
-- (Cell*)cellForDownload:(SafariDownload*)download
+- (DownloadCell*)cellForDownload:(SafariDownload*)download
 {
   NSUInteger row = [_currentDownloads indexOfObject:download];
-  Cell *cell = (Cell*)[_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
+  DownloadCell *cell = (DownloadCell*)[_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
   return cell;
 }
 
@@ -352,7 +352,7 @@ static id resourceBundle = nil;
 
 - (void)downloadDidBegin:(SafariDownload*)download
 {
-  Cell *cell = [self cellForDownload:download];
+  DownloadCell *cell = [self cellForDownload:download];
   cell.progressLabel = @"Downloading...";
   cell.completionLabel = @"0%";
 }
@@ -360,7 +360,7 @@ static id resourceBundle = nil;
 - (void)downloadDidFinish:(SafariDownload*)download
 {
   NSLog(@"downloadDidFinish");
-  Cell *cell = [self cellForDownload:download];
+  DownloadCell *cell = [self cellForDownload:download];
   
   if (cell == nil) {
     return;
@@ -393,7 +393,7 @@ static id resourceBundle = nil;
 
 - (void)downloadDidUpdate:(SafariDownload*)download
 {
-  Cell *cell = [self cellForDownload:download];
+  DownloadCell *cell = [self cellForDownload:download];
   if (!cell.nameLabel) cell.nameLabel = download.filename; // I know, why do this every update? I couldn't catch the suggested filename properly with didBegin. >:{
   cell.progressView.progress = download.progress;
   cell.completionLabel = [NSString stringWithFormat:@"%d%%", (int)(download.progress*100.0f)];
@@ -403,7 +403,7 @@ static id resourceBundle = nil;
 
 - (void)downloadDidFail:(SafariDownload*)download
 {
-  Cell *cell = [self cellForDownload:download];
+  DownloadCell *cell = [self cellForDownload:download];
   cell.progressLabel = @"Download Failed";
 }
 
@@ -472,10 +472,10 @@ static id resourceBundle = nil;
     finished = YES;
   }
   
-  Cell *cell = (Cell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  DownloadCell *cell = (DownloadCell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) 
   {
-    cell = [[[Cell alloc] initWithFrame:CGRectZero reuseIdentifier:CellIdentifier] autorelease];
+    cell = [[[DownloadCell alloc] initWithFrame:CGRectZero reuseIdentifier:CellIdentifier] autorelease];
   }
   
   // Set up the cell...

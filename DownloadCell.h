@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import "BaseCell.h"
 
-@interface Cell : BaseCell {
+@interface DownloadCell : BaseCell {
 	BOOL finished;
 	UIProgressView *progressView;
 	NSString *nameLabel;
