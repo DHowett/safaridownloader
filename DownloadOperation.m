@@ -92,6 +92,10 @@
   [_delegate setComplete:YES];
 }
 
+- (BOOL)download:(NSURLDownload *)download shouldDecodeSourceDataOfMIMEType:(NSString *)encodingType {
+  return NO;
+}
+
 - (BOOL)beginDownload
 {
   if ([self resumeDownload] == YES)
