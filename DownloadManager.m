@@ -239,7 +239,7 @@ static id resourceBundle = nil;
       [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
                         withRowAnimation:UITableViewRowAnimationFade];
     }
-    [self updateButtonBadges];
+    [self updateBadges];
     return YES;
   }
   return NO;
@@ -310,7 +310,7 @@ static id resourceBundle = nil;
       [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:idx inSection:0]]
                         withRowAnimation:UITableViewRowAnimationFade];
     }
-    [self updateButtonBadges];
+    [self updateBadges];
   }
   return NO;
 }
@@ -387,7 +387,7 @@ static id resourceBundle = nil;
   } else {
     [_tableView reloadData];
   }
-  [self updateButtonBadges];
+  [self updateBadges];
   
   [self saveData];
 }
@@ -541,11 +541,12 @@ static id resourceBundle = nil;
   _landscapeDownloadButton = landscapeButton;
 }
 
-- (void)updateButtonBadges {
+- (void)updateBadges {
   NSString *val = nil;
   if(_currentDownloads.count > 0) val = [NSString stringWithFormat:@"%d", _currentDownloads.count];
   [_portraitDownloadButton _setBadgeValue:val];
   [_landscapeDownloadButton _setBadgeValue:val];
+  [[UIApplication sharedApplication] setApplicationIconBadgeNumber:_currentDownloads.count];
 }
 @end
 

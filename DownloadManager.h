@@ -48,5 +48,5 @@
 // This seems hackish, but is for badging purposes.
 - (void)setPortraitDownloadButton:(id)portraitButton;
 - (void)setLandscapeDownloadButton:(id)landscapeButton;
-- (void)updateButtonBadges;
+- (void)updateBadges;
 @end
