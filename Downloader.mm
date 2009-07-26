@@ -12,7 +12,7 @@
 #import "Safari/BrowserController.h"
 #import "Safari/BrowserButtonBar.h"
 #import <QuartzCore/QuartzCore.h>
-#import <DHHookCommon.h>
+#import "DHHookCommon.h"
 
 // Numerical and Structural String Formatting Macros
 #define iF(i) [NSString stringWithFormat:@"%d", i]
@@ -22,7 +22,6 @@
 
 @class Downloader;
 static Downloader *downloader = nil;
-static DownloadManagerPanel *panel = nil;
 
 @class BrowserButtonBar;
 @interface BrowserButtonBar (mine)
@@ -45,8 +44,6 @@ static UIWebDocumentView *docView = nil;
 @end
 
 @implementation Downloader
-
-static UINavigationController *controller = nil;
 
 - (id)init {
 	self = [super init];
@@ -99,88 +96,6 @@ static UINavigationController *controller = nil;
   
   if (cg == 1 || cg == 2)
     [buttonBar showButtonGroup:cg withDuration:0]; // duration appears to either be ignored or is somehow related to animations
-}
-
-#pragma mark Download Manager UI Stuff/*{{{*/
-- (void)showDownloadManager
-{  
-  if (!panel) {
-    panel = [[DownloadManagerPanel alloc] init]; // our rotation disabler
-  }
-  
-  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
-  Class BrowserController = objc_getClass("BrowserController");
-  DownloadManager* dlManager = [DownloadManager sharedManager];
-  controller = [[UINavigationController alloc] initWithRootViewController:dlManager];
-  [[BrowserController sharedBrowserController] showBrowserPanelType:44];
-  
-  UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc]  initWithBarButtonSystemItem:UIBarButtonSystemItemDone 
-                                                                                   target:self 
-                                                                                   action:@selector(hideDownloadManager)];
-  dlManager.navigationItem.leftBarButtonItem = doneItemButton;
-  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
-                                                                   style:UIBarButtonItemStyleBordered 
-                                                                  target:nil 
-                                                                  action:nil];
-  
-  UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-  NSString *transition = kCATransitionFromTop;
-  if (orientation == UIDeviceOrientationLandscapeLeft)
-    transition = kCATransitionFromLeft;
-  else if (orientation == UIDeviceOrientationLandscapeRight)
-    transition = kCATransitionFromRight;
-  
-  dlManager.navigationItem.rightBarButtonItem = cancelButton;
-  dlManager.navigationItem.rightBarButtonItem.enabled = NO;
-  dlManager.navigationItem.title = @"Downloads";
-  [controller setNavigationBarHidden:NO];
-  CATransition *animation = [CATransition animation];
-  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
-  [animation setType:kCATransitionPush];
-  [animation setSubtype:transition];
-  [animation setDuration:0.3];
-  [animation setFillMode:kCAFillModeForwards];
-  [animation setRemovedOnCompletion:YES];
-  [[[controller view] layer] addAnimation:animation 
-                                   forKey:@"pushUp"];
-  
-  [keyWindow addSubview:[controller view]];
-  [panel allowRotations:NO];
-}
-
-- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
-{
-  Class BrowserController = objc_getClass("BrowserController");
-  [[BrowserController sharedBrowserController] hideBrowserPanelType:44];
-  [panel allowRotations:YES];
-  [[controller view] removeFromSuperview];
-  [controller release];
-  controller = nil;
-}
-
-- (void)hideDownloadManager
-{
-  UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-  NSString *transition = kCATransitionFromBottom;
-  if (orientation == UIDeviceOrientationLandscapeLeft)
-    transition = kCATransitionFromRight;
-  else if (orientation == UIDeviceOrientationLandscapeRight)
-    transition = kCATransitionFromLeft;
-  
-  CATransition *animation = [CATransition animation];
-  [animation setDelegate:self];
-  [animation setTimingFunction:[CAMediaTimingFunction 
-                                functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
-  [animation setType:kCATransitionPush];
-  [animation setSubtype:transition];
-  [animation setDuration:0.4];
-  [animation setFillMode:kCAFillModeForwards];
-  [animation setDelegate:self];
-  [animation setEndProgress:1.0];
-  [[[controller view] layer] addAnimation:animation 
-                                   forKey:@"pushUp"];
-  [[controller view] setFrame:CGRectOffset(controller.view.frame, 
-                                           0, -controller.view.frame.size.height)];
 }
 
 #pragma mark -/*}}}*/
@@ -341,13 +256,13 @@ HOOK(BrowserButtonBar, createButtonWithDescription$, id, id description) {
   if (tag == 17) // portrait buton
   {
     [ret setImage:[UIImage imageNamed:@"Download.png"]];
-    [ret addTarget:downloader action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
+    [ret addTarget:[DownloadManager sharedManager] action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
     [[DownloadManager sharedManager] setPortraitDownloadButton:ret];
   }
   else if (tag == 18) // landscape button
   {
     [ret setImage:[UIImage imageNamed:@"DownloadSmall.png"]];
-    [ret addTarget:downloader action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
+    [ret addTarget:[DownloadManager sharedManager] action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
     [[DownloadManager sharedManager] setLandscapeDownloadButton:ret];
   }
   else if (tag == 66) // portrait spacer
@@ -374,7 +289,7 @@ HOOK(UIToolbarButton, setFrame$, void, CGRect frame) {
 
 HOOK(BrowserController, _panelForPanelType$, id, int type) {
   if(type == 44)
-    return panel;
+    return [[DownloadManager sharedManager] browserPanel];
   return CALL_ORIG(BrowserController, _panelForPanelType$, type);
 }
 

@@ -21,8 +21,10 @@
 - (void)allowRotations:(BOOL)allow;
 @end
 
-//@class BrowserPanelViewController;
-@interface DownloadManager : UITableViewController <SafariDownloadDelegate> {
+@interface DownloadManagerNav : UINavigationController
+@end
+
+@interface DownloadManager : UIViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate> {
   UITableView*      _tableView;
   NSArray*          _mimeTypes;
   NSMutableArray*   _currentDownloads;
@@ -30,7 +32,11 @@
   NSOperationQueue* _downloadQueue;
   UIToolbarButton*  _portraitDownloadButton;
   UIToolbarButton*  _landscapeDownloadButton;
+  UINavigationItem* _navItem;
+  DownloadManagerPanel *_panel;
 }
+
+@property (nonatomic, retain) UINavigationItem* navigationItem;
 
 + (id)sharedManager;
 - (UIImage *)iconForExtension:(NSString *)extension;
@@ -44,6 +50,12 @@
 - (BOOL)cancelDownload:(SafariDownload *)download;
 - (BOOL)cancelDownloadWithURL:(NSURL *)url;
 - (void)cancelAllDownloads;
+
+- (DownloadManagerPanel*)browserPanel;
+- (void)showDownloadManager;
+- (void)hideDownloadManager;
+
+- (UIImage *)iconForExtension:(NSString *)extension;
 
 // This seems hackish, but is for badging purposes.
 - (void)setPortraitDownloadButton:(id)portraitButton;

@@ -5,7 +5,8 @@
 //  Created by Youssef Francis on 7/23/09.
 //  Copyright 2009 Brancipater Software. All rights reserved.
 //
-
+#import <QuartzCore/QuartzCore.h>
+#import "Safari/BrowserController.h"
 #import "DownloadManager.h"
 #import "DownloadCell.h"
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
@@ -41,7 +42,25 @@ static BOOL doRot = YES;
 
 @end
 
+@implementation DownloadManagerNav
+
+- (void)viewDidLoad
+{
+  self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
+  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
+  UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
+  [super viewDidLoad];
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+{
+  return YES; 
+}
+
+@end
+
 @implementation DownloadManager
+@synthesize navigationItem = _navItem;
 
 #pragma mark -
 #pragma mark Singleton Methods/*{{{*/
@@ -62,8 +81,9 @@ static id resourceBundle = nil;
 }
 
 - (id)init {
-  if([self initWithStyle:UITableViewStylePlain] != nil) 
+  if([self initWithNibName:nil bundle:nil] != nil) 
   {
+    _panel = [[DownloadManagerPanel alloc] init];
     _currentDownloads = [NSMutableArray new];
     _finishedDownloads = [NSMutableArray new];
     _downloadQueue = [NSOperationQueue new];
@@ -117,14 +137,47 @@ static id resourceBundle = nil;
 
 - (void)loadView
 {
-  _tableView = [[UITableView alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]  style:UITableViewStylePlain];
+  CGRect frame = [[UIScreen mainScreen] applicationFrame];
+  self.view = [[UIView alloc] initWithFrame:frame];
+  
+  UINavigationBar *navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
+  navBar.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
+  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
+  UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
+  self.navigationItem = [[UINavigationItem alloc] initWithTitle:@"Downloads"];
+    
+  UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc]  initWithBarButtonSystemItem:UIBarButtonSystemItemDone 
+                                                                                   target:self 
+                                                                                   action:@selector(hideDownloadManager)];
+  self.navigationItem.leftBarButtonItem = doneItemButton;
+  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
+                                                                   style:UIBarButtonItemStyleBordered 
+                                                                  target:self 
+                                                                  action:@selector(cancelAllDownloads)];    
+  self.navigationItem.rightBarButtonItem = cancelButton;
+  self.navigationItem.rightBarButtonItem.enabled = NO;
+
+  [navBar pushNavigationItem:self.navigationItem animated:NO];
+  [self.view addSubview:navBar];
+
+  frame.origin.y += 22;
+//  frame.size.height -= 22;
+  
+  _tableView = [[UITableView alloc] initWithFrame:frame  style:UITableViewStylePlain];
   _tableView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
   UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
   UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
   _tableView.delegate = self;
   _tableView.dataSource = self;
   _tableView.rowHeight = 56;
-  self.view = _tableView; 
+  [self.view addSubview:_tableView]; 
+}
+
+- (DownloadManagerPanel*)browserPanel
+{
+  if (!_panel)
+    _panel = [[DownloadManagerPanel alloc] init];
+  return _panel;
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -239,6 +292,7 @@ static id resourceBundle = nil;
       [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
                         withRowAnimation:UITableViewRowAnimationFade];
     }
+    self.navigationItem.rightBarButtonItem.enabled = YES;
     [self updateBadges];
     return YES;
   }
@@ -305,6 +359,7 @@ static id resourceBundle = nil;
     [_currentDownloads removeObject:download];
     
     if (_currentDownloads.count == 0) {
+      self.navigationItem.rightBarButtonItem.enabled = NO;
       [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
     } else {
       [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:idx inSection:0]]
@@ -339,6 +394,7 @@ static id resourceBundle = nil;
 {
   [self saveData];
   [_downloadQueue cancelAllOperations];
+  self.navigationItem.rightBarButtonItem.enabled = NO;
 }
 
 - (DownloadCell*)cellForDownload:(SafariDownload*)download
@@ -354,6 +410,7 @@ static id resourceBundle = nil;
 - (void)downloadDidBegin:(SafariDownload*)download
 {
   DownloadCell *cell = [self cellForDownload:download];
+  cell.nameLabel = download.filename;
   cell.progressLabel = @"Downloading...";
   cell.completionLabel = @"0%";
 }
@@ -361,14 +418,12 @@ static id resourceBundle = nil;
 - (void)downloadDidFinish:(SafariDownload*)download
 {
   NSLog(@"downloadDidFinish");
-  DownloadCell *cell = [self cellForDownload:download];
-  
+  DownloadCell* cell = [self cellForDownload:download];
   if (cell == nil) {
     return;
   }
   
   cell.progressLabel = @"Download Complete";
-  
   NSUInteger row = [_currentDownloads indexOfObject:download];
   [_currentDownloads removeObject:download];
   
@@ -387,15 +442,14 @@ static id resourceBundle = nil;
   } else {
     [_tableView reloadData];
   }
-  [self updateBadges];
   
+  [self updateBadges];
   [self saveData];
 }
 
 - (void)downloadDidUpdate:(SafariDownload*)download
 {
-  DownloadCell *cell = [self cellForDownload:download];
-  if (!cell.nameLabel) cell.nameLabel = download.filename; // I know, why do this every update? I couldn't catch the suggested filename properly with didBegin. >:{
+  DownloadCell* cell = [self cellForDownload:download];
   cell.progressView.progress = download.progress;
   cell.completionLabel = [NSString stringWithFormat:@"%d%%", (int)(download.progress*100.0f)];
   cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
@@ -411,9 +465,80 @@ static id resourceBundle = nil;
 #pragma mark -/*}}}*/
 #pragma mark UIViewController Methods/*{{{*/
 
+static int animationType = 0;
+
+- (void)showDownloadManager
+{    
+  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+  self.view.frame = [[UIScreen mainScreen] applicationFrame];
+  UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+  NSString *transition = kCATransitionFromTop;
+  if (orientation == UIDeviceOrientationLandscapeLeft)
+    transition = kCATransitionFromLeft;
+  else if (orientation == UIDeviceOrientationLandscapeRight)
+    transition = kCATransitionFromRight;
+  
+  CATransition *animation = [CATransition animation];
+  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+  [animation setDelegate:self];
+  [animation setType:kCATransitionPush];
+  [animation setSubtype:transition];
+  [animation setDuration:0.3];
+  [animation setFillMode:kCAFillModeForwards];
+  [animation setRemovedOnCompletion:YES];
+  [[self.view layer] addAnimation:animation forKey:@"pushUp"];
+  animationType = 1;
+  
+  [keyWindow addSubview:self.view];
+}
+
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
+{
+  Class BrowserController = objc_getClass("BrowserController");
+  [[BrowserController sharedBrowserController] showBrowserPanelType:44];
+  [[BrowserController sharedBrowserController] _setBrowserPanel:_panel];
+  
+  if (animationType == 1) 
+  {
+    [_panel allowRotations:NO];
+  }
+  else if (animationType == 2)
+  {
+    [_panel allowRotations:YES];
+    [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
+    [self.view removeFromSuperview];
+  }
+  
+  animationType = 0;
+}
+
+- (void)hideDownloadManager
+{
+  animationType = 2;
+  UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+  NSString *transition = kCATransitionFromBottom;
+  if (orientation == UIDeviceOrientationLandscapeLeft)
+    transition = kCATransitionFromRight;
+  else if (orientation == UIDeviceOrientationLandscapeRight)
+    transition = kCATransitionFromLeft;
+  
+  CATransition *animation = [CATransition animation];
+  [animation setDelegate:self];
+  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+  [animation setType:kCATransitionPush];
+  [animation setSubtype:transition];
+  [animation setDuration:0.4];
+  [animation setFillMode:kCAFillModeForwards];
+  [animation setDelegate:self];
+  [animation setEndProgress:1.0];
+  [animation setRemovedOnCompletion:YES];
+  [[self.view layer] addAnimation:animation forKey:@"pushUp"];
+  [self.view setFrame:CGRectOffset(self.view.frame, 0, self.view.frame.size.height)];
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-  return YES; 
+  return doRot; // do not rotate if safari rotations are disabled (i.e. panel is currently up)
 }
 
 - (void)didReceiveMemoryWarning
