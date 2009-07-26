@@ -14,7 +14,6 @@ delegate    = _delegate,
 urlReq      = _urlRequest,
 startDate   = _startDate,
 filename    = _filename, 
-icon        = _iconName,
 sizeString  = _sizeString,
 timeString  = _timeString,
 size        = _size,
@@ -25,7 +24,6 @@ complete    = _complete;
 
 - (id)initWithRequest:(NSURLRequest*)urlRequest 
                  name:(NSString *)name 
-                 icon:(NSString *)icn 
              delegate:(id)del
 {
   if (self = [super init])
@@ -34,7 +32,6 @@ complete    = _complete;
     self.urlReq     = urlRequest;
     self.startDate  = [NSDate date];
     self.filename   = name;
-    self.icon       = icn;
     self.sizeString = @"N/A";
     self.timeString = @"Calculating remaining time...";
   }
@@ -48,7 +45,6 @@ complete    = _complete;
     self.urlReq     = [coder decodeObject];
     self.startDate  = [coder decodeObject];
     self.filename   = [coder decodeObject];
-    self.icon       = [coder decodeObject];
     self.sizeString = [coder decodeObject];
     self.timeString = [coder decodeObject];
     self.time       = [coder decodeIntForKey:  @"time"    ];
@@ -65,7 +61,6 @@ complete    = _complete;
   [coder encodeObject: _urlRequest     ];
   [coder encodeObject: _startDate      ];
   [coder encodeObject: _filename       ];
-  [coder encodeObject: _iconName       ];
   [coder encodeObject: _sizeString     ];
   [coder encodeObject: _timeString     ];
   [coder encodeInt:    _time_remaining forKey:@"time"    ];
@@ -124,7 +119,6 @@ complete    = _complete;
   _delegate = nil;
   [_urlRequest release];
   [_filename release];
-  [_iconName release];
   [_sizeString release];
   [_timeString release];
   [super dealloc];

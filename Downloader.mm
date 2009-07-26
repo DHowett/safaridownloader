@@ -105,7 +105,7 @@ static UINavigationController *controller = nil;
 - (void)showDownloadManager
 {  
   if (!panel) {
-    panel = [[[DownloadManagerPanel alloc] init] autorelease]; // our rotation disabler
+    panel = [[DownloadManagerPanel alloc] init]; // our rotation disabler
   }
   
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
@@ -198,17 +198,8 @@ static UINavigationController *controller = nil;
                                        otherButtonTitles:nil];
   [lulz addButtonWithTitle:@"Yes"];
   
-  NSString *impr = @"/var/mobile/Library/SafariDownloads/images";
-  NSString *icn = [[filename pathExtension] stringByAppendingString:@".png"];
-  NSLog(@"trying path: %@", [impr stringByAppendingPathComponent:icn]);
-  if (![[NSFileManager defaultManager] 
-        fileExistsAtPath:[impr stringByAppendingPathComponent:icn]])
-    icn = @"unknown.png";
-  NSString *path = [impr stringByAppendingPathComponent:icn];
-  NSLog(@"chose path: %@", path);
-  
-  UIImageView *mmicon = [[UIImageView alloc] 
-                         initWithImage:[UIImage imageWithContentsOfFile:path]];
+  UIImageView *mmicon = [[UIImageView alloc]
+                              initWithImage:[[DownloadManager sharedManager] iconForExtension:[filename pathExtension]]];
   mmicon.frame = CGRectMake(40.0f, 19.0f, 22.0f, 22.0f);
   [lulz addSubview:mmicon];
   [mmicon release];    

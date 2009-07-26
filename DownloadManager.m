@@ -46,11 +46,13 @@ static BOOL doRot = YES;
 #pragma mark -
 #pragma mark Singleton Methods/*{{{*/
 static id sharedManager = nil;
+static id resourceBundle = nil;
 
 + (void)initialize  {
   if (self == [DownloadManager class])
   {
     sharedManager = [[self alloc] init];
+    resourceBundle = [[NSBundle alloc] initWithPath:@"/Library/Application Support/Downloader"];
   }
 }
 
@@ -141,6 +143,12 @@ static id sharedManager = nil;
 
 - (id)autorelease {
   return self;
+}
+
+- (UIImage *)iconForExtension:(NSString *)extension {
+  NSString *iconPath = [resourceBundle pathForResource:extension ofType:@"png" inDirectory:@"FileIcons"];
+  if(!iconPath) iconPath = [resourceBundle pathForResource:@"unknownfile" ofType:@"png"];
+  return [UIImage imageWithContentsOfFile:iconPath];
 }
 
 #pragma mark -/*}}}*/
@@ -241,16 +249,8 @@ static id sharedManager = nil;
     return NO;
   
   NSString *name = [[url absoluteString] lastPathComponent];
-  NSString *icon = nil;
-  
-  if ([[NSFileManager defaultManager] fileExistsAtPath:[[NSBundle mainBundle] pathForResource:[name pathExtension] ofType:@"png"]])
-    icon = [[name pathExtension] stringByAppendingString:@".png"];
-  else
-    icon = @"unknown.png";
-  
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:[NSURLRequest requestWithURL:url]
                                                                 name:name
-                                                                icon:icon
                                                             delegate:self];
   
   return [self addDownload:download];
@@ -260,16 +260,8 @@ static id sharedManager = nil;
   NSLog(@"addDownloadWithRequest: %@", request);
   NSString *name = [[[request URL] absoluteString] lastPathComponent];
   
-  NSString *icon = nil;
-  
-  if ([[NSFileManager defaultManager] fileExistsAtPath:[[NSBundle mainBundle] pathForResource:[name pathExtension] ofType:@"png"]])
-    icon = [[name pathExtension] stringByAppendingString:@".png"];
-  else
-    icon = @"unknown.png";
-  
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
                                                                 name:name
-                                                                icon:icon
                                                             delegate:self];
   if ([self downloadWithURL:[request URL]])
     [download release];
@@ -283,7 +275,6 @@ static id sharedManager = nil;
   NSURLRequest*   request  = [info objectForKey:@"request"];
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
                                                                 name:[info objectForKey:@"name"]
-                                                                icon:[info objectForKey:@"icon"]
                                                             delegate:self];
   if ([self downloadWithURL:[request URL]])
     [download release];
@@ -489,7 +480,7 @@ static id sharedManager = nil;
   
   // Set up the cell...
   cell.finished = finished;
-  cell.icon = [UIImage imageNamed:download.icon];
+  cell.icon = [self iconForExtension:[download.filename pathExtension]];
 	cell.nameLabel = download.filename;
   cell.sizeLabel = download.sizeString;
   if(!finished) {

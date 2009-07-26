@@ -33,6 +33,7 @@
 }
 
 + (id)sharedManager;
+- (UIImage *)iconForExtension:(NSString *)extension;
 - (BOOL)supportedRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType;
 

@@ -27,7 +27,6 @@
   NSString*      _filename;
   NSString*      _sizeString;
   NSString*      _timeString;
-  NSString*      _iconName;
   NSInteger      _size;
   NSInteger      _time_remaining;
   float          _progress;
@@ -39,7 +38,6 @@
 @property (nonatomic, retain) NSURLRequest    *urlReq;
 @property (nonatomic, retain) NSDate          *startDate;
 @property (nonatomic, retain) NSString        *filename;
-@property (nonatomic, retain) NSString        *icon;
 @property (nonatomic, retain) NSString        *sizeString;
 @property (nonatomic, retain) NSString        *timeString;
 @property (assign) NSInteger  time;
@@ -48,7 +46,7 @@
 @property (assign) float      speed;
 @property (assign) BOOL       complete;
 
-- (id)initWithRequest:(NSURLRequest*)urlRequest name:(NSString *)name icon:(NSString *)icn delegate:(id)del;
+- (id)initWithRequest:(NSURLRequest*)urlRequest name:(NSString *)name delegate:(id)del;
 - (void)downloadFailedWithError:(NSError *)err;
 - (void)setProgress:(float)prog speed:(float)spd;
 - (void)downloadStarted;
