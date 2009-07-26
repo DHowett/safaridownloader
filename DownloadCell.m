@@ -127,12 +127,12 @@ static UIFont *progressFont = nil;
 	[backgroundColor set];
 	CGContextFillRect(context, r);
 	
-  [_icon drawAtPoint:CGPointMake(HARD_LEFT_MARGIN, 5)];
+  [_icon drawAtPoint:CGPointMake(HARD_LEFT_MARGIN, 7)];
   
 	[textColor set];
 	NSString *filenameString = nameLabel;
 	CGSize filenameSize = [filenameString sizeWithFont:filenameFont forWidth:(288-(deleteButtonMargin+offset)) lineBreakMode:UILineBreakModeTailTruncation];
-	CGRect filenameRect = CGRectMake(HARD_LEFT_MARGIN + offset + _icon.size.width + 5, 12, filenameSize.width, filenameSize.height);
+	CGRect filenameRect = CGRectMake(HARD_LEFT_MARGIN + offset + _icon.size.width + 5, 9, filenameSize.width, filenameSize.height);
 	
   CGSize completionSize = [sizeLabel sizeWithFont:progressFont forWidth:100 lineBreakMode:UILineBreakModeTailTruncation];
 	CGRect completionRect = CGRectMake(320 - HARD_LEFT_MARGIN - completionSize.width - deleteButtonMargin, 18, completionSize.width, completionSize.height);
