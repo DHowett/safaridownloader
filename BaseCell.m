@@ -1,4 +1,4 @@
-#import "Cell.h"
+#import "BaseCell.h"
 
 @interface BaseCellView : UIView
 @end
