@@ -35,12 +35,12 @@ static DownloadManagerPanel *panel = nil;
 
 static UIWebDocumentView *docView = nil;
 
-@interface Downloader : NSObject <UIAlertViewDelegate>
+@interface Downloader : NSObject <UIActionSheetDelegate>
 {
   NSURLRequest* _currentRequest;
 }
 
-- (void)downloadFile:(NSString *)file;
+- (void)downloadFile;
 
 @end
 
@@ -191,42 +191,42 @@ static UINavigationController *controller = nil;
   NSString *filename = [[[[request URL] absoluteString] lastPathComponent] 
                         stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
   
-  UIAlertView *lulz = [[UIAlertView alloc] initWithTitle:@"Download?" 
-                                                 message:filename
-                                                delegate:self 
-                                       cancelButtonTitle:@"No" 
-                                       otherButtonTitles:nil];
-  [lulz addButtonWithTitle:@"Yes"];
+  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:filename
+                                                       delegate:self
+                                              cancelButtonTitle:@"Cancel"
+                                         destructiveButtonTitle:nil
+                                              otherButtonTitles:@"Download", @"View", nil];
+  [ohmygod setMessage:@"Thy bidding, master?"];
   
   UIImageView *mmicon = [[UIImageView alloc]
                               initWithImage:[[DownloadManager sharedManager] iconForExtension:[filename pathExtension]]];
   mmicon.frame = CGRectMake(40.0f, 19.0f, 22.0f, 22.0f);
-  [lulz addSubview:mmicon];
+  [ohmygod addSubview:mmicon];
   [mmicon release];    
   
-  [lulz show];
-  [lulz release];
+  [ohmygod showFromToolbar:[[objc_getClass("BrowserController") sharedBrowserController] buttonBar]];
+  [ohmygod release];
   
   [_currentRequest release];
   _currentRequest = [request retain];
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-  if (   [[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:@"Cancel"] 
-      || [[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:@"No"]) 
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+  if([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Cancel"])
+    return;
+  else if([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"View"]) 
   {
     [docView loadRequest:_currentRequest];
   }
-  else if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:@"Yes"])
+  else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Download"])
   {
-    [self downloadFile:alertView.message];
+    [self downloadFile];
   }
 }
 
-- (void)downloadFile:(NSString *)file
+- (void)downloadFile
 {
-  NSLog(@"downloadFile %@: currentRequest: %@", file, _currentRequest);
+  NSLog(@"downloadFile: currentRequest: %@", _currentRequest);
   
   if ([[DownloadManager sharedManager] addDownloadWithRequest:_currentRequest])
     NSLog(@"successfully added download");
