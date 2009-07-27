@@ -21,10 +21,7 @@
 - (void)allowRotations:(BOOL)allow;
 @end
 
-@interface DownloadManagerNav : UINavigationController
-@end
-
-@interface DownloadManager : UIViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate> {
+@interface DownloadManager : UITableViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate> {
   UITableView*      _tableView;
   NSArray*          _mimeTypes;
   NSMutableArray*   _currentDownloads;
@@ -33,6 +30,7 @@
   UIToolbarButton*  _portraitDownloadButton;
   UIToolbarButton*  _landscapeDownloadButton;
   UINavigationItem* _navItem;
+  UINavigationBar*  _navBar;
   DownloadManagerPanel *_panel;
 }
 
@@ -49,11 +47,11 @@
 - (BOOL)addDownload:(SafariDownload *)download;
 - (BOOL)cancelDownload:(SafariDownload *)download;
 - (BOOL)cancelDownloadWithURL:(NSURL *)url;
-- (void)cancelAllDownloads;
+- (IBAction)cancelAllDownloads;
 
 - (DownloadManagerPanel*)browserPanel;
 - (void)showDownloadManager;
-- (void)hideDownloadManager;
+- (IBAction)hideDownloadManager;
 
 - (UIImage *)iconForExtension:(NSString *)extension;
 

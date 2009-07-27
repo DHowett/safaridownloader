@@ -42,23 +42,6 @@ static BOOL doRot = YES;
 
 @end
 
-@implementation DownloadManagerNav
-
-- (void)viewDidLoad
-{
-  self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
-  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-  UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
-  [super viewDidLoad];
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
-{
-  return YES; 
-}
-
-@end
-
 @implementation DownloadManager
 @synthesize navigationItem = _navItem;
 
@@ -140,10 +123,16 @@ static id resourceBundle = nil;
   CGRect frame = [[UIScreen mainScreen] applicationFrame];
   self.view = [[UIView alloc] initWithFrame:frame];
   
-  UINavigationBar *navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
-  navBar.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
+  self.view.autoresizingMask =   UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
   UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-  UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
+  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
+  
+  self.view.autoresizesSubviews = YES;
+  _navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
+  _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
+  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
+  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
   self.navigationItem = [[UINavigationItem alloc] initWithTitle:@"Downloads"];
     
   UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc]  initWithBarButtonSystemItem:UIBarButtonSystemItemDone 
@@ -157,16 +146,17 @@ static id resourceBundle = nil;
   self.navigationItem.rightBarButtonItem = cancelButton;
   self.navigationItem.rightBarButtonItem.enabled = NO;
 
-  [navBar pushNavigationItem:self.navigationItem animated:NO];
-  [self.view addSubview:navBar];
+  [_navBar pushNavigationItem:self.navigationItem animated:NO];
+  [self.view addSubview:_navBar];
 
-  frame.origin.y += 22;
-//  frame.size.height -= 22;
+  frame.origin.y = _navBar.frame.size.height;
+  frame.size.height = self.view.frame.size.height - _navBar.frame.size.height;
   
   _tableView = [[UITableView alloc] initWithFrame:frame  style:UITableViewStylePlain];
-  _tableView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
-  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-  UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
+  _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
+////  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
+////  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
+//  UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
   _tableView.delegate = self;
   _tableView.dataSource = self;
   _tableView.rowHeight = 56;
@@ -478,6 +468,23 @@ static int animationType = 0;
   else if (orientation == UIDeviceOrientationLandscapeRight)
     transition = kCATransitionFromRight;
   
+//  CGRect frame = [[UIScreen mainScreen] applicationFrame];
+//  [self.view setFrame:frame];
+  NSLog(@"view frame: %@", NSStringFromCGRect(self.view.frame));
+  NSLog(@"table frame: %@", NSStringFromCGRect(_tableView.frame));
+  NSLog(@"navbar frame: %@", NSStringFromCGRect(_navBar.frame));
+//  _navBar.frame = CGRectMake(0, 0, frame.size.width, 44);
+//  frame.origin.y += 22;
+  
+  // portrait
+  //  Mon Jul 27 03:00:06 unknown MobileSafari[8555] <Warning>: table frame: {{0, 42}, {320, 416}}
+  //  Mon Jul 27 03:00:06 unknown MobileSafari[8555] <Warning>: navbar frame: {{0, 0}, {320, 44}}
+
+  
+  // landscape
+  //  Mon Jul 27 03:00:31 unknown MobileSafari[8555] <Warning>: table frame: {{0, 42}, {480, 256}}
+  //  Mon Jul 27 03:00:31 unknown MobileSafari[8555] <Warning>: navbar frame: {{0, 0}, {480, 44}}
+  
   CATransition *animation = [CATransition animation];
   [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
   [animation setDelegate:self];
@@ -488,25 +495,38 @@ static int animationType = 0;
   [animation setRemovedOnCompletion:YES];
   [[self.view layer] addAnimation:animation forKey:@"pushUp"];
   animationType = 1;
-  
   [keyWindow addSubview:self.view];
+  if (self.interfaceOrientation == UIInterfaceOrientationPortrait) {
+    _tableView.frame = CGRectMake(0, 44, 320, 416);
+    _navBar.frame = CGRectMake(0, 0, 320, 44);
+  }
+  else
+  {
+    _tableView.frame = CGRectMake(0, 44, 480, 256);
+    _navBar.frame = CGRectMake(0, 0, 480, 44);
+  }
+  
+  for (DownloadCell* cell in [_tableView visibleCells]) {
+    [cell setNeedsDisplay];
+  }
+  
 }
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
 {
   Class BrowserController = objc_getClass("BrowserController");
-  [[BrowserController sharedBrowserController] showBrowserPanelType:44];
-  [[BrowserController sharedBrowserController] _setBrowserPanel:_panel];
   
   if (animationType == 1) 
   {
+    [[BrowserController sharedBrowserController] showBrowserPanelType:44];
+    [[BrowserController sharedBrowserController] _setBrowserPanel:_panel];
     [_panel allowRotations:NO];
   }
   else if (animationType == 2)
   {
-    [_panel allowRotations:YES];
     [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
     [self.view removeFromSuperview];
+    [_panel allowRotations:YES];
   }
   
   animationType = 0;
@@ -532,12 +552,13 @@ static int animationType = 0;
   [animation setDelegate:self];
   [animation setEndProgress:1.0];
   [animation setRemovedOnCompletion:YES];
-  [[self.view layer] addAnimation:animation forKey:@"pushUp"];
+  [[self.view layer] addAnimation:animation forKey:@"pushDown"];
   [self.view setFrame:CGRectOffset(self.view.frame, 0, self.view.frame.size.height)];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
+  NSLog(@"shouldAutorotateToInterfaceOrientation? %d", doRot);
   return doRot; // do not rotate if safari rotations are disabled (i.e. panel is currently up)
 }
 
@@ -587,7 +608,7 @@ static int animationType = 0;
   
   static NSString *CellIdentifier = @"DownloadCell";
   BOOL finished = NO;
-  SafariDownload *download;
+  SafariDownload *download = nil;
   
   if(tableView.numberOfSections == 2 && indexPath.section == 0) {
     download = [_currentDownloads objectAtIndex:indexPath.row];
