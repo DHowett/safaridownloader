@@ -296,7 +296,8 @@ static id resourceBundle = nil;
   if ([self downloadWithURL:url])
     return NO;
   
-  NSString *name = [[url absoluteString] lastPathComponent];
+  NSString *name = [[[url absoluteString] lastPathComponent]
+    stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:[NSURLRequest requestWithURL:url]
                                                                 name:name
                                                             delegate:self];
@@ -306,30 +307,27 @@ static id resourceBundle = nil;
 
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request {
   NSLog(@"addDownloadWithRequest: %@", request);
-  NSString *name = [[[request URL] absoluteString] lastPathComponent];
+  NSString *name = [[[[request URL] absoluteString] lastPathComponent]
+    stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
   
+  if ([self downloadWithURL:[request URL]])
+    return NO;
+
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
                                                                 name:name
                                                             delegate:self];
-  if ([self downloadWithURL:[request URL]])
-    [download release];
-  else
-    return [self addDownload:download];
-  
-  return NO;
+  return [self addDownload:download];
 }
 
 - (BOOL)addDownloadWithInfo:(NSDictionary*)info {
   NSURLRequest*   request  = [info objectForKey:@"request"];
+  if ([self downloadWithURL:[request URL]])
+    return NO;
+
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
                                                                 name:[info objectForKey:@"name"]
                                                             delegate:self];
-  if ([self downloadWithURL:[request URL]])
-    [download release];
-  else
-    return [self addDownload:download];
-  
-  return NO;
+  return [self addDownload:download];
 }
 
 // everything eventually goes through this method

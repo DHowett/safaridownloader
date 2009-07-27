@@ -40,7 +40,6 @@
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename
 {
   NSLog(@"FILENAME SUGGESTED: %@", filename);
-  [download setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", filename] allowOverwrite:YES];
   [_delegate setFilename:filename];
 }
 
@@ -60,6 +59,7 @@
   _bytes += length;
   long long expectedLength = [_response expectedContentLength];
   float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
+  if (avspd > 1500) return;
 	float percentComplete=(float)(_bytes/expectedLength);
   [_delegate setProgress:percentComplete speed:avspd];
   if (avspd > 100) { // throttle
@@ -119,7 +119,7 @@
     NSLog(@"Restarting download from scratch - 114!");
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
-//    [_downloader setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]] allowOverwrite:YES];
+    [_downloader setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]] allowOverwrite:YES];
     _start = [NSDate timeIntervalSinceReferenceDate];
     _bytes = 0.0;
   }
