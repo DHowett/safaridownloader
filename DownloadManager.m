@@ -210,10 +210,13 @@ static id resourceBundle = nil;
     if (// documents
         [urlString hasSuffix:@".doc"]
         || [urlString hasSuffix:@".docx"]
+        || [urlString hasSuffix:@".odt"]
         || [urlString hasSuffix:@".ppt"]
         || [urlString hasSuffix:@".pptx"]
+        || [urlString hasSuffix:@".odp"]
         || [urlString hasSuffix:@".xls"]
         || [urlString hasSuffix:@".xlsx"]
+        || [urlString hasSuffix:@".ods"]
         // images
         || [urlString hasSuffix:@".jpg"]
         || [urlString hasSuffix:@".jpeg"]
