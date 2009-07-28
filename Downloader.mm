@@ -107,20 +107,30 @@ static id originalDelegate = nil;
   NSString *filename = [[[[request URL] absoluteString] lastPathComponent] 
                         stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
   
-  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:filename
+  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:@"What would you like to do?"
                                                        delegate:self
                                               cancelButtonTitle:@"Cancel"
                                          destructiveButtonTitle:nil
                                               otherButtonTitles:@"Download", @"View", nil];
-  [ohmygod setMessage:@"What would you like to do?"];
+  [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
   
-  UIImageView *mmicon = [[UIImageView alloc]
+  UILabel *nameLabel = [[ohmygod subviews] objectAtIndex:4];
+  UIFont *filenameFont = [nameLabel font];
+  CGSize filenameSize = [filename sizeWithFont:filenameFont];
+  CGRect screenRect = [[UIScreen mainScreen] bounds];
+  CGRect nameLabelRect = CGRectMake((screenRect.size.width / 2) - (filenameSize.width / 2), filenameSize.height,
+                                   filenameSize.width, filenameSize.height);
+  [nameLabel setFrame:nameLabelRect];
+  [nameLabel setText:filename];
+  
+  UIImageView *iconImageView = [[UIImageView alloc]
                               initWithImage:[[DownloadManager sharedManager] iconForExtension:[filename pathExtension]]];
-  mmicon.frame = CGRectMake(37.0f, 33.0f, 22.0f, 22.0f);
-  [ohmygod addSubview:mmicon];
-  [mmicon release];    
-  
+  iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
+  [ohmygod addSubview:iconImageView];
+  [iconImageView release];
+
   [ohmygod showFromToolbar:[[objc_getClass("BrowserController") sharedBrowserController] buttonBar]];
+  NSLog(@"%p", ohmygod);
   [ohmygod release];
   
   [_currentRequest release];
