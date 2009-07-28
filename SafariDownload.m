@@ -100,9 +100,14 @@ complete    = _complete;
   [_delegate performSelectorOnMainThread:@selector(downloadDidBegin:) withObject:self waitUntilDone:NO];
 }
 
+- (void)downloadCancelled
+{
+  [_delegate performSelectorOnMainThread:@selector(downloadDidCancel:) withObject:self waitUntilDone:NO];
+}
+
 - (void)downloadFailedWithError:(NSError *)err
 {
-  NSLog(@"FAILED WITH ERROR: %@", [err localizedDescription]);
+//  NSLog(@"FAILED WITH ERROR: %@", [err localizedDescription]);
   [_delegate performSelectorOnMainThread:@selector(downloadDidFail:) withObject:self waitUntilDone:NO];
 }
 
@@ -115,7 +120,7 @@ complete    = _complete;
 
 - (void) dealloc
 {
-  NSLog(@"SAFARI DOWNLOAD DEALLOC!");
+//  NSLog(@"SAFARI DOWNLOAD DEALLOC!");
   _delegate = nil;
   [_urlRequest release];
   [_filename release];

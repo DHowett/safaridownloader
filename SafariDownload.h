@@ -16,6 +16,7 @@
 - (void)downloadDidFinish:(SafariDownload*)download;
 - (void)downloadDidUpdate:(SafariDownload*)download;
 - (void)downloadDidFail:(SafariDownload*)download;
+- (void)downloadDidCancel:(SafariDownload*)download;
 
 @end
 

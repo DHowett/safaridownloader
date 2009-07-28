@@ -10,6 +10,7 @@
 - (void)setProgress:(float)prg speed:(float)spd;
 - (void)downloadStarted;
 - (void)downloadFailedWithError:(NSError *)err;
+- (void)downloadCancelled;
 @end
 
 @interface DownloadOperation : NSOperation {
@@ -19,6 +20,7 @@
   NSTimeInterval _start;
   BOOL           _keepAlive;
   float          _bytes;
+  NSTimer*       _timer;
 }
 
 @property (assign) id<DownloadOperationDelegate> delegate;

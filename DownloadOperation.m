@@ -12,11 +12,26 @@
 }
 
 - (void)dealloc {
-  NSLog(@"OPERATION DEALLOC!");
+//  NSLog(@"OPERATION DEALLOC!");
   _delegate = nil;
   [_downloader release];
   [_response release];
   [super dealloc];
+}
+
+- (void)progressHeartbeat:(NSTimer*)timer
+{
+  if (_keepAlive && _response) {
+    long long expectedLength = [_response expectedContentLength];
+    float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
+    float percentComplete=(float)(_bytes/expectedLength);
+    [_delegate setProgress:percentComplete speed:avspd];
+  }
+  else if (!_keepAlive)
+  {
+    [_timer invalidate];
+    _timer = nil;
+  }
 }
 
 #pragma mark -
@@ -32,21 +47,23 @@
 - (void)downloadDidBegin:(NSURLDownload *)download
 {
   _keepAlive = YES;
-  NSLog(@"download started!"); 
+//  NSLog(@"download started!"); 
   _start = [NSDate timeIntervalSinceReferenceDate]; 
   [_delegate downloadStarted];
+  _timer = [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(progressHeartbeat:) userInfo:nil repeats:YES];
 }
 
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename
 {
-  NSLog(@"FILENAME SUGGESTED: %@", filename);
+//  NSLog(@"FILENAME SUGGESTED: %@", filename);
+  [download setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", filename] allowOverwrite:YES];
   [_delegate setFilename:filename];
 }
 
 - (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)resp
 {
   _keepAlive = YES;
-  NSLog(@"Received response: %@", resp);
+//  NSLog(@"Received response: %@", resp);
 	long long expectedContentLength = [resp expectedContentLength];
   [_delegate setSize:expectedContentLength];
 	_start = [NSDate timeIntervalSinceReferenceDate];
@@ -57,20 +74,16 @@
 {
   _keepAlive = YES;
   _bytes += length;
-  long long expectedLength = [_response expectedContentLength];
   float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
-  if (avspd > 1500) return;
-	float percentComplete=(float)(_bytes/expectedLength);
-  [_delegate setProgress:percentComplete speed:avspd];
-  if (avspd > 100) { // throttle
-    NSUInteger sleepTime = 750000*((avspd-100)/600);
+  if (avspd > 300) { // throttle
+    NSUInteger sleepTime = 500000*((avspd-300)/1000);
     usleep(sleepTime);
   }
 }
 
 - (void)download:(NSURLDownload *)download willResumeWithResponse:(NSURLResponse *)resp fromByte:(long long)startingByte;
 {
-  NSLog(@"willResumeWithResponse: %@ fromByte: %ll", resp, startingByte);
+//  NSLog(@"willResumeWithResponse: %@ fromByte: %ll", resp, startingByte);
   _keepAlive = YES;
 	long long expectedContentLength = [resp expectedContentLength];
   [_delegate setSize:expectedContentLength + startingByte];
@@ -80,7 +93,7 @@
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error
 {
-  NSLog(@"DL FAILED! %@", [error description]);
+//  NSLog(@"DL FAILED! %@", [error description]);
   [self storeResumeData];
   _keepAlive = NO;
   _start = [NSDate timeIntervalSinceReferenceDate];
@@ -89,7 +102,7 @@
 
 - (void)downloadDidFinish:(NSURLDownload *)download
 {
-  NSLog(@"DL FINISHED!");
+//  NSLog(@"DL FINISHED!");
   _keepAlive = NO;
   _start = [NSDate timeIntervalSinceReferenceDate];
   [self deleteDownload];
@@ -116,10 +129,10 @@
     return NO;
   else
   {
-    NSLog(@"Restarting download from scratch - 114!");
+//    NSLog(@"Restarting download from scratch - 114!");
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
-    [_downloader setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]] allowOverwrite:YES];
+//    [_downloader setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]] allowOverwrite:YES];
     _start = [NSDate timeIntervalSinceReferenceDate];
     _bytes = 0.0;
   }
@@ -129,6 +142,7 @@
 
 - (BOOL)resumeDownload
 {
+  return NO;
   NSString *resumeDataPath = [NSString stringWithFormat:@"/var/mobile/Library/Downloads/partial/%@", [_delegate filename]];
   NSString *outputPath = [NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]];
   
@@ -137,26 +151,26 @@
   
   if ([[NSFileManager defaultManager] fileExistsAtPath:resumeDataPath] == NO)
   {
-    NSLog(@"file not found");
+//    NSLog(@"file not found");
     return NO;
   }
   
   NSData *resumeData = [NSData dataWithContentsOfFile:resumeDataPath];
   if (resumeData == nil || [resumeData length] == 0)
   {
-    NSLog(@"data is nil");
+//    NSLog(@"data is nil");
     return NO;
   }
   
   _downloader = [[NSURLDownload alloc] initWithResumeData:resumeData delegate:self path:outputPath];
   if (_downloader == nil)
   {
-    NSLog(@"downloader is nil");
+//    NSLog(@"downloader is nil");
     return NO;
   }
   else
   {
-    NSLog(@"Resuming download - 141! from length: %u", [resumeData length]);
+//    NSLog(@"Resuming download - 172! from length: %u", [resumeData length]);
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
     _start = [NSDate timeIntervalSinceReferenceDate];
@@ -182,10 +196,10 @@
 - (void) storeResumeData
 {
   NSData *data = [_downloader resumeData];
-  NSLog(@"storing resume data with length: %u", [data length]);
+//  NSLog(@"storing resume data with length: %u", [data length]);
   if (data != nil)
   {
-    NSLog(@"storing resume data OK!");
+//    NSLog(@"storing resume data OK!");
     NSString *path = [NSString stringWithFormat:@"/var/mobile/Library/Downloads/partial/%@", [_delegate filename]];
     [data writeToFile:path atomically:YES];
   }
@@ -193,8 +207,9 @@
 
 - (void)cancel
 {
-  NSLog(@"Received Cancel!");
+//  NSLog(@"Received Cancel!");
   [self cancelDownload];
+  [_delegate downloadCancelled];
 }
 
 - (void)main 
@@ -205,12 +220,14 @@
     [_delegate downloadFailedWithError:nil];
     return;
   }
-  NSLog(@"Starting runloop");
+//  NSLog(@"Starting runloop");
   NSRunLoop *theRL = [NSRunLoop currentRunLoop];
   while (_keepAlive) {
     [theRL runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
   }
-  NSLog(@"Terminating Runloop!");
+  [_timer invalidate];
+  _timer = nil;
+//  NSLog(@"Terminating Runloop!");
 }
 
 @end
