@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//GNUstep//DTD plist 0.9//EN" "http://www.gnustep.org/plist-0_9.xml">
+<plist version="0.9">
+<dict>
+    <key>items</key>
+    <array>
+	<dict>
+	    <key>cell</key>
+	    <string>PSGroupCell</string>
+	    <key>label</key>
+	    <string>Disclaimer</string>
+	    <key>isStaticText</key><true/>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSStaticTextCell</string>
+	    <key>label</key>
+	    <string>This is a horrible mess. You really don't want to be this PSListController right now.</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSGroupCell</string>
+	    <key>label</key>
+	    <string>File Extensions</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSLinkCell</string>
+	    <key>detail</key>
+	    <string>SDSettingsFiletypeListController</string>
+	    <key>label</key>
+	    <string>Built-in</string>
+	    <key>type</key>
+	    <string>ext</string>
+	</dict>
+	<!--	<dict>
+	    <key>cell</key>
+	    <string>PSLinkCell</string>
+	    <key>detail</key>
+	    <string>SDSettingsFiletypeListController</string>
+	    <key>label</key>
+	    <string>Custom</string>
+	    <key>type</key>
+	    <string>0</string>
+    </dict>-->
+	<dict>
+	    <key>cell</key>
+	    <string>PSGroupCell</string>
+	    <key>label</key>
+	    <string>MIME Types</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSLinkCell</string>
+	    <key>detail</key>
+	    <string>SDSettingsFiletypeListController</string>
+	    <key>label</key>
+	    <string>Built-in</string>
+	    <key>type</key>
+	    <string>mime</string>
+	</dict>
+	<!--	<dict>
+	    <key>cell</key>
+	    <string>PSLinkCell</string>
+	    <key>detail</key>
+	    <string>SDSettingsFiletypeListController</string>
+	    <key>label</key>
+	    <string>Custom</string>
+	    <key>type</key>
+	    <string>1</string>
+    </dict>-->
+    </array>
+    <key>title</key>
+    <string>Safari Downloader</string>
+</dict>
+</plist>

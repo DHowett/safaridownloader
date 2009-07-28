@@ -23,7 +23,8 @@
 
 @interface DownloadManager : UITableViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate> {
   UITableView*      _tableView;
-  NSArray*          _mimeTypes;
+  NSMutableArray*   _mimeTypes;
+  NSMutableArray*   _extensions;
   NSMutableArray*   _currentDownloads;
   NSMutableArray*   _finishedDownloads;
   NSOperationQueue* _downloadQueue;
@@ -37,6 +38,7 @@
 @property (nonatomic, retain) UINavigationItem* navItem;
 
 + (id)sharedManager;
+- (void)updateFileTypes;
 - (UIImage *)iconForExtension:(NSString *)extension;
 - (BOOL)supportedRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType;

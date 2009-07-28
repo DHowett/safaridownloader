@@ -1,3 +1,4 @@
+#!/usr/bin/make -f
 PWD:=$(shell pwd)
 TOP_DIR:=$(PWD)
 FRAMEWORKDIR=$(TOP_DIR)/framework
@@ -21,13 +22,14 @@ DEBUG_CFLAGS=-DDEBUG -ggdb
 STRIP=/bin/true
 endif
 
-CFLAGS:=-include Downloader_Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include
+CFLAGS:=-include $(TOP_DIR)/Downloader_Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include
 export FRAMEWORKDIR
 export CFLAGS
 
 OFILES=Downloader.o DownloadManager.o DownloadOperation.o SafariDownload.o BaseCell.o DownloadCell.o
 
 TARGET=Downloader.dylib
+subdirs=preferences
 
 all: build/$(TARGET)
 	@(for i in $(subdirs); do $(MAKE) -C $$i $@; done)
@@ -49,6 +51,7 @@ clean:
 
 package-local: build/$(TARGET)
 	cp build/$(TARGET) _/Library/MobileSubstrate/DynamicLibraries
+	cp preferences/SDSettings _/System/Library/PreferenceBundles/SafariDownloaderSettings.bundle
 	chown 0.80 _ -R
 
 include $(FRAMEWORKDIR)/makefiles/DebMakefile

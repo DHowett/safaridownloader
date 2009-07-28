@@ -11,6 +11,8 @@
 #import "DownloadCell.h"
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
 
+#define SD_PREFS @"/var/mobile/Library/Preferences/net.howett.safaridownloader.plist"
+
 static BOOL doRot = YES;
 
 @implementation DownloadManagerPanel
@@ -54,7 +56,6 @@ static id resourceBundle = nil;
   if (self == [DownloadManager class])
   {
     sharedManager = [[self alloc] init];
-    resourceBundle = [[NSBundle alloc] initWithPath:@"/Library/Application Support/Downloader"];
   }
 }
 
@@ -67,56 +68,39 @@ static id resourceBundle = nil;
   if([self initWithNibName:nil bundle:nil] != nil) 
   {
     _panel = [[DownloadManagerPanel alloc] init];
+    // THIS IS A STATIC RESOURCE BUT IT WAS NULL WHEN I PUT IT IN INITIALIZE, W T F. TODO DHOWETT GODDAMNIT WHY
+    resourceBundle = [[NSBundle alloc] initWithPath:@"/Library/Application Support/Downloader"];
     _currentDownloads = [NSMutableArray new];
     _finishedDownloads = [NSMutableArray new];
     _downloadQueue = [NSOperationQueue new];
     [_downloadQueue setMaxConcurrentOperationCount:5];
-    _mimeTypes = [[NSArray alloc] initWithObjects: // eventually have these loaded from prefs on disk
-                  @"image/jpeg",
-                  @"image/jpg",
-                  @"image/png",
-                  @"image/tga",
-                  @"image/targa",
-                  @"image/tiff",
-                  @"text/plain",
-                  @"application/text",
-                  @"application/pdf",
-                  @"text/pdf",
-                  @"application/msword",
-                  @"application/doc",
-                  @"appl/text",
-                  @"application/winword",
-                  @"application/word",
-                  @"text/xml",
-                  @"application/xml",
-                  @"application/msexcel",
-                  @"application/x-msexcel",
-                  @"application/x-ms-excel",
-                  @"application/vnd.ms-excel",
-                  @"application/x-excel",
-                  @"application/x-dos_ms_excel",
-                  @"application/xls",
-                  @"application/x-xls",
-                  @"zz-application/zz-winassoc-xls",
-                  @"application/mspowerpoint",
-                  @"application/ms-powerpoint",
-                  @"application/mspowerpnt",
-                  @"application/vnd-mspowerpoint",
-                  @"application/vnd.ms-powerpoint",
-                  @"application/powerpoint",
-                  @"application/x-powerpoint",
-                  @"application/x-mspowerpoint",
-                  @"application/octet-stream",
-                  @"application/bin",
-                  @"applicaiton/binary",
-                  @"application/x-msdownload",
-                  @"application/x-bzip2",
-                  @"application/x-deb",
-                  @"application/zip",
-                  @"video/quicktime",
-                  nil];  
+    [self updateFileTypes];
   }
   return self;
+}
+
+- (void)updateFileTypes {
+  NSDictionary *globalFileTypes = [NSDictionary dictionaryWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" ofType:@"plist"]];
+  NSLog(@"%@... %@: %@", resourceBundle, [resourceBundle pathForResource:@"FileTypes" ofType:@"plist"], [globalFileTypes description]);
+  if(_mimeTypes) [_mimeTypes release];
+  if(_extensions) [_extensions release];
+  _mimeTypes = [[NSMutableArray alloc] init];
+  _extensions = [[NSMutableArray alloc] init];
+  for(NSArray *a in [[globalFileTypes objectForKey:@"Mimetypes"] allValues]) {
+    NSLog(@"%@", [a description]);
+    [_mimeTypes addObjectsFromArray:a];
+  }
+  for(NSArray *a in [[globalFileTypes objectForKey:@"Extensions"] allValues]) {
+    NSLog(@"%@", [a description]);
+    [_extensions addObjectsFromArray:a];
+  }
+  
+  NSDictionary *disableShit = [NSDictionary dictionaryWithContentsOfFile:SD_PREFS];
+  [_mimeTypes removeObjectsInArray:[disableShit objectForKey:@"DisabledMimetypes"]];
+  NSLog(@"%@ - %@", _extensions, [disableShit objectForKey:@"DisabledExtensions"]);
+  [_extensions removeObjectsInArray:[disableShit objectForKey:@"DisabledExtensions"]];
+  NSLog(@"%@", _extensions);
+  return;
 }
 
 - (void)loadView
@@ -201,49 +185,13 @@ static id resourceBundle = nil;
             withMimeType:(NSString *)mimeType
 {
   NSString *urlString = [[request URL] absoluteString];
+  NSString *extension = [urlString pathExtension];
   if (mimeType != nil && [_mimeTypes containsObject:mimeType]) 
   {
     return YES;
   }
   else  // eventually have this read from a prefs array on disk
-    if (// documents
-        [urlString hasSuffix:@".doc"]
-        || [urlString hasSuffix:@".docx"]
-        || [urlString hasSuffix:@".odt"]
-        || [urlString hasSuffix:@".ppt"]
-        || [urlString hasSuffix:@".pptx"]
-        || [urlString hasSuffix:@".odp"]
-        || [urlString hasSuffix:@".xls"]
-        || [urlString hasSuffix:@".xlsx"]
-        || [urlString hasSuffix:@".ods"]
-        // images
-        || [urlString hasSuffix:@".jpg"]
-        || [urlString hasSuffix:@".jpeg"]
-        || [urlString hasSuffix:@".png"]
-        || [urlString hasSuffix:@".tif"]
-        || [urlString hasSuffix:@".tiff"]
-        || [urlString hasSuffix:@".gif"]
-        // audio/video
-        || [urlString hasSuffix:@".mp3"]
-        || [urlString hasSuffix:@".wav"]
-        || [urlString hasSuffix:@".ogg"]
-        || [urlString hasSuffix:@".mp4"]
-        || [urlString hasSuffix:@".mpg"]
-        || [urlString hasSuffix:@".mpeg"]
-        || [urlString hasSuffix:@".avi"]
-        || [urlString hasSuffix:@".aac"]
-        || [urlString hasSuffix:@".mp3"]
-        // archives
-        || [urlString hasSuffix:@".deb"]
-        || [urlString hasSuffix:@".zip"]
-        || [urlString hasSuffix:@".rar"]
-        || [urlString hasSuffix:@".tar"]
-        || [urlString hasSuffix:@".tgz"]
-        || [urlString hasSuffix:@".tbz"]
-        || [urlString hasSuffix:@".tbz2"]
-        || [urlString hasSuffix:@".bz2"]
-        || [urlString hasSuffix:@".gz"]
-        || [urlString hasSuffix:@".bzip2"])
+    if ([_extensions containsObject:extension])
     {
       return YES;
     }
