@@ -125,7 +125,7 @@ static UIFont *progressFont = nil;
 	[textColor set];
 	NSString *filenameString = nameLabel;
 	CGSize filenameSize = [filenameString sizeWithFont:filenameFont
-                                            forWidth:(cellWidth - (2 * SIDE_PADDING) - (deleteButtonMargin+offset) - (_icon.size.width + 5))
+                                            forWidth:(cellWidth - (2 * SIDE_PADDING) - (deleteButtonMargin+offset) - (_icon.size.width + 5)) - 19.0
                                        lineBreakMode:UILineBreakModeTailTruncation];
 	CGRect filenameRect = CGRectMake(SIDE_PADDING + offset + _icon.size.width + 5, 9, filenameSize.width, filenameSize.height);
 	
@@ -143,7 +143,7 @@ static UIFont *progressFont = nil;
   if(!finished) progressBarHeightOffset = 18.0f;
   
 	NSString *bString = progressLabel;
-	CGSize bSize = [bString sizeWithFont:progressFont forWidth:(200-(deleteButtonMargin + offset)) lineBreakMode:UILineBreakModeTailTruncation];
+	CGSize bSize = [bString sizeWithFont:progressFont forWidth:(10+200-(deleteButtonMargin + offset)) lineBreakMode:UILineBreakModeTailTruncation];
 	CGRect bRect = CGRectMake(SIDE_PADDING + offset, 28 + progressBarHeightOffset, bSize.width, bSize.height);
   
   CGSize sizeSize = [sizeLabel sizeWithFont:progressFont forWidth:100 lineBreakMode:UILineBreakModeTailTruncation];
