@@ -75,7 +75,8 @@
   [ohmygod addSubview:iconImageView];
   [iconImageView release];
   
-  [ohmygod showFromToolbar:[[objc_getClass("BrowserController") sharedBrowserController] buttonBar]];
+  //[ohmygod showFromToolbar:[[objc_getClass("BrowserController") sharedBrowserController] buttonBar]];
+  [ohmygod showInView:[[objc_getClass("BrowserController") sharedBrowserController] window]];
   [ohmygod release];
   
   [ModalAlert block:ohmygod];	
