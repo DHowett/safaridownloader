@@ -25,10 +25,6 @@
 @implementation SDSettingsFiletypeListController
 - (id)initForContentSize:(CGSize)size {
 	if((self = [super initForContentSize:size])) {
-		_type = [[self.specifier propertyForKey:@"type"] isEqualToString:@"ext"] ? 0 : 1;
-		NSLog(@"Type is %d...", _type);
-		NSArray *disabledItemsArray = [[NSDictionary dictionaryWithContentsOfFile:SD_PREFS] objectForKey:[@"Disabled" stringByAppendingString:(_type==0 ? @"Extensions" : @"Mimetypes")]] ?: [NSArray array];
-		_disabledItems = [[NSMutableSet alloc] initWithArray:disabledItemsArray];
 	}
 	return self;
 }
@@ -46,6 +42,11 @@
 }
 
 - (id)specifiers {
+	_type = [[self.specifier propertyForKey:@"type"] isEqualToString:@"ext"] ? 0 : 1;
+	NSLog(@"Why, dear god why. %@ %@", self.specifier, [self.specifier propertyForKey:@"type"]);
+	NSLog(@"Type is %d...", _type);
+	NSArray *disabledItemsArray = [[NSDictionary dictionaryWithContentsOfFile:SD_PREFS] objectForKey:[@"Disabled" stringByAppendingString:(_type==0 ? @"Extensions" : @"Mimetypes")]] ?: [NSArray array];
+	_disabledItems = [[NSMutableSet alloc] initWithArray:disabledItemsArray];
 	NSMutableArray *specs = [NSMutableArray array];
 	int c = [PSTableCell cellTypeFromString:@"PSSwitchCell"];
 	NSDictionary *d = [NSDictionary dictionaryWithContentsOfFile:@"/Library/Application Support/Downloader/FileTypes.plist"];
