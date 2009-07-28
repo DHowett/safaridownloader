@@ -33,6 +33,7 @@ static Downloader *downloader = nil;
 @end
 
 static UIWebDocumentView *docView = nil;
+static id originalDelegate = nil;
 
 @interface Downloader : NSObject <UIActionSheetDelegate>
 {
@@ -111,11 +112,11 @@ static UIWebDocumentView *docView = nil;
                                               cancelButtonTitle:@"Cancel"
                                          destructiveButtonTitle:nil
                                               otherButtonTitles:@"Download", @"View", nil];
-  [ohmygod setMessage:@"Thy bidding, master?"];
+  [ohmygod setMessage:@"What would you like to do?"];
   
   UIImageView *mmicon = [[UIImageView alloc]
                               initWithImage:[[DownloadManager sharedManager] iconForExtension:[filename pathExtension]]];
-  mmicon.frame = CGRectMake(40.0f, 19.0f, 22.0f, 22.0f);
+  mmicon.frame = CGRectMake(37.0f, 33.0f, 22.0f, 22.0f);
   [ohmygod addSubview:mmicon];
   [mmicon release];    
   
@@ -125,13 +126,21 @@ static UIWebDocumentView *docView = nil;
   [_currentRequest release];
   _currentRequest = [request retain];
 }
+static id curWebFrame = nil;
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
   if([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Cancel"])
+  {
+    [_currentRequest release];
+    _currentRequest = nil;
+    [curWebFrame release];
+    curWebFrame = nil;
     return;
+  }
   else if([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"View"]) 
   {
-    [docView loadRequest:_currentRequest];
+    NSLog(@"current web frame: %@", curWebFrame);
+    [curWebFrame loadRequest:_currentRequest];
   }
   else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Download"])
   {
@@ -150,7 +159,10 @@ static UIWebDocumentView *docView = nil;
   
   [_currentRequest release];
   _currentRequest = nil;
+  [curWebFrame release];
+  curWebFrame = nil;
 }
+
 
 #pragma mark -/*}}}*/
 #pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
@@ -177,12 +189,25 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
   NSLog(@"MIME: request: %@", request);
   NSLog(@"MIME: Listener!: %@", listener);
   NSLog(@"URLSTRING: %@",[[request URL] absoluteString]);
+    
+  NSString *url = [[request URL] absoluteString];
+  
+  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"]) {
+    NSLog(@"not a valid http url, continue.");
+    [originalDelegate webView:sender decidePolicyForMIMEType:type
+                      request:request
+                        frame:frame
+             decisionListener:listener];
+    return;
+  }
   
   if (_currentRequest != nil && [_currentRequest isEqual:request]) 
   {
     NSLog(@"MIME: looks like we're hitting the same request, ignore");
     [_currentRequest release];
     _currentRequest = nil;
+    [curWebFrame release];
+    curWebFrame = nil;
     [listener use];
     return;
   }
@@ -190,6 +215,8 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
   if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:type]) 
   {
     NSLog(@"MIME: yes we support it");
+    _currentRequest = [request retain];
+    curWebFrame = [[sender mainFrame] retain];
     [listener ignore];
     [self queryUserForDownloadWithRequest:request];
     return;    
@@ -211,12 +238,21 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
   NSLog(@"NAV: action: %@", action);
   NSLog(@"NAV: request: %@", request);
   NSLog(@"NAV: Listener!: %@", listener);
+    
+  NSString *url = [[request URL] absoluteString];
+  
+  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"]) {
+    NSLog(@"not a valid http url, continue.");
+    [originalDelegate webView:sender decidePolicyForNavigationAction:action
+                      request:request
+                        frame:frame
+             decisionListener:listener];
+    return;
+  }
   
   if (_currentRequest != nil && [_currentRequest isEqual:request]) 
   {
     NSLog(@"NAV: looks like we're hitting the same request, ignore");
-    [_currentRequest release];
-    _currentRequest = nil;
     [listener use];
     return;
   }
@@ -224,6 +260,8 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
   if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:nil]) 
   {
     NSLog(@"NAV: yes we support it");
+    _currentRequest = [request retain];
+    curWebFrame = [[sender mainFrame] retain];
     [listener ignore];
     [self queryUserForDownloadWithRequest:request];
     return;    
@@ -241,6 +279,8 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 #pragma mark Renamed Methods/*{{{*/
 @class WebView;
 HOOK(WebView, setPolicyDelegate$, void, id delegate) {
+  NSLog(@"wants to set delegate: %@", delegate);
+  originalDelegate = [delegate retain];
   CALL_ORIG(WebView, setPolicyDelegate$, downloader);
 }
 
