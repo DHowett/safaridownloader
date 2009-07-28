@@ -20,6 +20,68 @@
 #define bF(b) [NSString stringWithFormat:@"%@", b ? @"true" : @"false"]
 #define sF(inset) NSStringFromUIEdgeInsets(inset)
 
+@interface ModalAlert : NSObject @end
+@implementation ModalAlert
++ (void)block:(UIView *)view
+{
+  view.hidden=FALSE;
+  while (!view.hidden && view.superview != nil)
+    [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+}
+
++ (void)showAlertViewWithTitle:(NSString*)title 
+                       message:(NSString *)message 
+                  cancelButton:(NSString*)cancel 
+                      okButton:(NSString*)okButton 
+                      delegate:(id)delegate
+{
+  UIAlertView *alert= [[UIAlertView alloc] initWithTitle:title
+                                                 message:message
+                                                delegate:delegate 
+                                       cancelButtonTitle:cancel 
+                                       otherButtonTitles:okButton, nil];
+  [alert show];
+  [alert release];
+  [ModalAlert block:alert];	
+}
+
++ (void)showActionSheetWithTitle:(NSString*)title 
+                         message:(NSString *)message 
+                    cancelButton:(NSString*)cancel 
+                     destructive:(NSString*)destructive
+                           other:(NSString*)other 
+                        delegate:(id)delegate
+{
+
+  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:title
+                                                       delegate:delegate
+                                              cancelButtonTitle:cancel
+                                         destructiveButtonTitle:destructive
+                                              otherButtonTitles:other, nil];
+  [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
+  
+  UILabel *nameLabel = MSHookIvar<UILabel *>(ohmygod, "_bodyTextLabel");;
+  UIFont *filenameFont = [nameLabel font];
+  CGSize filenameSize = [message sizeWithFont:filenameFont];
+  CGRect screenRect = [[UIScreen mainScreen] bounds];
+  CGRect nameLabelRect = CGRectMake((screenRect.size.width / 2) - (filenameSize.width / 2), filenameSize.height,
+                                   filenameSize.width, filenameSize.height);
+  [nameLabel setFrame:nameLabelRect];
+  [nameLabel setText:message];
+  
+  UIImageView *iconImageView = [[UIImageView alloc]
+                              initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension]]];
+  iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
+  [ohmygod addSubview:iconImageView];
+  [iconImageView release];
+  
+  [ohmygod showFromToolbar:[[objc_getClass("BrowserController") sharedBrowserController] buttonBar]];
+  [ohmygod release];
+  
+  [ModalAlert block:ohmygod];	
+}
+@end
+
 @class Downloader;
 static Downloader *downloader = nil;
 
@@ -32,7 +94,6 @@ static Downloader *downloader = nil;
 - (id)$$createButtonWithDescription:(id)description;
 @end
 
-static UIWebDocumentView *docView = nil;
 static id originalDelegate = nil;
 
 @interface Downloader : NSObject <UIActionSheetDelegate>
@@ -101,145 +162,142 @@ static id originalDelegate = nil;
 
 #pragma mark -/*}}}*/
 #pragma mark Download Management/*{{{*/
-
-- (void)queryUserForDownloadWithRequest:(NSURLRequest *)request
-{  
-  NSString *filename = [[[[request URL] absoluteString] lastPathComponent] 
-                        stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-  
-  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:@"What would you like to do?"
-                                                       delegate:self
-                                              cancelButtonTitle:@"Cancel"
-                                         destructiveButtonTitle:nil
-                                              otherButtonTitles:@"Download", @"View", nil];
-  [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
-  
-  UILabel *nameLabel = [[ohmygod subviews] objectAtIndex:4];
-  UIFont *filenameFont = [nameLabel font];
-  CGSize filenameSize = [filename sizeWithFont:filenameFont];
-  CGRect screenRect = [[UIScreen mainScreen] bounds];
-  CGRect nameLabelRect = CGRectMake((screenRect.size.width / 2) - (filenameSize.width / 2), filenameSize.height,
-                                   filenameSize.width, filenameSize.height);
-  [nameLabel setFrame:nameLabelRect];
-  [nameLabel setText:filename];
-  
-  UIImageView *iconImageView = [[UIImageView alloc]
-                              initWithImage:[[DownloadManager sharedManager] iconForExtension:[filename pathExtension]]];
-  iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
-  [ohmygod addSubview:iconImageView];
-  [iconImageView release];
-
-  [ohmygod showFromToolbar:[[objc_getClass("BrowserController") sharedBrowserController] buttonBar]];
-  NSLog(@"%p", ohmygod);
-  [ohmygod release];
-  
-  [_currentRequest release];
-  _currentRequest = [request retain];
-}
 static id curWebFrame = nil;
+
+typedef enum
+{
+  SDActionTypeView = 1,
+  SDActionTypeDownload = 2,
+  SDActionTypeCancel = 3,
+} SDActionType;
+
+static SDActionType _actionType = SDActionTypeView;
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
   if([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Cancel"])
   {
-    [_currentRequest release];
-    _currentRequest = nil;
-    [curWebFrame release];
-    curWebFrame = nil;
-    return;
+    _actionType = SDActionTypeCancel;
   }
   else if([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"View"]) 
   {
-    NSLog(@"current web frame: %@", curWebFrame);
-    [curWebFrame loadRequest:_currentRequest];
+    _actionType = SDActionTypeView;
   }
   else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Download"])
   {
-    [self downloadFile];
+    _actionType = SDActionTypeDownload;
   }
 }
-
-- (void)downloadFile
-{
-  NSLog(@"downloadFile: currentRequest: %@", _currentRequest);
-  
-  if ([[DownloadManager sharedManager] addDownloadWithRequest:_currentRequest])
-    NSLog(@"successfully added download");
-  else
-    NSLog(@"add download failed");
-  
-  [_currentRequest release];
-  _currentRequest = nil;
-  [curWebFrame release];
-  curWebFrame = nil;
-}
-
 
 #pragma mark -/*}}}*/
 #pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
 
-- (void) webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)action 
-         request:(NSURLRequest *)request 
-    newFrameName:(NSString *)name 
-decisionListener:(id<WebPolicyDecisionListener>)listener {
-  
-  NSLog(@"NEWWINDOW: decidePolicyForNewWindowAction!!!!!!");
-  NSLog(@"NEWWINDOW: action: %@", action);
-  NSLog(@"NEWWINDOW: request: %@", request);
-  NSLog(@"NEWWINDOW: Listener!: %@", listener);
-  [listener use];
-}
-
-- (void) webView:(WebView *)sender decidePolicyForMIMEType:(NSString *)type 
-         request:(NSURLRequest *)request 
-           frame:(WebFrame *)frame 
-decisionListener:(id<WebPolicyDecisionListener>)listener {
-  
-  NSLog(@"MIME: decidePolicyForMIMEType!!!!!!");
-  NSLog(@"MIME: type: %@", type);
-  NSLog(@"MIME: request: %@", request);
-  NSLog(@"MIME: Listener!: %@", listener);
-  NSLog(@"URLSTRING: %@",[[request URL] absoluteString]);
-    
+// WebPolicyDelegate SafariDownloader Addition
+- (void) webView:(WebView *)webView 
+    decideAction:(NSDictionary*)action
+      forRequest:(NSURLRequest *)request 
+    withMimeType:(NSString *)mimeType 
+         inFrame:(WebFrame *)frame
+    withListener:(id<WebPolicyDecisionListener>)listener
+{
   NSString *url = [[request URL] absoluteString];
   
   if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"]) {
     NSLog(@"not a valid http url, continue.");
-    [originalDelegate webView:sender decidePolicyForMIMEType:type
+    [originalDelegate webView:webView decidePolicyForNavigationAction:action
                       request:request
                         frame:frame
              decisionListener:listener];
     return;
   }
   
-  if (_currentRequest != nil && [_currentRequest isEqual:request]) 
+  if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:mimeType])
   {
-    NSLog(@"MIME: looks like we're hitting the same request, ignore");
-    [_currentRequest release];
-    _currentRequest = nil;
-    [curWebFrame release];
-    curWebFrame = nil;
-    [listener use];
-    return;
-  }
-  
-  if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:type]) 
-  {
-    NSLog(@"MIME: yes we support it");
-    _currentRequest = [request retain];
-    curWebFrame = [[sender mainFrame] retain];
-    [listener ignore];
-    [self queryUserForDownloadWithRequest:request];
-    return;    
+    NSString *filename = [[[[request URL] absoluteString] lastPathComponent] 
+                          stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
+    NSString *other = [objc_getClass("WebView") canShowMIMEType:mimeType] ? @"View" : nil;
+    
+    [ModalAlert showActionSheetWithTitle:@"What would you like to do?"
+                                 message:filename
+                            cancelButton:@"Cancel"
+                             destructive:@"Download"
+                                   other:other
+                                delegate:self];
+    
+    if (_actionType == SDActionTypeView) 
+    {      
+      if (action) 
+      {
+        [originalDelegate webView:webView decidePolicyForNavigationAction:action
+                          request:request
+                            frame:frame
+                 decisionListener:listener];
+      }
+      else
+      {
+        [originalDelegate webView:webView decidePolicyForMIMEType:mimeType
+                          request:request
+                            frame:frame
+                 decisionListener:listener];
+      }
+    }
+    else if (_actionType == SDActionTypeDownload)
+    {
+      [listener ignore];
+      if ([[DownloadManager sharedManager] addDownloadWithRequest:request])
+        NSLog(@"successfully added download");
+      else
+        NSLog(@"add download failed");
+    }
+    else
+    {
+      [frame stopLoading];
+      [listener ignore]; 
+    }
   }
   else
   {
-    NSLog(@"MIME: we do not support this request");
-  }
-  
+    [listener use]; 
+  }  
+}
+///////////////////////////////////////////////////
+
+- (void) webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)action 
+         request:(NSURLRequest *)request 
+    newFrameName:(NSString *)name 
+decisionListener:(id<WebPolicyDecisionListener>)listener {
   [listener use];
 }
 
-- (void) webView:(WebView *)sender decidePolicyForNavigationAction:(NSDictionary *)action 
+- (void) webView:(WebView *)webView decidePolicyForMIMEType:(NSString *)type 
+         request:(NSURLRequest *)request 
+           frame:(WebFrame *)frame 
+decisionListener:(id<WebPolicyDecisionListener>)listener {
+//  
+  NSLog(@"MIME: decidePolicyForMIMEType!!!!!!");
+  NSLog(@"MIME: type: %@", type);
+  NSLog(@"MIME: request: %@", request);
+  NSLog(@"MIME: Listener!: %@", listener);
+  NSLog(@"URLSTRING: %@", [[request URL] absoluteString]);
+  
+  if (_currentRequest != nil && [_currentRequest isEqual:request]) 
+  {
+    [_currentRequest release];
+    _currentRequest = nil;
+    [listener use];
+    return;
+  }
+
+  [self webView:webView 
+   decideAction:nil 
+     forRequest:request 
+   withMimeType:type 
+        inFrame:frame 
+   withListener:listener];
+  
+}
+
+- (void) webView:(WebView *)webView decidePolicyForNavigationAction:(NSDictionary *)action 
          request:(NSURLRequest *)request 
            frame:(WebFrame *)frame 
 decisionListener:(id<WebPolicyDecisionListener>)listener {
@@ -248,40 +306,13 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
   NSLog(@"NAV: action: %@", action);
   NSLog(@"NAV: request: %@", request);
   NSLog(@"NAV: Listener!: %@", listener);
-    
-  NSString *url = [[request URL] absoluteString];
   
-  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"]) {
-    NSLog(@"not a valid http url, continue.");
-    [originalDelegate webView:sender decidePolicyForNavigationAction:action
-                      request:request
-                        frame:frame
-             decisionListener:listener];
-    return;
-  }
-  
-  if (_currentRequest != nil && [_currentRequest isEqual:request]) 
-  {
-    NSLog(@"NAV: looks like we're hitting the same request, ignore");
-    [listener use];
-    return;
-  }
-  
-  if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:nil]) 
-  {
-    NSLog(@"NAV: yes we support it");
-    _currentRequest = [request retain];
-    curWebFrame = [[sender mainFrame] retain];
-    [listener ignore];
-    [self queryUserForDownloadWithRequest:request];
-    return;    
-  }
-  else
-  {
-    NSLog(@"NAV: we do not support this request");
-  }
-  
-  [listener use];
+  [self webView:webView 
+   decideAction:action 
+     forRequest:request 
+   withMimeType:nil 
+        inFrame:frame 
+   withListener:listener];
 }
 #pragma mark -/*}}}*/
 @end
