@@ -37,13 +37,13 @@ static BOOL doRot = YES;
 }
 
 -(NSString*)description {
- return @"[DownloadManagerPanel]: Fake object that conforms to the browserpanel protocol, this allows us to block rotations successfully"; 
+  return @"[DownloadManagerPanel]: Fake object that conforms to the browserpanel protocol, this allows us to block rotations successfully"; 
 }
 
 @end
 
 @implementation DownloadManager
-@synthesize navigationItem = _navItem;
+@synthesize navItem = _navItem;
 
 #pragma mark -
 #pragma mark Singleton Methods/*{{{*/
@@ -110,6 +110,7 @@ static id resourceBundle = nil;
                   @"application/bin",
                   @"applicaiton/binary",
                   @"application/x-msdownload",
+                  @"application/x-bzip2",
                   @"application/x-deb",
                   @"application/zip",
                   @"video/quicktime",
@@ -124,8 +125,9 @@ static id resourceBundle = nil;
   self.view = [[UIView alloc] initWithFrame:frame];
   
   self.view.autoresizingMask =   UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
-  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
+                                 UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
+                                 UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth       | 
+                                 UIViewAutoresizingFlexibleHeight;
   
   self.view.autoresizesSubviews = YES;
   _navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
@@ -133,30 +135,27 @@ static id resourceBundle = nil;
   UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
   UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
   UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
-  self.navigationItem = [[UINavigationItem alloc] initWithTitle:@"Downloads"];
-    
+  self.navItem = [[UINavigationItem alloc] initWithTitle:@"Downloads"];
+  
   UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc]  initWithBarButtonSystemItem:UIBarButtonSystemItemDone 
                                                                                    target:self 
                                                                                    action:@selector(hideDownloadManager)];
-  self.navigationItem.leftBarButtonItem = doneItemButton;
+  self.navItem.leftBarButtonItem = doneItemButton;
   UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
                                                                    style:UIBarButtonItemStyleBordered 
                                                                   target:self 
                                                                   action:@selector(cancelAllDownloads)];    
-  self.navigationItem.rightBarButtonItem = cancelButton;
-  self.navigationItem.rightBarButtonItem.enabled = NO;
-
-  [_navBar pushNavigationItem:self.navigationItem animated:NO];
+  self.navItem.rightBarButtonItem = cancelButton;
+  self.navItem.rightBarButtonItem.enabled = YES;
+  
+  [_navBar pushNavigationItem:self.navItem animated:NO];
   [self.view addSubview:_navBar];
-
+  
   frame.origin.y = _navBar.frame.size.height;
   frame.size.height = self.view.frame.size.height - _navBar.frame.size.height;
   
-  _tableView = [[UITableView alloc] initWithFrame:frame  style:UITableViewStylePlain];
-  _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
-////  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
-////  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-//  UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
+  _tableView = [[UITableView alloc] initWithFrame:frame style:UITableViewStylePlain];
+  _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   _tableView.delegate = self;
   _tableView.dataSource = self;
   _tableView.rowHeight = 56;
@@ -241,6 +240,8 @@ static id resourceBundle = nil;
         || [urlString hasSuffix:@".tar"]
         || [urlString hasSuffix:@".tgz"]
         || [urlString hasSuffix:@".tbz"]
+        || [urlString hasSuffix:@".tbz2"]
+        || [urlString hasSuffix:@".bz2"]
         || [urlString hasSuffix:@".gz"]
         || [urlString hasSuffix:@".bzip2"])
     {
@@ -285,7 +286,6 @@ static id resourceBundle = nil;
       [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
                         withRowAnimation:UITableViewRowAnimationFade];
     }
-    self.navigationItem.rightBarButtonItem.enabled = YES;
     [self updateBadges];
     return YES;
   }
@@ -306,7 +306,7 @@ static id resourceBundle = nil;
 }
 
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request {
-  NSLog(@"addDownloadWithRequest: %@", request);
+//  NSLog(@"addDownloadWithRequest: %@", request);
   NSString *name = [[[[request URL] absoluteString] lastPathComponent]
     stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
   
@@ -346,16 +346,16 @@ static id resourceBundle = nil;
       NSLog(@"exception caught attempting to cancel operation"); 
     }
     
-    int idx = [_currentDownloads indexOfObject:download];
+    NSUInteger row = [_currentDownloads indexOfObject:download];
     [_currentDownloads removeObject:download];
     
     if (_currentDownloads.count == 0) {
-      self.navigationItem.rightBarButtonItem.enabled = NO;
       [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
     } else {
-      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:idx inSection:0]]
+      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
                         withRowAnimation:UITableViewRowAnimationFade];
     }
+
     [self updateBadges];
   }
   return NO;
@@ -375,7 +375,7 @@ static id resourceBundle = nil;
   //  NSLog(@"removing file at path: %@", path);
   //  [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
   //  NSUInteger index = [_downloadedVideos indexOfObject:download];
-  //  [_downloadedVideos removeObjectAtIndex:index];
+  //  [_finishedDownloads removeObjectAtIndex:index];
   //  NSInteger section = [_tableView numberOfSections] - 1;
   //  [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:index inSection:section]] 
   //                    withRowAnimation:UITableViewRowAnimationFade]; 
@@ -383,9 +383,37 @@ static id resourceBundle = nil;
 
 - (void)cancelAllDownloads
 {
-  [self saveData];
-  [_downloadQueue cancelAllOperations];
-  self.navigationItem.rightBarButtonItem.enabled = NO;
+  UIAlertView* alert = nil;
+  if (_currentDownloads.count > 0) 
+  {
+    alert = [[UIAlertView alloc] initWithTitle:@"Cancel All Downloads?"
+                                       message:nil
+                                      delegate:self
+                             cancelButtonTitle:@"No"
+                             otherButtonTitles:@"Yes", nil];
+  }
+  else
+  {
+    alert = [[UIAlertView alloc] initWithTitle:@"Nothing to Cancel"
+                                       message:nil
+                                      delegate:self
+                             cancelButtonTitle:@"OK"
+                             otherButtonTitles:nil];
+  }
+
+  [alert show];
+  [alert release];
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+ if (buttonIndex == 1) {
+   if (_currentDownloads.count > 0) {
+     [self saveData];
+     [_downloadQueue cancelAllOperations];
+     [_currentDownloads removeAllObjects];
+     [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+   }
+ } 
 }
 
 - (DownloadCell*)cellForDownload:(SafariDownload*)download
@@ -408,7 +436,7 @@ static id resourceBundle = nil;
 
 - (void)downloadDidFinish:(SafariDownload*)download
 {
-  NSLog(@"downloadDidFinish");
+//  NSLog(@"downloadDidFinish");
   DownloadCell* cell = [self cellForDownload:download];
   if (cell == nil) {
     return;
@@ -447,6 +475,12 @@ static id resourceBundle = nil;
   cell.sizeLabel = download.sizeString;
 }
 
+- (void)downloadDidCancel:(SafariDownload*)download
+{    
+  [self updateBadges];
+  [self saveData];  
+}
+
 - (void)downloadDidFail:(SafariDownload*)download
 {
   DownloadCell *cell = [self cellForDownload:download];
@@ -468,23 +502,6 @@ static int animationType = 0;
     transition = kCATransitionFromLeft;
   else if (orientation == UIDeviceOrientationLandscapeRight)
     transition = kCATransitionFromRight;
-  
-//  CGRect frame = [[UIScreen mainScreen] applicationFrame];
-//  [self.view setFrame:frame];
-  NSLog(@"view frame: %@", NSStringFromCGRect(self.view.frame));
-  NSLog(@"table frame: %@", NSStringFromCGRect(_tableView.frame));
-  NSLog(@"navbar frame: %@", NSStringFromCGRect(_navBar.frame));
-//  _navBar.frame = CGRectMake(0, 0, frame.size.width, 44);
-//  frame.origin.y += 22;
-  
-  // portrait
-  //  Mon Jul 27 03:00:06 unknown MobileSafari[8555] <Warning>: table frame: {{0, 42}, {320, 416}}
-  //  Mon Jul 27 03:00:06 unknown MobileSafari[8555] <Warning>: navbar frame: {{0, 0}, {320, 44}}
-
-  
-  // landscape
-  //  Mon Jul 27 03:00:31 unknown MobileSafari[8555] <Warning>: table frame: {{0, 42}, {480, 256}}
-  //  Mon Jul 27 03:00:31 unknown MobileSafari[8555] <Warning>: navbar frame: {{0, 0}, {480, 44}}
   
   CATransition *animation = [CATransition animation];
   [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
@@ -559,7 +576,7 @@ static int animationType = 0;
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-  NSLog(@"shouldAutorotateToInterfaceOrientation? %d", doRot);
+//  NSLog(@"shouldAutorotateToInterfaceOrientation? %d", doRot);
   return doRot; // do not rotate if safari rotations are disabled (i.e. panel is currently up)
 }
 
@@ -632,7 +649,7 @@ static int animationType = 0;
 	cell.nameLabel = download.filename;
   cell.sizeLabel = download.sizeString;
   if(!finished) {
-    cell.progressLabel = [NSString stringWithFormat:@"Downloading (%.1fKB/sec)", download.speed];
+    cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
     cell.progressView.progress = download.progress;
   } else {
     cell.progressLabel = @"Download Complete";

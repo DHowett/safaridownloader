@@ -21,7 +21,7 @@
 - (void)allowRotations:(BOOL)allow;
 @end
 
-@interface DownloadManager : UITableViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate> {
+@interface DownloadManager : UITableViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate> {
   UITableView*      _tableView;
   NSArray*          _mimeTypes;
   NSMutableArray*   _currentDownloads;
@@ -34,7 +34,7 @@
   DownloadManagerPanel *_panel;
 }
 
-@property (nonatomic, retain) UINavigationItem* navigationItem;
+@property (nonatomic, retain) UINavigationItem* navItem;
 
 + (id)sharedManager;
 - (UIImage *)iconForExtension:(NSString *)extension;
