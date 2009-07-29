@@ -6,16 +6,14 @@
     <array>
 	<dict>
 	    <key>cell</key>
-	    <string>PSGroupCell</string>
+	    <string>PSSwitchCell</string>
+	    <key>defaults</key>
+	    <string>net.howett.safaridownloader</string>
+	    <key>default</key><true/>
 	    <key>label</key>
-	    <string>Disclaimer</string>
-	    <key>isStaticText</key><true/>
-	</dict>
-	<dict>
-	    <key>cell</key>
-	    <string>PSStaticTextCell</string>
-	    <key>label</key>
-	    <string>This is a horrible mess. You really don't want to be this PSListController right now.</string>
+	    <string>Enable</string>
+	    <key>key</key>
+	    <string>Enabled</string>
 	</dict>
 	<dict>
 	    <key>cell</key>
