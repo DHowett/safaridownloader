@@ -80,8 +80,9 @@ static id fileTypesDict = nil;
 
 @implementation SDSettingsFileClassListController : PSListController
 - (id)specifiers {
-	id specs = [NSMutableArray array];
+	NSMutableArray *specs = [self loadSpecifiersFromPlistName:@"FileClass" target:self];
 	int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
+	int index = 1;
 	for(NSString *fileClass in fileTypesDict) {
 		PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileClass
 								   target:self
@@ -91,8 +92,9 @@ static id fileTypesDict = nil;
 								     cell:c
 								     edit:nil];
 		[spec setProperty:fileClass forKey:@"class"];
-		[specs addObject:spec];
+		[specs insertObject:spec atIndex:index++];
 	}
+	self.title = @"Filetypes";
 	return specs;
 }
 @end
@@ -116,7 +118,6 @@ static NSMutableArray *extraSpecs;
 	NSString *plist = [self.specifier propertyForKey:@"plist"] ?: @"SafariDownloader";
 	id specifiers = [self localizedSpecifiersWithSpecifiers:[self loadSpecifiersFromPlistName:plist target:self]];
 //	[specifiers addObjectsFromArray:extraSpecs];
-	NSLog(@"%@", specifiers);
 	return specifiers;
 }
 

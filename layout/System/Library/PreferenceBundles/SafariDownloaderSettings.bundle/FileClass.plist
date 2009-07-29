@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//GNUstep//DTD plist 0.9//EN" "http://www.gnustep.org/plist-0_9.xml">
+<plist version="0.9">
+<dict>
+    <key>items</key>
+    <array>
+	<dict>
+	    <key>cell</key>
+	    <string>PSGroupCell</string>
+	    <key>label</key>
+	    <string>Built-In Types</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSGroupCell</string>
+	    <key>label</key>
+	    <string>Custom</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSCuttonCell</string>
+	    <key>label</key>
+	    <string>Add...</string>
+	</dict>
+	<!--	<dict>
+	    <key>cell</key>
+	    <string>PSLinkCell</string>
+	    <key>detail</key>
+	    <string>SDSettingsFiletypeListController</string>
+	    <key>label</key>
+	    <string>Custom</string>
+	    <key>type</key>
+	    <string>0</string>
+    </dict>-->
+	<!--	<dict>
+	    <key>cell</key>
+	    <string>PSLinkCell</string>
+	    <key>detail</key>
+	    <string>SDSettingsFiletypeListController</string>
+	    <key>label</key>
+	    <string>Custom</string>
+	    <key>type</key>
+	    <string>1</string>
+    </dict>-->
+    </array>
+</dict>
+</plist>

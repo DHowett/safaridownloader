@@ -1,6 +1,6 @@
 {
     Archives = {
-	"BZip2 Archive" = {
+	"BZip2" = {
 	    Extensions = (
 		bz2,
 		bzip2,
@@ -19,7 +19,7 @@
 		"application/x-deb"
 	    );
 	};
-	"GZIP Archive" = {
+	"GZIP" = {
 	    Extensions = (
 		gz,
 		tgz
@@ -30,12 +30,12 @@
 		rar
 	    );
 	};
-	"Uncompressed Tape Archive" = {
+	"TAR" = {
 	    Extensions = (
 		tar
 	    );
 	};
-	"ZIP Archive" = {
+	"ZIP" = {
 	    Extensions = (
 		zip
 	    );
@@ -50,7 +50,7 @@
 	};
     };
     Documents = {
-	"Microsoft Office Document" = {
+	"Microsoft Office" = {
 	    Extensions = (
 		doc,
 		docx,
@@ -83,27 +83,27 @@
 		application/doc
 	    );
 	};
-	"OpenOffice Document" = {
+	"OpenOffice" = {
 	    Extensions = (
 		odp,
 		ods,
 		odt
 	    );
 	};
-	"PDF Document" = {
+	"PDF" = {
 	    Mimetypes = (
 		application/pdf,
 		text/pdf
 	    );
 	};
-	"Text Document" = {
+	"Text" = {
 	    Mimetypes = (
 		appl/text,
 		application/text,
 		text/plain
 	    );
 	};
-	"XML Document" = {
+	"XML" = {
 	    Mimetypes = (
 		application/xml,
 		text/xml
@@ -111,12 +111,12 @@
 	};
     };
     Images = {
-	"GIF Image" = {
+	"GIF" = {
 	    Extensions = (
 		gif
 	    );
 	};
-	"JPEG Image" = {
+	"JPEG" = {
 	    Extensions = (
 		jpeg,
 		jpg
@@ -126,7 +126,7 @@
 		image/jpg
 	    );
 	};
-	"PNG Image" = {
+	"PNG" = {
 	    Extensions = (
 		png
 	    );
@@ -134,7 +134,7 @@
 		image/png
 	    );
 	};
-	"TIFF Image" = {
+	"TIFF" = {
 	    Extensions = (
 		tif,
 		tiff
@@ -143,7 +143,7 @@
 		image/tiff
 	    );
 	};
-	"Targa Image" = {
+	"Targa" = {
 	    Extensions = (
 		tga
 	    );
@@ -154,54 +154,54 @@
 	};
     };
     Media = {
-	aac = {
+	AAC = {
 	    Extensions = (
 		aac
 	    );
 	};
-	avi = {
+	AVI = {
 	    Extensions = (
 		avi
 	    );
 	};
-	mp3 = {
+	MP3 = {
 	    Extensions = (
 		mp3
 	    );
 	};
-	mp4 = {
+	MP4 = {
 	    Extensions = (
 		mp4
 	    );
 	};
-	mpeg = {
+	MPEG = {
 	    Extensions = (
-		mpeg
-	    );
-	};
-	mpg = {
-	    Extensions = (
+		mpeg,
 		mpg
 	    );
 	};
-	ogg = {
+	OGG = {
 	    Extensions = (
 		ogg
 	    );
 	};
-	video/quicktime = {
+	"Quicktime Video" = {
+	    Extensions = (
+	        mov
+	    );
 	    Mimetypes = (
 		video/quicktime
 	    );
 	};
-	wav = {
+	"WAVE Audio" = {
 	    Extensions = (
-		wav
+		wav,
+		pcm
 	    );
 	};
     };
     Miscellaneous = {
-	"Binary File" = {
+	"Binary" = {
 	    Mimetypes = (
 		application/binary,
 		application/bin,
