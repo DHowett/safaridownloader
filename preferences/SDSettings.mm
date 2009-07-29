@@ -1,4 +1,5 @@
 #import "SDSettings.h"
+#import "../DownloaderCommon.h"
 
 /*
  * BIG DISCLAIMER
@@ -9,8 +10,6 @@
  * BWA HA AND HA. heh.
  * - DHowett
  */
-
-#define SD_PREFS @"/var/mobile/Library/Preferences/net.howett.safaridownloader.plist"
 
 @interface SDSettingsFiletypeListController : PSListController {
 	int _type;
@@ -35,9 +34,9 @@
 }
 
 - (void)suspend {
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:SD_PREFS] ?: [NSMutableDictionary dictionary];
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] ?: [NSMutableDictionary dictionary];
 	[dict setObject:[_disabledItems allObjects] forKey:[@"Disabled" stringByAppendingString:(_type==0 ? @"Extensions" : @"Mimetypes")]];
-	[dict writeToFile:SD_PREFS atomically:NO];
+	[dict writeToFile:PREFERENCES_FILE atomically:NO];
 	[super suspend];
 }
 
@@ -45,7 +44,7 @@
 	_type = [[self.specifier propertyForKey:@"type"] isEqualToString:@"ext"] ? 0 : 1;
 	NSLog(@"Why, dear god why. %@ %@", self.specifier, [self.specifier propertyForKey:@"type"]);
 	NSLog(@"Type is %d...", _type);
-	NSArray *disabledItemsArray = [[NSDictionary dictionaryWithContentsOfFile:SD_PREFS] objectForKey:[@"Disabled" stringByAppendingString:(_type==0 ? @"Extensions" : @"Mimetypes")]] ?: [NSArray array];
+	NSArray *disabledItemsArray = [[NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] objectForKey:[@"Disabled" stringByAppendingString:(_type==0 ? @"Extensions" : @"Mimetypes")]] ?: [NSArray array];
 	_disabledItems = [[NSMutableSet alloc] initWithArray:disabledItemsArray];
 	NSMutableArray *specs = [NSMutableArray array];
 	int c = [PSTableCell cellTypeFromString:@"PSSwitchCell"];

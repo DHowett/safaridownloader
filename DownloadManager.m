@@ -9,9 +9,8 @@
 #import "Safari/BrowserController.h"
 #import "DownloadManager.h"
 #import "DownloadCell.h"
+#import "DownloaderCommon.h"
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
-
-#define SD_PREFS @"/var/mobile/Library/Preferences/net.howett.safaridownloader.plist"
 
 static BOOL doRot = YES;
 
@@ -69,7 +68,7 @@ static id resourceBundle = nil;
   {
     _panel = [[DownloadManagerPanel alloc] init];
     // THIS IS A STATIC RESOURCE BUT IT WAS NULL WHEN I PUT IT IN INITIALIZE, W T F. TODO DHOWETT GODDAMNIT WHY
-    resourceBundle = [[NSBundle alloc] initWithPath:@"/Library/Application Support/Downloader"];
+    resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
     _currentDownloads = [NSMutableArray new];
     _finishedDownloads = [NSMutableArray new];
     _downloadQueue = [NSOperationQueue new];
@@ -95,7 +94,7 @@ static id resourceBundle = nil;
     [_extensions addObjectsFromArray:a];
   }
   
-  NSDictionary *disableShit = [NSDictionary dictionaryWithContentsOfFile:SD_PREFS];
+  NSDictionary *disableShit = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
   [_mimeTypes removeObjectsInArray:[disableShit objectForKey:@"DisabledMimetypes"]];
   NSLog(@"%@ - %@", _extensions, [disableShit objectForKey:@"DisabledExtensions"]);
   [_extensions removeObjectsInArray:[disableShit objectForKey:@"DisabledExtensions"]];
