@@ -1,6 +1,6 @@
 Package: net.howett.downloader
 Name: Downloader
-Depends: mobilesubstrate
+Depends: mobilesubstrate, preferenceloader
 Version: 0.0.1
 Architecture: iphoneos-arm
 Description: 

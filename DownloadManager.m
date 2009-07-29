@@ -88,7 +88,11 @@ static id resourceBundle = nil;
   _mimeTypes = [[NSMutableSet alloc] init];
   _extensions = [[NSMutableSet alloc] init];
 
-  for(NSDictionary *fileClass in [globalFileTypes allValues]) {
+  if(_classMappings) [_classMappings release];
+  _classMappings = [[NSMutableDictionary alloc] init];
+
+  for(NSDictionary *fileClassName in globalFileTypes) {
+    NSDictionary *fileClass = [globalFileTypes objectForKey:fileClassName];
     for(NSString *fileTypeName in fileClass) {
       if([disabledItems containsObject:fileTypeName]) {
         NSLog(@"Skipping %@...", fileTypeName);
@@ -96,8 +100,12 @@ static id resourceBundle = nil;
       }
 
       NSDictionary *fileType = [fileClass objectForKey:fileTypeName];
-      [_mimeTypes addObjectsFromArray:[fileType objectForKey:@"Mimetypes"]];
-      [_extensions addObjectsFromArray:[fileType objectForKey:@"Extensions"]];
+      NSArray *mimes = [fileType objectForKey:@"Mimetypes"];
+      NSArray *exts = [fileType objectForKey:@"Extensions"];
+      [_mimeTypes addObjectsFromArray:mimes];
+      [_extensions addObjectsFromArray:exts];
+      for(NSString *i in mimes) [_classMappings setObject:fileClassName forKey:i];
+      for(NSString *i in exts) [_classMappings setObject:fileClassName forKey:i];
     }
   }
   NSLog(@"%@", _mimeTypes);
@@ -182,7 +190,15 @@ static id resourceBundle = nil;
 
 - (UIImage *)iconForExtension:(NSString *)extension {
   NSString *iconPath = nil;
-  if(extension && [extension length] > 0) iconPath = [resourceBundle pathForResource:extension ofType:@"png" inDirectory:@"FileIcons"];
+  if(extension && [extension length] > 0) {
+    iconPath = [resourceBundle pathForResource:extension ofType:@"png" inDirectory:@"FileIcons"];
+    NSString *t;
+    if(!iconPath) {
+      t = [_classMappings objectForKey:extension];
+      if(t != nil)
+        iconPath = [resourceBundle pathForResource:[@"Class-" stringByAppendingString:t] ofType:@"png" inDirectory:@"FileIcons"];
+    }
+  }
   if(!iconPath) iconPath = [resourceBundle pathForResource:@"unknownfile" ofType:@"png"];
   return [UIImage imageWithContentsOfFile:iconPath];
 }

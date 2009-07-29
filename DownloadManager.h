@@ -25,6 +25,7 @@
   UITableView*      _tableView;
   NSMutableSet*     _mimeTypes;
   NSMutableSet*     _extensions;
+  NSMutableDictionary* _classMappings;
   NSMutableArray*   _currentDownloads;
   NSMutableArray*   _finishedDownloads;
   NSOperationQueue* _downloadQueue;

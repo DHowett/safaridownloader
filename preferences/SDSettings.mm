@@ -82,7 +82,7 @@ static id fileTypesDict = nil;
 - (id)specifiers {
 	NSMutableArray *specs = [self loadSpecifiersFromPlistName:@"FileClass" target:self];
 	int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
-	int index = 1;
+	int index = 3;
 	for(NSString *fileClass in fileTypesDict) {
 		PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileClass
 								   target:self
@@ -92,6 +92,7 @@ static id fileTypesDict = nil;
 								     cell:c
 								     edit:nil];
 		[spec setProperty:fileClass forKey:@"class"];
+		[spec setProperty:[UIImage imageWithContentsOfFile:[resourceBundle pathForResource:[@"Class-" stringByAppendingString:fileClass] ofType:@"png" inDirectory:@"FileIcons"]] forKey:@"iconImage"];
 		[specs insertObject:spec atIndex:index++];
 	}
 	self.title = @"Filetypes";

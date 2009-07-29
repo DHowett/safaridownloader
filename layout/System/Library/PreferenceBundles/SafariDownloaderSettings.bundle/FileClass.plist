@@ -7,6 +7,18 @@
 	<dict>
 	    <key>cell</key>
 	    <string>PSGroupCell</string>
+	    <key>isStaticText</key>
+		<true/>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSStaticTextCell</string>
+	    <key>label</key>
+	    <string>Disabling a file type will cause Safari to not prompt you with regards to downloading a file of that type, and instead behave normally.</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSGroupCell</string>
 	    <key>label</key>
 	    <string>Built-In Types</string>
 	</dict>
