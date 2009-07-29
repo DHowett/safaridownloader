@@ -21,17 +21,15 @@
 	    <key>cell</key>
 	    <string>PSGroupCell</string>
 	    <key>label</key>
-	    <string>File Extensions</string>
+	    <string>Ooooh</string>
 	</dict>
 	<dict>
 	    <key>cell</key>
 	    <string>PSLinkCell</string>
 	    <key>detail</key>
-	    <string>SDSettingsFiletypeListController</string>
+	    <string>SDSettingsFileClassListController</string>
 	    <key>label</key>
-	    <string>Built-in</string>
-	    <key>type</key>
-	    <string>ext</string>
+	    <string>File Type Configuration</string>
 	</dict>
 	<!--	<dict>
 	    <key>cell</key>
@@ -43,22 +41,6 @@
 	    <key>type</key>
 	    <string>0</string>
     </dict>-->
-	<dict>
-	    <key>cell</key>
-	    <string>PSGroupCell</string>
-	    <key>label</key>
-	    <string>MIME Types</string>
-	</dict>
-	<dict>
-	    <key>cell</key>
-	    <string>PSLinkCell</string>
-	    <key>detail</key>
-	    <string>SDSettingsFiletypeListController</string>
-	    <key>label</key>
-	    <string>Built-in</string>
-	    <key>type</key>
-	    <string>mime</string>
-	</dict>
 	<!--	<dict>
 	    <key>cell</key>
 	    <string>PSLinkCell</string>

@@ -1,3 +1,6 @@
+firstrule:
+	@(cd ..; make)
+
 LDFLAGS=-lobjc -framework Foundation -framework UIKit -framework CoreFoundation -multiply_defined suppress \
 	-Wall -Werror -lobjc -ObjC++ -fobjc-exceptions -bundle -fobjc-call-cxx-cdtors \
 	-F/opt/iphone-sdk/sys/System/Library/PrivateFrameworks -framework Preferences

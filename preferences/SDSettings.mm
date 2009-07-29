@@ -1,17 +1,10 @@
 #import "SDSettings.h"
 #import "../DownloaderCommon.h"
 
-/*
- * BIG DISCLAIMER
- * IF YOU IGNORE THIS I WILL STAB YOU
- * I AM NOT PROUD OF THIS
- * THIS IS A "MAKE IT FRIGGIN WORK" IMPLEMENTATION
- * IT WILL GET CLEANED UP LATER
- * BWA HA AND HA. heh.
- * - DHowett
- */
+static id resourceBundle = nil;
+static id fileTypesDict = nil;
 
-@interface SDSettingsFiletypeListController : PSListController {
+@interface SDSettingsFileTypeListController : PSListController {
 	int _type;
 	NSMutableSet *_disabledItems;
 }
@@ -21,9 +14,11 @@
 - (id)specifiers;
 @end
 
-@implementation SDSettingsFiletypeListController
+@implementation SDSettingsFileTypeListController
 - (id)initForContentSize:(CGSize)size {
 	if((self = [super initForContentSize:size])) {
+		NSArray *disabledItemsArray = [[NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] objectForKey:@"DisabledItems"] ?: [NSArray array];
+		_disabledItems = [[NSMutableSet alloc] initWithArray:disabledItemsArray];
 	}
 	return self;
 }
@@ -35,33 +30,25 @@
 
 - (void)suspend {
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] ?: [NSMutableDictionary dictionary];
-	[dict setObject:[_disabledItems allObjects] forKey:[@"Disabled" stringByAppendingString:(_type==0 ? @"Extensions" : @"Mimetypes")]];
+	[dict setObject:[_disabledItems allObjects] forKey:@"DisabledItems"];
 	[dict writeToFile:PREFERENCES_FILE atomically:NO];
 	[super suspend];
 }
 
 - (id)specifiers {
-	_type = [[self.specifier propertyForKey:@"type"] isEqualToString:@"ext"] ? 0 : 1;
-	NSLog(@"Why, dear god why. %@ %@", self.specifier, [self.specifier propertyForKey:@"type"]);
-	NSLog(@"Type is %d...", _type);
-	NSArray *disabledItemsArray = [[NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] objectForKey:[@"Disabled" stringByAppendingString:(_type==0 ? @"Extensions" : @"Mimetypes")]] ?: [NSArray array];
-	_disabledItems = [[NSMutableSet alloc] initWithArray:disabledItemsArray];
 	NSMutableArray *specs = [NSMutableArray array];
+	NSString *fileClass = [self.specifier propertyForKey:@"class"];
 	int c = [PSTableCell cellTypeFromString:@"PSSwitchCell"];
-	NSDictionary *d = [NSDictionary dictionaryWithContentsOfFile:@"/Library/Application Support/Downloader/FileTypes.plist"];
-	for(NSArray *a in [[d objectForKey:(_type==0 ? @"Extensions" : @"Mimetypes")] allValues]) {
-		NSLog(@"%@", a);
-		for(NSString *s in a) {
-			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:s
-									target:self
-									   set:@selector(set:spec:)
-									get:@selector(get:)
-									detail:nil
-									cell:c
-									edit:nil];
-			[spec setProperty:s forKey:@"id"];
-			[specs addObject:spec];
-		}
+	for(NSString *fileType in [fileTypesDict objectForKey:fileClass]) {
+		PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileType
+								   target:self
+								      set:@selector(set:spec:)
+								      get:@selector(get:)
+								   detail:nil
+								     cell:c
+								     edit:nil];
+		[spec setProperty:fileType forKey:@"id"];
+		[specs addObject:spec];
 	}
 	return specs;
 }
@@ -83,6 +70,33 @@
 }
 @end
 
+@interface SDSettingsFileClassListController : PSListController {
+}
+//- (id)initForContentSize:(CGSize)size;
+//- (void)dealloc;
+//- (void)suspend;
+- (id)specifiers;
+@end
+
+@implementation SDSettingsFileClassListController : PSListController
+- (id)specifiers {
+	id specs = [NSMutableArray array];
+	int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
+	for(NSString *fileClass in fileTypesDict) {
+		PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileClass
+								   target:self
+								      set:nil
+								      get:nil
+								   detail:[SDSettingsFileTypeListController class]
+								     cell:c
+								     edit:nil];
+		[spec setProperty:fileClass forKey:@"class"];
+		[specs addObject:spec];
+	}
+	return specs;
+}
+@end
+
 @implementation SDSettingsController
 
 static NSMutableArray *extraSpecs;
@@ -91,13 +105,18 @@ static NSMutableArray *extraSpecs;
 	if((self = [super initForContentSize:size])) {
 //		extraSpecs = [NSMutableArray array];
 //		[extraSpecs addObject:spec];
+		resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
+		fileTypesDict = [[NSDictionary alloc] initWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" ofType:@"plist"]];
+
 	}
 	return self;
 }
 
 - (id)specifiers {
-	id specifiers = [self localizedSpecifiersWithSpecifiers:[self loadSpecifiersFromPlistName:@"SafariDownloader" target:self]];
+	NSString *plist = [self.specifier propertyForKey:@"plist"] ?: @"SafariDownloader";
+	id specifiers = [self localizedSpecifiersWithSpecifiers:[self loadSpecifiersFromPlistName:plist target:self]];
 //	[specifiers addObjectsFromArray:extraSpecs];
+	NSLog(@"%@", specifiers);
 	return specifiers;
 }
 

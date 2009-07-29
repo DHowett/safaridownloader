@@ -80,25 +80,35 @@ static id resourceBundle = nil;
 
 - (void)updateFileTypes {
   NSDictionary *globalFileTypes = [NSDictionary dictionaryWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" ofType:@"plist"]];
-  NSLog(@"%@... %@: %@", resourceBundle, [resourceBundle pathForResource:@"FileTypes" ofType:@"plist"], [globalFileTypes description]);
+  NSDictionary *userPrefs = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
+  NSArray *disabledItems = [userPrefs objectForKey:@"DisabledItems"];
+
   if(_mimeTypes) [_mimeTypes release];
   if(_extensions) [_extensions release];
-  _mimeTypes = [[NSMutableArray alloc] init];
-  _extensions = [[NSMutableArray alloc] init];
-  for(NSArray *a in [[globalFileTypes objectForKey:@"Mimetypes"] allValues]) {
-    NSLog(@"%@", [a description]);
-    [_mimeTypes addObjectsFromArray:a];
+  _mimeTypes = [[NSMutableSet alloc] init];
+  _extensions = [[NSMutableSet alloc] init];
+
+  for(NSDictionary *fileClass in [globalFileTypes allValues]) {
+    for(NSString *fileTypeName in fileClass) {
+      if([disabledItems containsObject:fileTypeName]) {
+        NSLog(@"Skipping %@...", fileTypeName);
+        continue;
+      }
+
+      NSDictionary *fileType = [fileClass objectForKey:fileTypeName];
+      [_mimeTypes addObjectsFromArray:[fileType objectForKey:@"Mimetypes"]];
+      [_extensions addObjectsFromArray:[fileType objectForKey:@"Extensions"]];
+    }
   }
-  for(NSArray *a in [[globalFileTypes objectForKey:@"Extensions"] allValues]) {
-    NSLog(@"%@", [a description]);
-    [_extensions addObjectsFromArray:a];
-  }
+  NSLog(@"%@", _mimeTypes);
   
+  /*
   NSDictionary *disableShit = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
   [_mimeTypes removeObjectsInArray:[disableShit objectForKey:@"DisabledMimetypes"]];
   NSLog(@"%@ - %@", _extensions, [disableShit objectForKey:@"DisabledExtensions"]);
   [_extensions removeObjectsInArray:[disableShit objectForKey:@"DisabledExtensions"]];
   NSLog(@"%@", _extensions);
+  */
   return;
 }
 

@@ -23,8 +23,8 @@
 
 @interface DownloadManager : UITableViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate> {
   UITableView*      _tableView;
-  NSMutableArray*   _mimeTypes;
-  NSMutableArray*   _extensions;
+  NSMutableSet*     _mimeTypes;
+  NSMutableSet*     _extensions;
   NSMutableArray*   _currentDownloads;
   NSMutableArray*   _finishedDownloads;
   NSOperationQueue* _downloadQueue;
