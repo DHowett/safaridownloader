@@ -79,9 +79,11 @@ static id resourceBundle = nil;
 }
 
 - (void)updateFileTypes {
-  NSDictionary *globalFileTypes = [NSDictionary dictionaryWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" ofType:@"plist"]];
+  NSMutableDictionary *globalFileTypes = [NSMutableDictionary dictionaryWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" ofType:@"plist"]];
   NSDictionary *userPrefs = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
   NSArray *disabledItems = [userPrefs objectForKey:@"DisabledItems"];
+  NSDictionary *customTypes = [userPrefs objectForKey:@"CustomItems"];
+  if(customTypes) [globalFileTypes setValue:customTypes forKey:@"CustomItems"];
 
   if(_mimeTypes) [_mimeTypes release];
   if(_extensions) [_extensions release];

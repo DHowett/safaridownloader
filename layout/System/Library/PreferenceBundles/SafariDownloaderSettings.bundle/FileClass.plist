@@ -30,9 +30,11 @@
 	</dict>
 	<dict>
 	    <key>cell</key>
-	    <string>PSCuttonCell</string>
+	    <string>PSLinkCell</string>
 	    <key>label</key>
 	    <string>Add...</string>
+		<key>detail</key>
+		<string>SDSettingsCustomFileTypeController</string>
 	</dict>
 	<!--	<dict>
 	    <key>cell</key>

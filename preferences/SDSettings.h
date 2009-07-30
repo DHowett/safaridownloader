@@ -1,4 +1,5 @@
 #import <Preferences/PSSpecifier.h>
+#import <Preferences/PSTextFieldSpecifier.h>
 #import <Preferences/PSTableCell.h>
 #import <DHLocalizedListController.h>
 
