@@ -4,7 +4,7 @@
 static id resourceBundle = nil;
 static id fileTypesDict = nil;
 
-@interface SDSettingsCustomFileTypeController : PSListController {
+@interface SDSettingsCustomFileTypeController : PSSetupListController {
 		BOOL _deleted;
 		BOOL _isNewType;
 		NSString *_name;
@@ -13,21 +13,38 @@ static id fileTypesDict = nil;
 		NSMutableArray *_extensions;
 		NSMutableArray *_mimetypes;
 }
++ (BOOL)isOverlay;
 - (id)specifiers;
 - (void)dealloc;
 - (void)suspend;
 - (PSSpecifier *)newExtraItemSpecifierWithContents:(NSString *)contents isExtension:(BOOL)extension;
 - (NSString *)getOrigItem:(PSSpecifier *)spec;
 - (void)setNewItem:(NSString *)s forSpecifier:(PSSpecifier *)spec;
-- (void)deleteButtonPressed;
+- (void)deleteButtonPressed:(id)object;
+- (id)preferencesTable:(id)table cellForRow:(int)row inGroup:(int)group;
 @end
 
 @implementation SDSettingsCustomFileTypeController
++ (BOOL)isOverlay { return YES; }
 - (id)initForContentSize:(CGSize)size {
     if((self = [super initForContentSize:size])) {
 		_deleted = NO;
 	}
 	return self;
+}
+
+- (id)preferencesTable:(id)table cellForRow:(int)row inGroup:(int)group {
+	static id deleteCell;
+	if(group == 3) {
+		if(!deleteCell) {
+			deleteCell = [[UIPreferencesDeleteTableCell alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+			[[deleteCell button] setTitle:@"Delete this File Type"];
+			[[deleteCell button] addTarget:self action:@selector(deleteButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+		}
+		[[deleteCell button] setEnabled:YES];
+		return deleteCell;
+	}
+	else return [super preferencesTable:table cellForRow:row inGroup:group];
 }
 
 - (void)dealloc {
@@ -152,7 +169,8 @@ static id fileTypesDict = nil;
 		[self insertSpecifier:[self newExtraItemSpecifierWithContents:nil isExtension:isExtension] atIndex:([self indexOfSpecifier:spec] + 1) animated:YES];
 }
 
-- (void)deleteButtonPressed {
+- (void)deleteButtonPressed:(id)object {
+	[object setEnabled:NO];
 	_deleted = YES;
 	[self.rootController popController];
 }
