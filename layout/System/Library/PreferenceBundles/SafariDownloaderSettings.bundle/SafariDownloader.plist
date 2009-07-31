@@ -11,15 +11,13 @@
 	    <string>net.howett.safaridownloader</string>
 	    <key>default</key><true/>
 	    <key>label</key>
-	    <string>Enable</string>
+	    <string>Download Files</string>
 	    <key>key</key>
 	    <string>Enabled</string>
 	</dict>
 	<dict>
 	    <key>cell</key>
 	    <string>PSGroupCell</string>
-	    <key>label</key>
-	    <string>Ooooh</string>
 	</dict>
 	<dict>
 	    <key>cell</key>
@@ -27,7 +25,7 @@
 	    <key>detail</key>
 	    <string>SDSettingsFileClassListController</string>
 	    <key>label</key>
-	    <string>File Type Configuration</string>
+	    <string>File Types</string>
 	</dict>
 	<!--	<dict>
 	    <key>cell</key>
