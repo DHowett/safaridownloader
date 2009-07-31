@@ -79,13 +79,24 @@ static id fileClassController = nil;
 	[self updatePreferencesFile];
 }
 
+- (NSString *)getTextFromSpecifier:(PSSpecifier *)spec {
+	return [[spec propertyForKey:@"cellObject"] value];
+}
+
 - (void)updatePreferencesFile {
 	NSMutableDictionary *prefsDict = [NSMutableDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
 	NSMutableDictionary *customItems = [prefsDict objectForKey:@"CustomItems"] ?: [NSMutableDictionary dictionary];
 
+	_name = [self getTextFromSpecifier:_nameSpec];
 	if(!_name) return;
 
 	if(!_deleted) {
+		NSString *finalExt, *finalMime;
+		finalExt = [self getTextFromSpecifier:_newExtSpec];
+		finalMime = [self getTextFromSpecifier:_newMimeSpec];
+		if(finalExt) [_extensions addObject:finalExt];
+		if(finalMime) [_extensions addObject:finalMime];
+
 		[_customEntry setValue:_extensions forKey:@"Extensions"];
 		[_customEntry setValue:_mimetypes forKey:@"Mimetypes"];
 
