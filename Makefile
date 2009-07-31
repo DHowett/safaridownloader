@@ -53,5 +53,6 @@ package-local: build/$(TARGET)
 	cp build/$(TARGET) _/Library/MobileSubstrate/DynamicLibraries
 	cp preferences/SDSettings _/System/Library/PreferenceBundles/SafariDownloaderSettings.bundle
 	chown 0.80 _ -R
+	-find _ -iname '*.plist' -print0 | xargs -0 /home/dustin/bin/plutil -convert binary1
 
 include $(FRAMEWORKDIR)/makefiles/DebMakefile

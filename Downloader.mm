@@ -20,6 +20,10 @@
 #define bF(b) [NSString stringWithFormat:@"%@", b ? @"true" : @"false"]
 #define sF(inset) NSStringFromUIEdgeInsets(inset)
 
+#ifndef DEBUG
+#define NSLog(...)
+#endif
+
 @interface ModalAlert : NSObject @end
 @implementation ModalAlert
 + (void)block:(UIView *)view

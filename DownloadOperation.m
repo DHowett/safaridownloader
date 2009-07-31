@@ -1,6 +1,10 @@
 #import "DownloadOperation.h"
 #import "NSURLDownload.h"
 
+#ifndef DEBUG
+#define NSLog(...)
+#endif
+
 @implementation DownloadOperation
 @synthesize delegate = _delegate;
 

@@ -12,6 +12,10 @@
 #import "DownloaderCommon.h"
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
 
+#ifndef DEBUG
+#define NSLog(...)
+#endif
+
 static BOOL doRot = YES;
 
 @implementation DownloadManagerPanel
