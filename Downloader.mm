@@ -331,6 +331,11 @@ HOOK(Application, applicationDidFinishLaunching$, void, UIApplication *applicati
   [downloader loadCustomToolbar];
 }
 
+HOOK(Application, applicationResume$, void, GSEventRef event) {
+  CALL_ORIG(Application, applicationResume$, event);
+  [[DownloadManager sharedManager] updateFileTypes];
+}
+
 HOOK(BrowserButtonBar, createButtonWithDescription$, id, id description) {
   UIToolbarButton* ret = CALL_ORIG(BrowserButtonBar, createButtonWithDescription$, description);
   NSInteger tag = [[description objectForKey:@"UIButtonBarButtonTag"] intValue];
@@ -385,6 +390,7 @@ extern "C" void DownloaderInitialize() {
 
   GET_CLASS(Application);
   HOOK_MESSAGE_F(Application, applicationDidFinishLaunching:, applicationDidFinishLaunching$);
+  HOOK_MESSAGE_F(Application, applicationResume:, applicationResume$);
 
   GET_CLASS(BrowserButtonBar);
   HOOK_MESSAGE_F(BrowserButtonBar, createButtonWithDescription:, createButtonWithDescription$);
