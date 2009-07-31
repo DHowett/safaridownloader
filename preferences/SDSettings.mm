@@ -1,22 +1,34 @@
 #import "SDSettings.h"
+#import <objc/runtime.h>
 #import "../DownloaderCommon.h"
 
 static id resourceBundle = nil;
 static id fileTypesDict = nil;
+static id fileClassController = nil;
 
-@interface SDSettingsCustomFileTypeController : PSSetupListController {
-		BOOL _deleted;
-		BOOL _isNewType;
-		NSString *_name;
-		NSString *_originalName;
-		NSDictionary *_customEntry;
-		NSMutableArray *_extensions;
-		NSMutableArray *_mimetypes;
+@interface SDFileTypeSetupController : PSSetupController {
 }
 + (BOOL)isOverlay;
+- (void)navigationBar:(id)bar buttonClicked:(int)clicked;
+@end
+
+@interface SDSettingsCustomFileTypeController : PSListController {
+	BOOL _deleted;
+	BOOL _isNewType;
+	NSString *_name;
+	NSString *_originalName;
+	NSDictionary *_customEntry;
+	NSMutableArray *_extensions;
+	NSMutableArray *_mimetypes;
+	PSSpecifier *_nameSpec;
+	PSSpecifier *_newExtSpec;
+	PSSpecifier *_newMimeSpec;
+	UIPreferencesDeleteTableCell *_deleteCell;
+}
 - (id)specifiers;
 - (void)dealloc;
 - (void)suspend;
+- (void)updatePreferencesFile;
 - (PSSpecifier *)newExtraItemSpecifierWithContents:(NSString *)contents isExtension:(BOOL)extension;
 - (NSString *)getOrigItem:(PSSpecifier *)spec;
 - (void)setNewItem:(NSString *)s forSpecifier:(PSSpecifier *)spec;
@@ -24,11 +36,23 @@ static id fileTypesDict = nil;
 - (id)preferencesTable:(id)table cellForRow:(int)row inGroup:(int)group;
 @end
 
+@implementation SDFileTypeSetupController
++ (BOOL)isOverlay { return NO; }
+- (void)navigationBar:(id)bar buttonClicked:(int)clicked {
+	SDSettingsCustomFileTypeController *controller = [_controllers lastObject];
+	if(clicked == 1) [controller updatePreferencesFile];
+	[self dismiss];
+	[fileClassController reloadSpecifiers];
+}
+@end
+
 @implementation SDSettingsCustomFileTypeController
-+ (BOOL)isOverlay { return YES; }
 - (id)initForContentSize:(CGSize)size {
-    if((self = [super initForContentSize:size])) {
+	if((self = [super initForContentSize:size])) {
 		_deleted = NO;
+		_deleteCell = [[UIPreferencesDeleteTableCell alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+		[[_deleteCell button] setTitle:@"Delete this File Type"];
+		//[[_deleteCell button] addTarget:self action:@selector(deleteButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
 	}
 	return self;
 }
@@ -36,13 +60,9 @@ static id fileTypesDict = nil;
 - (id)preferencesTable:(id)table cellForRow:(int)row inGroup:(int)group {
 	static id deleteCell;
 	if(group == 3) {
-		if(!deleteCell) {
-			deleteCell = [[UIPreferencesDeleteTableCell alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
-			[[deleteCell button] setTitle:@"Delete this File Type"];
-			[[deleteCell button] addTarget:self action:@selector(deleteButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-		}
-		[[deleteCell button] setEnabled:YES];
-		return deleteCell;
+		[[_deleteCell button] setEnabled:YES];
+		[[_deleteCell button] addTarget:self action:@selector(deleteButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+		return _deleteCell;
 	}
 	else return [super preferencesTable:table cellForRow:row inGroup:group];
 }
@@ -51,10 +71,15 @@ static id fileTypesDict = nil;
 	[_customEntry release];
 	[_extensions release];
 	[_mimetypes release];
+	[_deleteCell release];
 	[super dealloc];
 }
 
 - (void)suspend {
+	[self updatePreferencesFile];
+}
+
+- (void)updatePreferencesFile {
 	NSMutableDictionary *prefsDict = [NSMutableDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
 	NSMutableDictionary *customItems = [prefsDict objectForKey:@"CustomItems"] ?: [NSMutableDictionary dictionary];
 
@@ -93,28 +118,30 @@ static id fileTypesDict = nil;
 	}
 }
 
-- (void)loadExtraItemsToSpecifierArray:(NSMutableArray *)specs atIndex:(int)index extensions:(BOOL)extensions {
+- (void)loadExtraItemsAtIndex:(int)index extensions:(BOOL)extensions {
 	NSMutableArray *workArray = extensions ? _extensions : _mimetypes;
 	for(NSString *item in workArray) {
-			[specs insertObject:[self newExtraItemSpecifierWithContents:item isExtension:extensions] atIndex:index];
+		[self insertSpecifier:[self newExtraItemSpecifierWithContents:item isExtension:extensions] atIndex:index];
 	}
 }
 
 - (id)specifiers {
-	NSMutableArray *specs = [self loadSpecifiersFromPlistName:@"FileType" target:self];
-	NSLog(@"%@", specs);
-	[self postinit];
-	int extIdx = 0, mimIdx = 0;
-	for(PSSpecifier *spec in specs) {
-		if([spec.identifier isEqualToString:@"newExt"]) extIdx = [specs indexOfObject:spec];
-		else if([spec.identifier isEqualToString:@"newMime"]) mimIdx = [specs indexOfObject:spec];
+	if(_specifiers == nil) {
+		_specifiers = [[self loadSpecifiersFromPlistName:@"FileType" target:self] retain];
+		[self postinit];
+		int extIdx = 0, mimIdx = 0;
+		_nameSpec = [self specifierForID:@"name"];
+		_newExtSpec = [self specifierForID:@"newExt"];
+		_newMimeSpec = [self specifierForID:@"newMime"];
+		extIdx = [self indexOfSpecifier:_newExtSpec];
+		mimIdx = [self indexOfSpecifier:_newMimeSpec];
+		if(!_isNewType) {
+			[self loadExtraItemsAtIndex:extIdx extensions:YES];
+			[self loadExtraItemsAtIndex:mimIdx extensions:NO];
+		}
+		self.title = _isNewType ? @"New File Type" : _name;
 	}
-	if(!_isNewType) {
-		[self loadExtraItemsToSpecifierArray:specs atIndex:extIdx extensions:YES];
-		[self loadExtraItemsToSpecifierArray:specs atIndex:mimIdx extensions:NO];
-	}
-	self.title = _isNewType ? @"New File Type" : _name;
-	return specs;
+	return _specifiers;
 }
 
 - (NSString *)getName:(PSSpecifier *)spec {
@@ -128,15 +155,18 @@ static id fileTypesDict = nil;
 - (PSSpecifier *)newExtraItemSpecifierWithContents:(NSString *)contents isExtension:(BOOL)extension {
 	int c = [PSTableCell cellTypeFromString:@"PSEditTextCell"];
 	PSTextFieldSpecifier *spec = [PSTextFieldSpecifier preferenceSpecifierNamed:nil
-																		 target:self
-																			set:@selector(setNewItem:forSpecifier:)
-																			get:(contents ? @selector(getOrigItem:) : nil)
-																		 detail:nil cell:c edit:nil];
+									     target:self
+										set:@selector(setNewItem:forSpecifier:)
+										get:(contents ? @selector(getOrigItem:) : nil)
+									     detail:nil
+									       cell:c
+									       edit:nil];
 	if(contents) [spec setProperty:contents forKey:@"valueCopy"];
 	[spec setPlaceholder:(extension ? @"Extension (no dot)" : @"Mimetype")];
 	[spec setKeyboardType:0 autoCaps:0 autoCorrection:0];
 	[spec setProperty:[NSNumber numberWithBool:(contents == nil)] forKey:@"new"];
 	[spec setProperty:(extension ? @"extension" : @"mimetype") forKey:@"itemType"];
+	if(!contents) (extension ? _newExtSpec : _newMimeSpec) = spec;
 	return spec;
 }
 
@@ -171,8 +201,10 @@ static id fileTypesDict = nil;
 
 - (void)deleteButtonPressed:(id)object {
 	[object setEnabled:NO];
+	[object removeTarget:self action:NULL forControlEvents:UIControlEventTouchUpInside];
 	_deleted = YES;
-	[self.rootController popController];
+	[self updatePreferencesFile];
+	[self.parentController dismiss];
 }
 @end
 
@@ -208,21 +240,23 @@ static id fileTypesDict = nil;
 }
 
 - (id)specifiers {
-	NSMutableArray *specs = [NSMutableArray array];
-	NSString *fileClass = [self.specifier propertyForKey:@"class"];
-	int c = [PSTableCell cellTypeFromString:@"PSSwitchCell"];
-	for(NSString *fileType in [fileTypesDict objectForKey:fileClass]) {
-		PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileType
-								   target:self
-								      set:@selector(set:spec:)
-								      get:@selector(get:)
-								   detail:nil
-								     cell:c
-								     edit:nil];
-		[spec setProperty:fileType forKey:@"id"];
-		[specs addObject:spec];
+	if(!_specifiers) {
+		_specifiers = [[NSMutableArray array] retain];
+		NSString *fileClass = [self.specifier propertyForKey:@"class"];
+		int c = [PSTableCell cellTypeFromString:@"PSSwitchCell"];
+		for(NSString *fileType in [fileTypesDict objectForKey:fileClass]) {
+			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileType
+									   target:self
+									      set:@selector(set:spec:)
+									      get:@selector(get:)
+									   detail:nil
+									     cell:c
+									     edit:nil];
+			[spec setProperty:fileType forKey:@"id"];
+			[self addSpecifier:spec];
+		}
 	}
-	return specs;
+	return _specifiers;
 }
 
 - (CFBooleanRef)get:(PSSpecifier *)spec {
@@ -259,13 +293,14 @@ static id fileTypesDict = nil;
 
 - (id)initForContentSize:(CGSize)size {
 	if((self = [super initForContentSize:size])) {
-			_customTypeSpecifiers = [[NSMutableArray alloc] init];
+		fileClassController = self;
+		_customTypeSpecifiers = [[NSMutableArray alloc] init];
 	}
 	return self;
 }
 
 - (id)specifiers {
-	NSMutableArray *specs = [self loadSpecifiersFromPlistName:@"FileClass" target:self];
+	_specifiers = [[self loadSpecifiersFromPlistName:@"FileClass" target:self] retain];
 	NSArray *customTypes = [[[NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] objectForKey:@"CustomItems"] allKeys] ?: [NSArray array];
 
 	int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
@@ -280,23 +315,28 @@ static id fileTypesDict = nil;
 								     edit:nil];
 		[spec setProperty:fileClass forKey:@"class"];
 		[spec setProperty:[UIImage imageWithContentsOfFile:[resourceBundle pathForResource:[@"Class-" stringByAppendingString:fileClass] ofType:@"png" inDirectory:@"FileIcons"]] forKey:@"iconImage"];
-		[specs insertObject:spec atIndex:index++];
+		[self insertSpecifier:spec atIndex:index++];
 	}
 
+//	[s setProperty:objc_getClass("SDSettingsCustomFileTypeController") forKey:@"customControllerClass"];
 	for(NSString *customType in customTypes) {
 		PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:customType
 								   target:self
 								      set:nil
 								      get:nil
-								   detail:[SDSettingsCustomFileTypeController class]
+								   detail:[SDFileTypeSetupController class]
 								     cell:c
 								     edit:nil];
 		[spec setProperty:customType forKey:@"typename"];
+		[spec setProperty:@"SDSettingsCustomFileTypeController" forKey:@"customControllerClass"];
+		[spec setProperty:@"Save" forKey:@"okTitle"];
+		[spec setProperty:@"Cancel" forKey:@"cancelTitle"];
+		[spec setProperty:@"Edit this File Type information." forKey:@"prompt"];
 		[_customTypeSpecifiers addObject:spec];
-		[specs addObject:spec];
+		[self addSpecifier:spec];
 	}
 	self.title = @"Filetypes";
-	return specs;
+	return _specifiers;
 }
 @end
 
@@ -316,9 +356,11 @@ static NSMutableArray *extraSpecs;
 
 - (id)specifiers {
 	NSString *plist = [self.specifier propertyForKey:@"plist"] ?: @"SafariDownloader";
-	id specifiers = [self localizedSpecifiersWithSpecifiers:[self loadSpecifiersFromPlistName:plist target:self]];
+	if(_specifiers == nil) {
+		_specifiers = [[self localizedSpecifiersWithSpecifiers:[self loadSpecifiersFromPlistName:plist target:self]] retain];
 //	[specifiers addObjectsFromArray:extraSpecs];
-	return specifiers;
+	}
+	return _specifiers;
 }
 
 @end
