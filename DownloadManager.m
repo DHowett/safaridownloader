@@ -91,11 +91,13 @@ static id resourceBundle = nil;
 
   if(_mimeTypes) [_mimeTypes release];
   if(_extensions) [_extensions release];
+  if(_classMappings) [_classMappings release];
   _mimeTypes = [[NSMutableSet alloc] init];
   _extensions = [[NSMutableSet alloc] init];
-
-  if(_classMappings) [_classMappings release];
   _classMappings = [[NSMutableDictionary alloc] init];
+
+  BOOL enabled = [[userPrefs objectForKey:@"Enabled"] boolValue];
+  if(!enabled) return;
 
   for(NSDictionary *fileClassName in globalFileTypes) {
     NSDictionary *fileClass = [globalFileTypes objectForKey:fileClassName];
