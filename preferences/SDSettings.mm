@@ -99,6 +99,7 @@ static id fileClassController = nil;
 
 	[prefsDict setValue:customItems forKey:@"CustomItems"];
 	[prefsDict writeToFile:PREFERENCES_FILE atomically:NO];
+	[fileClassController reloadSpecifiers];
 }
 
 - (void)postinit {
@@ -140,6 +141,11 @@ static id fileClassController = nil;
 			[self loadExtraItemsAtIndex:mimIdx extensions:NO];
 		}
 		self.title = _isNewType ? @"New File Type" : _name;
+	}
+	if(_isNewType) {
+		// remove the delete button and its group if we're a new type.
+		[self removeLastSpecifier];
+		[self removeLastSpecifier];
 	}
 	return _specifiers;
 }
@@ -288,7 +294,7 @@ static id fileClassController = nil;
 
 @implementation SDSettingsFileClassListController : PSListController
 - (void)viewWillRedisplay {
-	[self reloadSpecifiers]; return;
+	[self reloadSpecifiers];
 }
 
 - (id)initForContentSize:(CGSize)size {
