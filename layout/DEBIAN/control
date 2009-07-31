@@ -1,9 +1,11 @@
-Package: net.howett.downloader
+Package: net.howett.safaridownloader
 Name: Downloader
 Depends: mobilesubstrate, preferenceloader
-Version: 0.0.1
+Conflicts: net.howett.downloader
+Replaces: net.howett.downloader
+Version: 0.0.2
 Architecture: iphoneos-arm
-Description: 
+Description: Add a full Download Manager to Mobile Safari.
 Maintainer: Dustin Howett <dustin@howett.net>
 Author: Dustin Howett <dustin@howett.net>
 Section: Tweaks

@@ -1,6 +1,6 @@
 {
     CFBundleDevelopmentRegion = English;
-    CFBundleIdentifier = net.howett.downloader;
+    CFBundleIdentifier = net.howett.safaridownloader;
     CFBundleInfoDictionaryVersion = 6.0;
     CFBundlePackageType = BNDL;
     CFBundleShortVersionString = 1.0;
