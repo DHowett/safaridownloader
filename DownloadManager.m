@@ -96,8 +96,8 @@ static id resourceBundle = nil;
   _extensions = [[NSMutableSet alloc] init];
   _classMappings = [[NSMutableDictionary alloc] init];
 
-  BOOL enabled = [[userPrefs objectForKey:@"Enabled"] boolValue];
-  if(!enabled) return;
+  BOOL disabled = [[userPrefs objectForKey:@"Disabled"] boolValue];
+  if(disabled) return;
 
   for(NSDictionary *fileClassName in globalFileTypes) {
     NSDictionary *fileClass = [globalFileTypes objectForKey:fileClassName];

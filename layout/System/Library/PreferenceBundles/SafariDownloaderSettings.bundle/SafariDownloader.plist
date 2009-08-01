@@ -13,7 +13,8 @@
 	    <key>label</key>
 	    <string>Download Files</string>
 	    <key>key</key>
-	    <string>Enabled</string>
+	    <string>Disabled</string>
+	    <key>negate</key><true/>
 	</dict>
 	<dict>
 	    <key>cell</key>
