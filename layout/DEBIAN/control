@@ -3,11 +3,10 @@ Name: Safari Download Manager
 Depends: mobilesubstrate, preferenceloader
 Conflicts: net.howett.downloader
 Replaces: net.howett.downloader
-Version: 0.0.2
+Version: 0.0.3
 Architecture: iphoneos-arm
 Description: A full Download Manager for Mobile Safari.
 Maintainer: Dustin Howett <dustin@howett.net>
 Author: Dustin Howett <dustin@howett.net>
 Section: Tweaks
-Depiction: http://192.168.1.1/~dustin/depict/menes/sd.html
 tag: cydia::commercial

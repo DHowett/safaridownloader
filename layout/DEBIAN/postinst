@@ -1,4 +1,5 @@
 #!/bin/bash
 if [[ ! -f /var/mobile/Library/Preferences/net.howett.safaridownloader.plist ]]; then
 	cp "/Library/Application Support/Safari Downloader/DefaultPrefs.plist" /var/mobile/Library/Preferences/net.howett.safaridownloader.plist
+	chown mobile.mobile /var/mobile/Library/Preferences/net.howett.safaridownloader.plist
 fi
