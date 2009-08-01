@@ -21,11 +21,12 @@
 - (void)allowRotations:(BOOL)allow;
 @end
 
-@interface DownloadManager : UITableViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate> {
+@interface DownloadManager : UITableViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate> {
   UITableView*      _tableView;
   NSMutableSet*     _mimeTypes;
   NSMutableSet*     _extensions;
   NSMutableDictionary* _classMappings;
+  NSMutableDictionary* _launchActions;
   NSMutableArray*   _currentDownloads;
   NSMutableArray*   _finishedDownloads;
   NSOperationQueue* _downloadQueue;

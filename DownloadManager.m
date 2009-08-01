@@ -54,6 +54,7 @@ static BOOL doRot = YES;
 #pragma mark Singleton Methods/*{{{*/
 static id sharedManager = nil;
 static id resourceBundle = nil;
+static SafariDownload *curDownload = nil;
 
 + (void)initialize  {
   if (self == [DownloadManager class])
@@ -125,6 +126,12 @@ static id resourceBundle = nil;
   [_extensions removeObjectsInArray:[disableShit objectForKey:@"DisabledExtensions"]];
   NSLog(@"%@", _extensions);
   */
+  NSFileManager *fm = [NSFileManager defaultManager];
+  if(_launchActions) [_launchActions release];
+  _launchActions = [[NSMutableDictionary alloc] init];
+  if([fm fileExistsAtPath:@"/Applications/iFile.app"]) {
+    [_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
+  }
   return;
 }
 
@@ -646,6 +653,24 @@ static int animationType = 0;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+  [tableView deselectRowAtIndexPath:indexPath animated:YES];
+  if(tableView.numberOfSections == 1 || indexPath.section == 1) {
+    curDownload = [_finishedDownloads objectAtIndex:indexPath.row];
+    UIActionSheet *launch = [[UIActionSheet alloc] initWithTitle:curDownload.filename
+                                                        delegate:self
+                                               cancelButtonTitle:nil
+                                          destructiveButtonTitle:nil
+                                               otherButtonTitles:nil];
+    for(NSString *title in _launchActions) {
+      [launch addButtonWithTitle:title];
+    }
+    if(_launchActions.count == 0) {
+      [launch setMessage:@"Nothing to do!"];
+    }
+    launch.cancelButtonIndex = [launch addButtonWithTitle:@"Cancel"];
+    [launch showInView:[[objc_getClass("BrowserController") sharedBrowserController] window]];
+    [launch release];
+  }
   // Navigation logic may go here. Create and push another view controller.
 	// AnotherViewController *anotherViewController = [[AnotherViewController alloc] initWithNibName:@"AnotherView" bundle:nil];
 	// [self.navigationController pushViewController:anotherViewController];
@@ -677,6 +702,17 @@ static int animationType = 0;
   }
 }
 /*}}}*/
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+  NSString *button = [actionSheet buttonTitleAtIndex:buttonIndex];
+  NSString *action = [_launchActions objectForKey:button];
+  if(action) {
+    Class Application = objc_getClass("Application");
+    NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
+    [[Application sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", action, path]]];
+  }
+  curDownload = nil;
+}
 
 - (void)setPortraitDownloadButton:(id)portraitButton {
   _portraitDownloadButton = portraitButton;
