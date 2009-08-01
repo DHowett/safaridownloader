@@ -43,11 +43,6 @@
 		application/zip
 	    );
 	};
-	"application/x-msdownload" = {
-	    Mimetypes = (
-		"application/x-msdownload"
-	    );
-	};
     };
     Documents = {
 	"Microsoft Office" = {
@@ -206,6 +201,11 @@
 		application/binary,
 		application/bin,
 		"application/octet-stream"
+	    );
+	};
+	"MS Download" = {
+	    Mimetypes = (
+		"application/x-msdownload"
 	    );
 	};
     };
