@@ -7,14 +7,16 @@
 	<dict>
 	    <key>cell</key>
 	    <string>PSSwitchCell</string>
+	    <key>default</key>
+	    <true/>
 	    <key>defaults</key>
 	    <string>net.howett.safaridownloader</string>
-	    <key>default</key><true/>
-	    <key>label</key>
-	    <string>Download Files</string>
 	    <key>key</key>
 	    <string>Disabled</string>
-	    <key>negate</key><true/>
+	    <key>label</key>
+	    <string>Download Files</string>
+	    <key>negate</key>
+	    <true/>
 	</dict>
 	<dict>
 	    <key>cell</key>
@@ -28,26 +30,28 @@
 	    <key>label</key>
 	    <string>File Types</string>
 	</dict>
-	<!--	<dict>
+	<dict>
 	    <key>cell</key>
-	    <string>PSLinkCell</string>
-	    <key>detail</key>
-	    <string>SDSettingsFiletypeListController</string>
-	    <key>label</key>
-	    <string>Custom</string>
-	    <key>type</key>
-	    <string>0</string>
-    </dict>-->
-	<!--	<dict>
+	    <string>PSGroupCell</string>
+	    <key>isStaticText</key>
+	    <true/>
+	</dict>
+	<dict>
+	    <key>alignment</key>
+	    <integer>2</integer>
 	    <key>cell</key>
-	    <string>PSLinkCell</string>
-	    <key>detail</key>
-	    <string>SDSettingsFiletypeListController</string>
+	    <string>PSStaticTextCell</string>
 	    <key>label</key>
-	    <string>Custom</string>
-	    <key>type</key>
-	    <string>1</string>
-    </dict>-->
+	    <string>© 2009</string>
+	</dict>
+	<dict>
+	    <key>alignment</key>
+	    <integer>2</integer>
+	    <key>cell</key>
+	    <string>PSStaticTextCell</string>
+	    <key>label</key>
+	    <string>Youssef Francis and Dustin Howett</string>
+	</dict>
     </array>
     <key>title</key>
     <string>Safari Downloader</string>
