@@ -130,7 +130,10 @@ static SafariDownload *curDownload = nil;
   if(_launchActions) [_launchActions release];
   _launchActions = [[NSMutableDictionary alloc] init];
   if([fm fileExistsAtPath:@"/Applications/iFile.app"]) {
-    [_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
+    NSDictionary *iFile = [NSDictionary dictionaryWithContentsOfFile:@"/Applications/iFile.app/Info.plist"];
+    NSString *iFileVersion = [iFile objectForKey:@"CFBundleVersion"];
+    if(![iFileVersion isEqualToString:@"1.0.0"])
+      [_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
   }
   return;
 }
