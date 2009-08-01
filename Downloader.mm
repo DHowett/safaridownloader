@@ -1,4 +1,3 @@
-#error you fat FAT U FAT
 #include "substrate.h"
 #import <objc/runtime.h>
 #import "Safari/BrowserController.h"
