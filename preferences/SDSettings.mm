@@ -95,7 +95,8 @@ static id fileClassController = nil;
 		finalExt = [self getTextFromSpecifier:_newExtSpec];
 		finalMime = [self getTextFromSpecifier:_newMimeSpec];
 		if(finalExt) [_extensions addObject:finalExt];
-		if(finalMime) [_extensions addObject:finalMime];
+		if(finalMime) [_mimetypes addObject:finalMime];
+		//[self setNewItem:finalExt forSpecifier:_newExtSpec]; and mime
 
 		[_customEntry setValue:_extensions forKey:@"Extensions"];
 		[_customEntry setValue:_mimetypes forKey:@"Mimetypes"];
@@ -130,10 +131,9 @@ static id fileClassController = nil;
 	}
 }
 
-- (void)loadExtraItemsAtIndex:(int)index extensions:(BOOL)extensions {
-	NSMutableArray *workArray = extensions ? _extensions : _mimetypes;
-	for(NSString *item in workArray) {
-		[self insertSpecifier:[self newExtraItemSpecifierWithContents:item isExtension:extensions] atIndex:index];
+- (void)loadExtraItemsAtIndex:(int)index fromArray:(NSArray *)array {
+	for(NSString *item in array) {
+		[self insertSpecifier:[self newExtraItemSpecifierWithContents:item isExtension:(array == _extensions)] atIndex:index];
 	}
 }
 
@@ -145,11 +145,14 @@ static id fileClassController = nil;
 		_nameSpec = [self specifierForID:@"name"];
 		_newExtSpec = [self specifierForID:@"newExt"];
 		_newMimeSpec = [self specifierForID:@"newMime"];
-		extIdx = [self indexOfSpecifier:_newExtSpec];
-		mimIdx = [self indexOfSpecifier:_newMimeSpec];
 		if(!_isNewType) {
-			[self loadExtraItemsAtIndex:extIdx extensions:YES];
-			[self loadExtraItemsAtIndex:mimIdx extensions:NO];
+			extIdx = [self indexOfSpecifier:_newExtSpec];
+			NSLog(@"%@", _extensions);
+			[self loadExtraItemsAtIndex:extIdx fromArray:_extensions];
+
+			mimIdx = [self indexOfSpecifier:_newMimeSpec];
+			NSLog(@"%@", _mimetypes);
+			[self loadExtraItemsAtIndex:mimIdx fromArray:_mimetypes];
 		}
 		self.title = _isNewType ? @"New File Type" : _name;
 	}
