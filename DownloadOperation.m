@@ -60,8 +60,8 @@
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename
 {
 //  NSLog(@"FILENAME SUGGESTED: %@", filename);
-  [download setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", filename] allowOverwrite:YES];
-  [_delegate setFilename:filename];
+//  [download setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", filename] allowOverwrite:YES];
+//  [_delegate setFilename:filename];
 }
 
 - (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)resp
@@ -136,7 +136,7 @@
 //    NSLog(@"Restarting download from scratch - 114!");
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
-//    [_downloader setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]] allowOverwrite:YES];
+    [_downloader setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]] allowOverwrite:YES];
     _start = [NSDate timeIntervalSinceReferenceDate];
     _bytes = 0.0;
   }
