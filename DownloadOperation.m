@@ -25,10 +25,13 @@
 
 - (void)progressHeartbeat:(NSTimer*)timer
 {
+
+  NSLog(@"Heartbeat firing, _keepalive %d _response %d", _keepAlive, _response);
   if (_keepAlive && _response) {
     long long expectedLength = [_response expectedContentLength];
     float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
     float percentComplete=(float)(_bytes/expectedLength);
+    NSLog(@"HOLY CRAP. HEARTBEAT FIRING. PROGRESS: %f", _bytes);
     [_delegate setProgress:percentComplete speed:avspd];
   }
   else if (!_keepAlive)
@@ -79,7 +82,7 @@
   _keepAlive = YES;
   _bytes += length;
   float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
-  if (avspd > 300) { // throttle
+  if (avspd > 300 && avspd < 2048) { // throttle
     NSUInteger sleepTime = 500000*((avspd-300)/1000);
     usleep(sleepTime);
   }
