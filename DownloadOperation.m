@@ -149,7 +149,6 @@
 
 - (BOOL)resumeDownload
 {
-  return NO;
   NSString *resumeDataPath = [NSString stringWithFormat:@"/var/mobile/Library/Downloads/partial/%@", [_delegate filename]];
   NSString *outputPath = [NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]];
   
