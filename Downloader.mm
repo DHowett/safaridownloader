@@ -220,7 +220,8 @@ static SDActionType _actionType = SDActionTypeView;
     NSString *filename = [[[[request URL] absoluteString] lastPathComponent] 
                           stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     
-    NSString *other = [objc_getClass("WebView") canShowMIMEType:mimeType] ? @"View" : nil;
+    //NSString *other = [objc_getClass("WebView") canShowMIMEType:mimeType] ? @"View" : nil;
+    NSString *other = @"View";
     
     [ModalAlert showActionSheetWithTitle:@"What would you like to do?"
                                  message:filename
@@ -271,7 +272,47 @@ static SDActionType _actionType = SDActionTypeView;
          request:(NSURLRequest *)request 
     newFrameName:(NSString *)name 
 decisionListener:(id<WebPolicyDecisionListener>)listener {
-  [listener use];
+  NSString *url = [[request URL] absoluteString];
+  
+  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"]) {
+    NSLog(@"not a valid http url, continue.");
+    [originalDelegate webView:sender decidePolicyForNewWindowAction:action
+                      request:request
+                 newFrameName:name
+             decisionListener:listener];
+    return;
+  }
+  
+  if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:nil]) {
+    NSString *filename = [[[[request URL] absoluteString] lastPathComponent] 
+                          stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
+    NSString *other = @"View";
+    
+    [ModalAlert showActionSheetWithTitle:@"What would you like to do?"
+                                 message:filename
+                            cancelButton:@"Cancel"
+                             destructive:@"Download"
+                                   other:other
+                                delegate:self];
+    
+    if (_actionType == SDActionTypeView) {      
+      [originalDelegate webView:sender decidePolicyForNewWindowAction:action
+                        request:request
+                   newFrameName:name
+               decisionListener:listener];
+    } else if (_actionType == SDActionTypeDownload) {
+      [listener ignore];
+      if ([[DownloadManager sharedManager] addDownloadWithRequest:request])
+        NSLog(@"successfully added download");
+      else
+        NSLog(@"add download failed");
+    } else {
+      [listener ignore]; 
+    }
+  } else {
+    [listener use]; 
+  }  
 }
 
 - (void) webView:(WebView *)webView decidePolicyForMIMEType:(NSString *)type 
