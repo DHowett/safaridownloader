@@ -1,12 +1,17 @@
 Package: net.howett.safaridownloader
 Name: Safari Download Manager
+Pre-Depends: firmware (>= 3.0)
 Depends: mobilesubstrate, preferenceloader
 Conflicts: net.howett.downloader
 Replaces: net.howett.downloader
-Version: 0.0.3
+Version: 1.0.0
 Architecture: iphoneos-arm
 Description: A full Download Manager for Mobile Safari.
 Maintainer: Dustin Howett <dustin@howett.net>
 Author: Dustin Howett <dustin@howett.net>
 Section: Tweaks
+Depiction: http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=safaridownloaderData
+Homepage: http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=safaridownloaderData
+Sponsor: thebigboss.org <http://thebigboss.org>
+dev: dustinhowett
 tag: cydia::commercial
