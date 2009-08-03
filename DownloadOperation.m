@@ -25,11 +25,22 @@
 
 - (void)progressHeartbeat:(NSTimer*)timer
 {
-  NSLog(@"Heartbeat firing, _keepalive %d _response %d", _keepAlive, _response);
-  if (_keepAlive && _response) {
+  NSLog(@"Heartbeat firing, _keepalive %d _response %@", _keepAlive, _response);
+  if (_keepAlive && _response && !_noUpdate) {
     long long expectedLength = [_response expectedContentLength];
     float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
     float percentComplete=(float)(_bytes/expectedLength);
+    
+#if 0
+    if (percentComplete > 0.2) {
+      NSLog(@"SIMULATING FAILURE!!");
+      [_downloader cancel];
+      [_timer invalidate];
+      _timer = nil;
+      [self download:_downloader didFailWithError:nil];
+    }
+#endif
+    
     NSLog(@"HOLY CRAP. HEARTBEAT FIRING. PROGRESS: %f", _bytes);
     [_delegate setProgress:percentComplete speed:avspd];
   }
@@ -82,9 +93,10 @@
 {
   _keepAlive = YES;
   _bytes += length;
+  
   float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
   if (avspd > 300 && avspd < 2048) { // throttle
-    NSUInteger sleepTime = 500000*((avspd-300)/1000);
+    NSUInteger sleepTime = 50000*((avspd-300)/1000);
     usleep(sleepTime);
   }
 }
@@ -138,6 +150,9 @@
 
 fail:
   NSLog(@"we have failed!");
+  _noUpdate = YES;
+  [_timer invalidate];
+  _timer = nil;
   _keepAlive = NO;
   [_delegate downloadFailedWithError:error];
 }
@@ -231,6 +246,7 @@ fail:
 
 - (void)cancelDownload
 {
+  _noUpdate = YES;
   [_downloader cancel];
   [self storeResumeData];
   _keepAlive = NO;

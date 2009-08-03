@@ -456,7 +456,7 @@ static SafariDownload *curDownload = nil;
 
 - (void)downloadDidFinish:(SafariDownload*)download
 {
-//  NSLog(@"downloadDidFinish");
+  NSLog(@"downloadDidFinish");
   DownloadCell* cell = [self cellForDownload:download];
   if (cell == nil) {
     return;
@@ -503,8 +503,34 @@ static SafariDownload *curDownload = nil;
 
 - (void)downloadDidFail:(SafariDownload*)download
 {
-  DownloadCell *cell = [self cellForDownload:download];
+  NSLog(@"downloadDidFail");
+  DownloadCell* cell = [self cellForDownload:download];
+  if (cell == nil) {
+    return;
+  }
+  
   cell.progressLabel = @"Download Failed";
+  NSUInteger row = [_currentDownloads indexOfObject:download];
+  [_currentDownloads removeObject:download];
+  
+  if (_currentDownloads.count == 0) {
+    [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+  } else {
+    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
+                      withRowAnimation:UITableViewRowAnimationFade];
+  }
+  
+  [_finishedDownloads addObject:download];
+  
+  if (_currentDownloads.count > 0) {
+    [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_finishedDownloads.count-1 inSection:1]]
+                      withRowAnimation:UITableViewRowAnimationFade];
+  } else {
+    [_tableView reloadData];
+  }
+  
+  [self updateBadges];
+  [self saveData];  
 }
 
 #pragma mark -/*}}}*/
@@ -668,11 +694,17 @@ static int animationType = 0;
   cell.icon = [self iconForExtension:[download.filename pathExtension]];
 	cell.nameLabel = download.filename;
   cell.sizeLabel = download.sizeString;
-  if(!finished) {
+  if(!finished && !download.failed) {
     cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
     cell.progressView.progress = download.progress;
-  } else {
-    cell.progressLabel = @"Download Complete";
+  } 
+  else {
+    if (download.failed) {
+      cell.progressLabel = @"Download Failed";
+    }
+    else {
+      cell.progressLabel = @"Download Complete";
+    }
   }
   
   return cell;
