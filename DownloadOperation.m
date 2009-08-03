@@ -28,6 +28,7 @@
   NSLog(@"Heartbeat firing, _keepalive %d _response %@", _keepAlive, _response);
   if (_keepAlive && _response && !_noUpdate) {
     long long expectedLength = [_response expectedContentLength];
+    if(_wasResumed) expectedLength += _resumedFrom;
     float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
     float percentComplete=(float)(_bytes/expectedLength);
     
@@ -73,8 +74,9 @@
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename
 {
   NSLog(@"FILENAME SUGGESTED: %@", filename);
+  if (_wasResumed) return;
   if ([_delegate useSuggest] || [_delegate filename] == nil) {
-    [download setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", filename] allowOverwrite:NO];
+    [download setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", filename] allowOverwrite:YES];
   }
   [_delegate setFilename:filename];
 }
@@ -93,6 +95,7 @@
 {
   _keepAlive = YES;
   _bytes += length;
+  NSLog(@"didReceiveDataOfLength: %llu, _bytes now = %f", length, _bytes);
   
   float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
   if (avspd > 300 && avspd < 2048) { // throttle
@@ -103,12 +106,17 @@
 
 - (void)download:(NSURLDownload *)download willResumeWithResponse:(NSURLResponse *)resp fromByte:(long long)startingByte;
 {
-  NSLog(@"willResumeWithResponse: %@ fromByte: %ll", resp, startingByte);
+  NSLog(@"willResumeWithResponse: %@ fromByte: %llu", resp, startingByte);
   _keepAlive = YES;
 	long long expectedContentLength = [resp expectedContentLength];
   [_delegate setSize:expectedContentLength + startingByte];
 	_start = [NSDate timeIntervalSinceReferenceDate];
   [self setDownloadResponse:resp];
+  if(startingByte > 0) { // If we're actually resuming at all...
+    _bytes = startingByte;
+    _resumedFrom = startingByte;
+    _wasResumed = YES;
+  }
 }
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error
@@ -170,9 +178,18 @@ fail:
   return NO;
 }
 
+- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path {
+  NSString *curFn = [_delegate filename];
+  NSString *newFn = [path lastPathComponent];
+  NSLog(@"didCreateDestination:%@", path);
+  if(![newFn isEqualToString:curFn]) [_delegate setFilename:newFn];
+  return;
+}
+
 - (BOOL)beginDownload
 {
-  if ([self resumeDownload] == YES)
+  BOOL resumeResult = [self resumeDownload];
+  if (resumeResult)
     return YES;
   
   [self deleteDownload];
@@ -190,7 +207,7 @@ fail:
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
     if (![_delegate useSuggest] && [_delegate filename] != nil) {
-      [_downloader setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]] allowOverwrite:NO];
+      [_downloader setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]] allowOverwrite:YES];
     }
     _start = [NSDate timeIntervalSinceReferenceDate];
     _bytes = 0.0;
@@ -232,7 +249,6 @@ fail:
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
     _start = [NSDate timeIntervalSinceReferenceDate];
-    _bytes =[resumeData length]; 
   }
   
   return YES;

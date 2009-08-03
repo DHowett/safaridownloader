@@ -24,6 +24,8 @@
   NSTimer*       _timer;
   int            _retryCount;
   BOOL           _noUpdate;
+  BOOL		 _wasResumed;
+  long long	 _resumedFrom;
 }
 
 @property (assign) id<DownloadOperationDelegate> delegate;
