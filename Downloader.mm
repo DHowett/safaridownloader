@@ -213,7 +213,20 @@ static SDActionType _actionType = SDActionTypeView;
   }
   else
   {
-    [listener use]; 
+    if (action) 
+    {
+      [originalDelegate webView:webView decidePolicyForNavigationAction:action
+                        request:request
+                          frame:frame
+               decisionListener:listener];
+    }
+    else
+    {
+      [originalDelegate webView:webView decidePolicyForMIMEType:mimeType
+                        request:request
+                          frame:frame
+               decisionListener:listener];
+    }
   }  
 }
 ///////////////////////////////////////////////////
