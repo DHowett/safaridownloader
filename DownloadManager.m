@@ -691,6 +691,7 @@ static int animationType = 0;
   
   // Set up the cell...
   cell.finished = finished;
+  cell.failed = download.failed;
   cell.icon = [self iconForExtension:[download.filename pathExtension]];
 	cell.nameLabel = download.filename;
   cell.sizeLabel = download.sizeString;
@@ -723,13 +724,13 @@ static int animationType = 0;
     UIActionSheet *launch = [[UIActionSheet alloc] initWithTitle:curDownload.filename
                                                         delegate:self
                                                cancelButtonTitle:nil
-                                          destructiveButtonTitle:nil
+                                          destructiveButtonTitle:@"Delete"
                                                otherButtonTitles:nil];
-    for(NSString *title in _launchActions) {
-      [launch addButtonWithTitle:title];
-    }
-    if(_launchActions.count == 0) {
-      [launch setMessage:@"Nothing to do!"];
+    if(curDownload.failed) [launch addButtonWithTitle:@"Retry"];
+    else {
+      for(NSString *title in _launchActions) {
+        [launch addButtonWithTitle:title];
+      }
     }
     launch.cancelButtonIndex = [launch addButtonWithTitle:@"Cancel"];
     [launch showInView:[[objc_getClass("BrowserController") sharedBrowserController] window]];
@@ -770,7 +771,23 @@ static int animationType = 0;
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
   NSString *button = [actionSheet buttonTitleAtIndex:buttonIndex];
   NSString *action = [_launchActions objectForKey:button];
-  if(action) {
+  if([button isEqualToString:@"Delete"]) {
+    NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
+    int row = [_finishedDownloads indexOfObject:curDownload];
+    int section = (_currentDownloads.count > 0) ? 1 : 0;
+
+    [_finishedDownloads removeObjectAtIndex:row];
+    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
+    [[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
+  } else if([button isEqualToString:@"Retry"]) {
+    int row = [_finishedDownloads indexOfObject:curDownload];
+    int section = (_currentDownloads.count > 0) ? 1 : 0;
+    [_finishedDownloads removeObjectAtIndex:row];
+    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
+    curDownload.failed = NO;
+    curDownload.useSuggest = NO;
+    [self addDownload:curDownload];
+  } else if(action) {
     Class Application = objc_getClass("Application");
     NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
     [[Application sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", action, path]]];
