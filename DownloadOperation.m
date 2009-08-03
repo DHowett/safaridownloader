@@ -1,54 +1,29 @@
+#import "DHHookCommon.h"
+#import "DownloadManager.h"
 #import "DownloadOperation.h"
 #import "NSURLDownload.h"
 #import "ModalAlert.h"
 #import "WebUI/WebUI.h"
-#import "Safari/BrowserController.h"
 
 #ifndef DEBUG
 #define NSLog(...)
 #endif
-
-//static DownloadOperation* _currentOp = nil;
-//@class BrowserController;
-//HOOK(BrowserController, logInFromAuthenticationView$withCredential$, void, id view, NSURLCredential* credential) {
-//  NSLog(@"logInFromAuthenticationView");
-//  if (_currentOp == nil || ![_currentOp requiresAuth]) {
-//    NSLog(@"using default authentication");
-//    CALL_ORIG(BrowserController, logInFromAuthenticationView$withCredential$, view, credential);
-//  }
-//  else {
-//    NSLog(@"using our authentication with credential: %@", credential);
-//    [_currentOp setCredential:credential];
-//  }
-//}
 
 @interface DownloadOperation (extra)
 AuthenticationView* _authenticationView;
 @end
 
 @implementation MyAuthenticationView
+@synthesize savedChallenge;
 
-- (void)didShowBrowserPanel {
-  NSLog(@"didShowBrowserPanel!!");
-  
-  //  NSLog(@"navbar subviews: %@", [navBar subviews]);
-  //  
-  //  UIView* rightView = nil, * leftView = nil;
-  //  object_getInstanceVariable(navBar, "_rightView", (void**)&rightView);
-  //  object_getInstanceVariable(navBar, "_leftView", (void**)&leftView);
-  //  
-  //  NSLog(@"item rightBarButtonItem: %@", rightView);
-  //  NSLog(@"item leftBarButtonItem: %@", leftView);
-  //  
-  //  [leftView retain]; [rightView retain];
-  //  [leftView removeFromSuperview];
-  //  [rightView removeFromSuperview];
-  //  
-  //  [navBar addSubview:rightView];
-  //  [navBar addSubview:leftView];
-  //  
-  //  NSLog(@"navbar NEW subviews: %@", [navBar subviews]);
-  
+- (void)_logIn {  
+  if (!_challenge) {
+    _challenge = savedChallenge;
+  }
+  [super _logIn];
+}
+
+- (void)didShowBrowserPanel {  
   UINavigationBar* navBar = nil;
   object_getInstanceVariable(self, "_navigationBar", (void**)&navBar);
   
@@ -60,11 +35,9 @@ AuthenticationView* _authenticationView;
   navItem.leftBarButtonItem = cancelItem;
   [navBar popNavigationItemAnimated:NO];
   [navBar pushNavigationItem:navItem animated:NO];
-  
 }
 
 @end
-
 
 @implementation DownloadOperation
 @synthesize delegate = _delegate;
@@ -113,14 +86,36 @@ AuthenticationView* _authenticationView;
   }
 }
 
+static id savedPanel = nil;
+
 -(void)cancelFromAuthenticationView:(id)authenticationView {
   [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];
+    
+  if (savedPanel == [[DownloadManager sharedManager] browserPanel]) {
+    [[objc_getClass("BrowserController") sharedBrowserController] _setBrowserPanel:savedPanel];
+    NSLog(@"download manager is down!!!");
+    [[DownloadManager sharedManager] view].alpha = 1;
+  }
+  
+  [savedPanel release];
+  savedPanel = nil;
+  
   _requiresAuthentication = NO;
 }
 
 -(void)logInFromAuthenticationView:(id)authenticationView withCredential:(id)credential {
   [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];
   [self setCredential:credential];
+    
+  if (savedPanel == [[DownloadManager sharedManager] browserPanel]) {
+    [[objc_getClass("BrowserController") sharedBrowserController] _setBrowserPanel:savedPanel];
+    NSLog(@"download manager is down!!!");
+    [[DownloadManager sharedManager] view].alpha = 1;
+  }
+  
+  [savedPanel release];
+  savedPanel = nil;
+  
   _requiresAuthentication = NO;
 }
 
@@ -137,16 +132,19 @@ AuthenticationView* _authenticationView;
 }
 
 - (void)showAuthenticationChallenge:(NSURLAuthenticationChallenge*)challenge {
-  //-(void)logInFromAuthenticationView:(id)authenticationView withCredential:(id)credential
-  //  GET_CLASS(BrowserController);
-  //  HOOK_MESSAGE_F(BrowserController, logInFromAuthenticationView:withCredential:, logInFromAuthenticationView$withCredential$);
-  //  [ModalAlert showAuthViewWithChallenge:challenge];
-  //  _authDict = [[ModalAlert showAuthAlertViewWithTitle:[_delegate filename]
-  //                                             message:@"Please enter your credentials"
-  //                                        cancelButton:@"Cancel"
-  //                                            okButton:@"OK"
-  //                                            delegate:self] retain];
+  
+  savedPanel = [[[objc_getClass("BrowserController") sharedBrowserController] browserPanel] retain];
+  
+  if (savedPanel == [[DownloadManager sharedManager] browserPanel]) {
+    NSLog(@"download manager is up!!!");
+    [[DownloadManager sharedManager] view].alpha = 0;
+    [[objc_getClass("BrowserController") sharedBrowserController] _setBrowserPanel:nil];
+  }
+  
   [[objc_getClass("BrowserController") sharedBrowserController] showBrowserPanelType:88];
+  [[objc_getClass("BrowserController") sharedBrowserController] _setBrowserPanel:_authenticationView];
+  NSLog(@"setting challenge: %@", challenge);
+  [_authenticationView setSavedChallenge:challenge];
   [_authenticationView setChallenge:challenge];
   [_authenticationView layoutSubviews];
   [_authenticationView setNeedsDisplay];
@@ -170,9 +168,8 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
   _requiresAuthentication = YES;
   _authenticationView = [[MyAuthenticationView alloc] initWithDelegate:self];
   NSLog(@"checking authview challenge: %@", [_authenticationView challenge]);
-  
   [self performSelectorOnMainThread:@selector(showAuthenticationChallenge:) 
-                         withObject:challenge 
+                         withObject:challenge
                       waitUntilDone:YES];
   
   while (_authCredential == nil && _requiresAuthentication) {

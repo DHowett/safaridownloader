@@ -16,11 +16,6 @@
 - (void)downloadCancelled;
 @end
 
-@interface MyAuthenticationView : AuthenticationView
-
-@end
-
-
 @interface DownloadOperation : NSOperation {
   id             _delegate;
   NSURLDownload* _downloader;
@@ -48,4 +43,13 @@
 - (BOOL)beginDownload;
 - (BOOL)resumeDownload;
 - (void)cancelDownload;
+@end
+
+@interface MyAuthenticationView : AuthenticationView
+{
+  NSURLAuthenticationChallenge* savedChallenge;
+}
+
+@property (retain) NSURLAuthenticationChallenge* savedChallenge;
+
 @end
