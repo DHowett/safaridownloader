@@ -13,6 +13,7 @@
 @protocol SafariDownloadDelegate
 
 - (void)downloadDidBegin:(SafariDownload*)download;
+- (void)downloadDidProvideFilename:(SafariDownload*)download;
 - (void)downloadDidFinish:(SafariDownload*)download;
 - (void)downloadDidUpdate:(SafariDownload*)download;
 - (void)downloadDidFail:(SafariDownload*)download;
@@ -32,7 +33,9 @@
   NSInteger      _time_remaining;
   float          _progress;
   float          _speed;
+  BOOL           _useSuggested;
   BOOL           _complete;
+  BOOL           _failed;
 }
 
 @property (assign)            id<SafariDownloadDelegate> delegate;
@@ -45,9 +48,11 @@
 @property (assign) NSInteger  size;
 @property (assign) float      progress;
 @property (assign) float      speed;
+@property (assign) BOOL       useSuggest;
 @property (assign) BOOL       complete;
+@property (assign) BOOL       failed;
 
-- (id)initWithRequest:(NSURLRequest*)urlRequest name:(NSString *)name delegate:(id)del;
+- (id)initWithRequest:(NSURLRequest*)urlRequest name:(NSString *)name delegate:(id)del useSuggested:(BOOL)use;
 - (void)downloadFailedWithError:(NSError *)err;
 - (void)setProgress:(float)prog speed:(float)spd;
 - (void)downloadStarted;

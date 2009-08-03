@@ -22,6 +22,7 @@
   BOOL           _keepAlive;
   float          _bytes;
   NSTimer*       _timer;
+  int            _retryCount;
 }
 
 @property (assign) id<DownloadOperationDelegate> delegate;

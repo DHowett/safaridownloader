@@ -16,7 +16,7 @@
 }
 
 - (void)dealloc {
-//  NSLog(@"OPERATION DEALLOC!");
+  NSLog(@"OPERATION DEALLOC!");
   _delegate = nil;
   [_downloader release];
   [_response release];
@@ -53,7 +53,7 @@
 - (void)downloadDidBegin:(NSURLDownload *)download
 {
   _keepAlive = YES;
-//  NSLog(@"download started!"); 
+  NSLog(@"download started!"); 
   _start = [NSDate timeIntervalSinceReferenceDate]; 
   [_delegate downloadStarted];
   _timer = [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(progressHeartbeat:) userInfo:nil repeats:YES];
@@ -71,7 +71,7 @@
 - (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)resp
 {
   _keepAlive = YES;
-//  NSLog(@"Received response: %@", resp);
+  NSLog(@"Received response: %@", resp);
 	long long expectedContentLength = [resp expectedContentLength];
   [_delegate setSize:expectedContentLength];
 	_start = [NSDate timeIntervalSinceReferenceDate];
@@ -91,7 +91,7 @@
 
 - (void)download:(NSURLDownload *)download willResumeWithResponse:(NSURLResponse *)resp fromByte:(long long)startingByte;
 {
-//  NSLog(@"willResumeWithResponse: %@ fromByte: %ll", resp, startingByte);
+  NSLog(@"willResumeWithResponse: %@ fromByte: %ll", resp, startingByte);
   _keepAlive = YES;
 	long long expectedContentLength = [resp expectedContentLength];
   [_delegate setSize:expectedContentLength + startingByte];
@@ -101,16 +101,50 @@
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error
 {
-//  NSLog(@"DL FAILED! %@", [error description]);
+  NSLog(@"didFailWithError: %@", error);
   [self storeResumeData];
+  NSInteger code = [error code];
+  if (_retryCount < 3
+      && code != NSURLErrorCancelled
+      && code != NSURLErrorBadURL
+      && code != NSURLErrorUnsupportedURL
+      && code != NSURLErrorDataLengthExceedsMaximum
+      && code != NSURLErrorHTTPTooManyRedirects
+      && code != NSURLErrorNotConnectedToInternet
+      && code != NSURLErrorUserCancelledAuthentication
+      && code != NSURLErrorUserAuthenticationRequired
+      && code != NSURLErrorZeroByteResource
+      && code != NSURLErrorNoPermissionsToReadFile
+      && code != NSURLErrorCannotCreateFile
+      && code != NSURLErrorCannotOpenFile
+      && code != NSURLErrorCannotWriteToFile
+      && code != NSURLErrorCannotCloseFile
+      && code != NSURLErrorCannotRemoveFile
+      && code != NSURLErrorCannotMoveFile)
+  {
+    NSLog(@"retry count is %d, resuming", _retryCount);
+    _retryCount++;
+    if ([self beginDownload] == NO) {
+      NSLog(@"download failed to begin, failing");
+      goto fail;
+    }
+    else {
+      NSLog(@"download began successfully");
+      return;
+    }
+  }
+  else
+    goto fail;
+
+fail:
+  NSLog(@"we have failed!");
   _keepAlive = NO;
-  _start = [NSDate timeIntervalSinceReferenceDate];
   [_delegate downloadFailedWithError:error];
 }
 
 - (void)downloadDidFinish:(NSURLDownload *)download
 {
-//  NSLog(@"DL FINISHED!");
+  NSLog(@"DL FINISHED!");
   _keepAlive = NO;
   _start = [NSDate timeIntervalSinceReferenceDate];
   [self deleteDownload];
@@ -137,7 +171,7 @@
     return NO;
   else
   {
-//    NSLog(@"Restarting download from scratch - 114!");
+    NSLog(@"Restarting download from scratch");
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
     if (![_delegate useSuggest] && [_delegate filename] != nil) {
@@ -160,26 +194,26 @@
   
   if ([[NSFileManager defaultManager] fileExistsAtPath:resumeDataPath] == NO)
   {
-//    NSLog(@"file not found");
+    NSLog(@"file not found");
     return NO;
   }
   
   NSData *resumeData = [NSData dataWithContentsOfFile:resumeDataPath];
   if (resumeData == nil || [resumeData length] == 0)
   {
-//    NSLog(@"data is nil");
+    NSLog(@"data is nil");
     return NO;
   }
   
   _downloader = [[NSURLDownload alloc] initWithResumeData:resumeData delegate:self path:outputPath];
   if (_downloader == nil)
   {
-//    NSLog(@"downloader is nil");
+    NSLog(@"downloader is nil");
     return NO;
   }
   else
   {
-//    NSLog(@"Resuming download - 172! from length: %u", [resumeData length]);
+    NSLog(@"Resuming download from length: %u", [resumeData length]);
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
     _start = [NSDate timeIntervalSinceReferenceDate];
@@ -205,10 +239,10 @@
 - (void)storeResumeData
 {
   NSData *data = [_downloader resumeData];
-//  NSLog(@"storing resume data with length: %u", [data length]);
+  NSLog(@"storing resume data with length: %u", [data length]);
   if (data != nil)
   {
-//    NSLog(@"storing resume data OK!");
+    NSLog(@"storing resume data OK!");
     NSString *path = [NSString stringWithFormat:@"/var/mobile/Library/Downloads/partial/%@", [_delegate filename]];
     [data writeToFile:path atomically:YES];
   }
@@ -216,7 +250,7 @@
 
 - (void)cancel
 {
-//  NSLog(@"Received Cancel!");
+  NSLog(@"Received Cancel!");
   [self cancelDownload];
   [_delegate downloadCancelled];
 }
@@ -229,14 +263,14 @@
     [_delegate downloadFailedWithError:nil];
     return;
   }
-//  NSLog(@"Starting runloop");
+  NSLog(@"Starting runloop");
   NSRunLoop *theRL = [NSRunLoop currentRunLoop];
   while (_keepAlive) {
     [theRL runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
   }
   [_timer invalidate];
   _timer = nil;
-//  NSLog(@"Terminating Runloop!");
+  NSLog(@"Terminating Runloop!");
 }
 
 @end

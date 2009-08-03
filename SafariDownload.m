@@ -20,12 +20,14 @@ size        = _size,
 progress    = _progress,
 time        = _time_remaining,
 speed       = _speed,
-complete    = _complete;
+useSuggest  = _useSuggested,
+complete    = _complete,
+failed      = _failed;
 
 - (id)initWithRequest:(NSURLRequest*)urlRequest 
                  name:(NSString *)name 
              delegate:(id)del
-{
+         useSuggested:(BOOL)use {
   if (self = [super init])
   {
     self.delegate   = del;
@@ -34,14 +36,13 @@ complete    = _complete;
     self.filename   = name;
     self.sizeString = @"N/A";
     self.timeString = @"Calculating remaining time...";
+    self.useSuggest = use;
   }
   return self;
 }
 
-- (id)initWithCoder:(NSCoder *)coder
-{
-  if (self = [super init])
-  {
+- (id)initWithCoder:(NSCoder *)coder {
+  if (self = [super init]) {
     self.urlReq     = [coder decodeObject];
     self.startDate  = [coder decodeObject];
     self.filename   = [coder decodeObject];
@@ -52,12 +53,13 @@ complete    = _complete;
     self.speed      = [coder decodeFloatForKey:@"speed"   ];
     self.size       = [coder decodeBoolForKey: @"size"    ];
     self.complete   = [coder decodeBoolForKey: @"complete"];
+    self.useSuggest = [coder decodeBoolForKey: @"suggest" ];
+    self.failed     = [coder decodeBoolForKey: @"failed"  ];
   }
   return self;
 }
 
--(void)encodeWithCoder:(NSCoder*)coder
-{
+-(void)encodeWithCoder:(NSCoder*)coder {
   [coder encodeObject: _urlRequest     ];
   [coder encodeObject: _startDate      ];
   [coder encodeObject: _filename       ];
@@ -68,6 +70,8 @@ complete    = _complete;
   [coder encodeFloat:  _speed          forKey:@"speed"   ];
   [coder encodeInt:    _size           forKey:@"size"    ];
   [coder encodeBool:   _complete       forKey:@"complete"];
+  [coder encodeBool:   _useSuggested   forKey:@"suggest" ];
+  [coder encodeBool:   _failed         forKey:@"failed"  ];
 }
 
 - (void)setSize:(NSInteger)length
@@ -79,6 +83,14 @@ complete    = _complete;
     rSize /= (double)1024;
   }
   self.sizeString = [NSString stringWithFormat:@"%.1lf%@B", rSize, ord];
+}
+
+- (void)setFilename:(NSString*)nam {
+  [_filename release];
+  _filename = [nam retain];
+  if (_filename != nil) {
+    [_delegate performSelectorOnMainThread:@selector(downloadDidProvideFilename:) withObject:self waitUntilDone:YES];
+  }
 }
 
 - (void)setProgress:(float)prog 
@@ -107,7 +119,8 @@ complete    = _complete;
 
 - (void)downloadFailedWithError:(NSError *)err
 {
-//  NSLog(@"FAILED WITH ERROR: %@", [err localizedDescription]);
+  NSLog(@"FAILED WITH ERROR: %@", [err localizedDescription]);
+  self.failed = YES;
   [_delegate performSelectorOnMainThread:@selector(downloadDidFail:) withObject:self waitUntilDone:NO];
 }
 
@@ -120,7 +133,7 @@ complete    = _complete;
 
 - (void) dealloc
 {
-//  NSLog(@"SAFARI DOWNLOAD DEALLOC!");
+  NSLog(@"SAFARI DOWNLOAD DEALLOC!");
   _delegate = nil;
   [_urlRequest release];
   [_filename release];
