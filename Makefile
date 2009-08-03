@@ -15,7 +15,8 @@ export CC CXX STRIP CODESIGN_ALLOCATE
 
 LDFLAGS:=-lobjc -framework Foundation -framework UIKit -framework CoreFoundation -framework QuartzCore \
 	-framework CoreGraphics -multiply_defined suppress -dynamiclib -init _DownloaderInitialize -Wall \
-	-Werror -lsubstrate -lobjc -ObjC++ -fobjc-exceptions -fobjc-call-cxx-cdtors $(LDFLAGS)
+	-Werror -lsubstrate -lobjc -ObjC++ -fobjc-exceptions -fobjc-call-cxx-cdtors $(LDFLAGS) \
+	-F/opt/iphone-sdk-3.0/sysroot/System/Library/PrivateFrameworks -framework WebUI
 
 ifdef DEBUG
 DEBUG_CFLAGS=-DDEBUG -ggdb
@@ -26,7 +27,7 @@ CFLAGS:=-include $(TOP_DIR)/Downloader_Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I
 export FRAMEWORKDIR
 export CFLAGS
 
-OFILES=Downloader.o DownloadManager.o DownloadOperation.o SafariDownload.o BaseCell.o DownloadCell.o
+OFILES=Downloader.o DownloadManager.o DownloadOperation.o SafariDownload.o BaseCell.o DownloadCell.o ModalAlert.o
 
 TARGET=Downloader.dylib
 subdirs=preferences
@@ -43,7 +44,7 @@ build/%.o: %.mm
 	$(CXX) -c $(CFLAGS) $< -o $@
 
 build/%.o: %.m
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CXX) -c $(CFLAGS) $< -o $@
 
 clean:
 	rm -f build/*

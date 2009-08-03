@@ -7,7 +7,7 @@ typedef struct _NSZone NSZone;
 
 //typedef struct __CFDictionary* CFDictionaryRef;
 
-typedef struct __SecPolicy* SecPolicyRef;
+//typedef struct __SecPolicy* SecPolicyRef;
 
 //typedef struct CGPoint {
 //	float _field1;
