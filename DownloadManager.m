@@ -206,6 +206,17 @@ static SafariDownload *curDownload = nil;
   return self;
 }
 
+- (NSString*)fileNameForURL:(NSURL*)url {
+  NSString *filename = [[[url absoluteString] lastPathComponent] 
+                        stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+  NSRange range = [filename rangeOfString: @"?"];
+  if (range.location != NSNotFound)
+    filename = [filename substringToIndex:range.location];
+  if (filename.length == 0 || [[filename pathExtension] isEqualToString:@"php"])
+    return nil;
+  return filename;
+}
+
 - (UIImage *)iconForExtension:(NSString *)extension {
   NSString *iconPath = nil;
   if(extension && [extension length] > 0) {
@@ -287,26 +298,37 @@ static SafariDownload *curDownload = nil;
   if ([self downloadWithURL:url])
     return NO;
   
-  NSString *name = [[[url absoluteString] lastPathComponent]
-    stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+  BOOL use = NO;
+  NSString *filename = [self fileNameForURL:url];
+  if (filename == nil) {
+    filename = [url absoluteString];
+    use = YES;
+  }
+  
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:[NSURLRequest requestWithURL:url]
-                                                                name:name
-                                                            delegate:self];
+                                                                name:filename
+                                                            delegate:self
+                                                        useSuggested:use];
   
   return [self addDownload:download];
 }
 
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request {
 //  NSLog(@"addDownloadWithRequest: %@", request);
-  NSString *name = [[[[request URL] absoluteString] lastPathComponent]
-    stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+  BOOL use = NO;
+  NSString *filename = [self fileNameForURL:[request URL]];
+  if (filename == nil) {
+    filename = [[request URL] absoluteString];
+    use = YES;
+  }
   
   if ([self downloadWithURL:[request URL]])
     return NO;
 
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
-                                                                name:name
-                                                            delegate:self];
+                                                                name:filename
+                                                            delegate:self
+                                                        useSuggested:use];
   return [self addDownload:download];
 }
 
@@ -317,7 +339,8 @@ static SafariDownload *curDownload = nil;
 
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
                                                                 name:[info objectForKey:@"name"]
-                                                            delegate:self];
+                                                            delegate:self
+                                                        useSuggested:NO];
   return [self addDownload:download];
 }
 
@@ -423,6 +446,12 @@ static SafariDownload *curDownload = nil;
   cell.nameLabel = download.filename;
   cell.progressLabel = @"Downloading...";
   cell.completionLabel = @"0%";
+}
+
+- (void)downloadDidProvideFilename:(SafariDownload*)download
+{
+  DownloadCell *cell = [self cellForDownload:download];
+  cell.nameLabel = download.filename;
 }
 
 - (void)downloadDidFinish:(SafariDownload*)download
@@ -651,8 +680,8 @@ static int animationType = 0;
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if(tableView.numberOfSections == 2 && indexPath.section == 0) return 74;
-  else return 58;
+  if(tableView.numberOfSections == 2 && indexPath.section == 0) return 75;
+  else return 56;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {

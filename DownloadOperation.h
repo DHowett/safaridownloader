@@ -4,6 +4,7 @@
 @protocol DownloadOperationDelegate
 - (NSURLRequest *)urlReq;
 - (NSString *)filename;
+- (BOOL)useSuggest;
 - (void)setFilename:(NSString *)filename;
 - (void)setComplete:(BOOL)comp;
 - (void)setSize:(long long)size;

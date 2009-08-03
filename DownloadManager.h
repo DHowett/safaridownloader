@@ -14,6 +14,10 @@
 #define kProgressViewTag 238823
 #define progressViewForCell(cell) ((UIProgressView*)[cell viewWithTag:kProgressViewTag])
 
+@interface UIActionSheet (hidden)
+- (void)setMessage:(id)message;
+@end
+
 @interface DownloadManagerPanel : NSObject <BrowserPanel>
 {
   BOOL _allowsRotations; 
@@ -44,6 +48,8 @@
 - (UIImage *)iconForExtension:(NSString *)extension;
 - (BOOL)supportedRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType;
+
+- (NSString*)fileNameForURL:(NSURL*)url;
 
 - (BOOL)addDownloadWithInfo:(NSDictionary*)info;
 - (BOOL)addDownloadWithURL:(NSURL*)url;

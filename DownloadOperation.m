@@ -25,7 +25,6 @@
 
 - (void)progressHeartbeat:(NSTimer*)timer
 {
-
   NSLog(@"Heartbeat firing, _keepalive %d _response %d", _keepAlive, _response);
   if (_keepAlive && _response) {
     long long expectedLength = [_response expectedContentLength];
@@ -62,9 +61,11 @@
 
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename
 {
-//  NSLog(@"FILENAME SUGGESTED: %@", filename);
-//  [download setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", filename] allowOverwrite:YES];
-//  [_delegate setFilename:filename];
+  NSLog(@"FILENAME SUGGESTED: %@", filename);
+  if ([_delegate useSuggest] || [_delegate filename] == nil) {
+    [download setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", filename] allowOverwrite:NO];
+  }
+  [_delegate setFilename:filename];
 }
 
 - (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)resp
@@ -139,7 +140,9 @@
 //    NSLog(@"Restarting download from scratch - 114!");
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
-    [_downloader setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]] allowOverwrite:YES];
+    if (![_delegate useSuggest] && [_delegate filename] != nil) {
+      [_downloader setDestination:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", [_delegate filename]] allowOverwrite:NO];
+    }
     _start = [NSDate timeIntervalSinceReferenceDate];
     _bytes = 0.0;
   }
@@ -199,7 +202,7 @@
   _keepAlive = NO;
 }
 
-- (void) storeResumeData
+- (void)storeResumeData
 {
   NSData *data = [_downloader resumeData];
 //  NSLog(@"storing resume data with length: %u", [data length]);

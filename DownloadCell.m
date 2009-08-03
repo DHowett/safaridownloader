@@ -130,12 +130,12 @@ static UIFont *progressFont = nil;
 	CGRect filenameRect = CGRectMake(SIDE_PADDING + offset + _icon.size.width + 5, 9, filenameSize.width, filenameSize.height);
 	
   CGSize completionSize = [sizeLabel sizeWithFont:progressFont forWidth:100 lineBreakMode:UILineBreakModeTailTruncation];
+	CGRect completionRect = CGRectMake(cellWidth - SIDE_PADDING - completionSize.width - deleteButtonMargin, 18, completionSize.width, completionSize.height);
 	
 	[filenameString drawInRect:filenameRect withFont:filenameFont lineBreakMode:UILineBreakModeTailTruncation];
   
 	[userColor set];
   if (!finished) { // don't draw the progress % if this is a completed download
-	  CGRect completionRect = CGRectMake(cellWidth - SIDE_PADDING - completionSize.width - deleteButtonMargin, 15, completionSize.width, completionSize.height);
     [completionLabel drawInRect:completionRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation alignment:UITextAlignmentRight];
   }
   

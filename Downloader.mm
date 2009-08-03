@@ -106,8 +106,6 @@ static id originalDelegate = nil;
   NSURLRequest* _currentRequest;
 }
 
-- (void)downloadFile;
-
 @end
 
 @implementation Downloader
@@ -167,7 +165,6 @@ static id originalDelegate = nil;
 
 #pragma mark -/*}}}*/
 #pragma mark Download Management/*{{{*/
-static id curWebFrame = nil;
 
 typedef enum
 {
@@ -217,8 +214,10 @@ static SDActionType _actionType = SDActionTypeView;
   
   if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:mimeType])
   {
-    NSString *filename = [[[[request URL] absoluteString] lastPathComponent] 
-                          stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *filename = [[DownloadManager sharedManager] fileNameForURL:[request URL]];
+    if (filename == nil) {
+      filename = [[request URL] absoluteString];
+    }
     
     //NSString *other = [objc_getClass("WebView") canShowMIMEType:mimeType] ? @"View" : nil;
     NSString *other = @"View";
@@ -284,8 +283,10 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
   }
   
   if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:nil]) {
-    NSString *filename = [[[[request URL] absoluteString] lastPathComponent] 
-                          stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *filename = [[DownloadManager sharedManager] fileNameForURL:[request URL]];
+    if (filename == nil) {
+      filename = [[request URL] absoluteString];
+    }
     
     NSString *other = @"View";
     
@@ -301,16 +302,19 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
                         request:request
                    newFrameName:name
                decisionListener:listener];
-    } else if (_actionType == SDActionTypeDownload) {
+    } 
+    else if (_actionType == SDActionTypeDownload) {
       [listener ignore];
       if ([[DownloadManager sharedManager] addDownloadWithRequest:request])
         NSLog(@"successfully added download");
       else
         NSLog(@"add download failed");
-    } else {
+    } 
+    else {
       [listener ignore]; 
     }
-  } else {
+  } 
+  else {
     [listener use]; 
   }  
 }
@@ -319,7 +323,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
          request:(NSURLRequest *)request 
            frame:(WebFrame *)frame 
 decisionListener:(id<WebPolicyDecisionListener>)listener {
-//  
   NSLog(@"MIME: decidePolicyForMIMEType!!!!!!");
   NSLog(@"MIME: type: %@", type);
   NSLog(@"MIME: request: %@", request);
