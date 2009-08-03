@@ -13,7 +13,7 @@ ptr = sptr; \
 static UIFont *filenameFont = nil;
 static UIFont *speedFont = nil;
 static UIFont *progressFont = nil;
-@synthesize finished, nameLabel, progressView, sizeLabel, progressLabel, completionLabel, icon = _icon;
+@synthesize finished, failed, nameLabel, progressView, sizeLabel, progressLabel, completionLabel, icon = _icon;
 
 + (void)initialize {
 	if(self == [DownloadCell class]) {
@@ -97,6 +97,7 @@ static UIFont *progressFont = nil;
 	UIColor *backgroundColor = nil;
 	UIColor *textColor = nil;
 	UIColor *userColor = nil;
+  UIColor *failColor = nil;
   float offset = 0.0f;
 	float deleteButtonMargin = 0.0f;
   float cellWidth = r.size.width;
@@ -105,10 +106,12 @@ static UIFont *progressFont = nil;
 		textColor = [UIColor whiteColor];
 		backgroundColor = [UIColor clearColor];
 		userColor = [UIColor whiteColor];
+		failColor = [UIColor whiteColor];
 	} else {
 		textColor = [UIColor blackColor];
 		backgroundColor = [UIColor whiteColor];
 		userColor = [UIColor grayColor];
+    failColor = [UIColor colorWithRed:0.78f green:0.0f blue:0.0f alpha:1.0f];
 	}
   
   //if(self.editing) offset = 30.0f;
@@ -149,7 +152,10 @@ static UIFont *progressFont = nil;
   CGSize sizeSize = [sizeLabel sizeWithFont:progressFont forWidth:100 lineBreakMode:UILineBreakModeTailTruncation];
 	CGRect sizeRect = CGRectMake(cellWidth - SIDE_PADDING - sizeSize.width - deleteButtonMargin, 28 + progressBarHeightOffset, sizeSize.width, sizeSize.height);
 	
+  if(failed) [failColor set];
   [bString drawInRect:bRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation];
+  if(failed) [userColor set];
+
   [sizeLabel drawInRect:sizeRect withFont:progressFont lineBreakMode:UILineBreakModeTailTruncation alignment:UITextAlignmentRight];
 	
   [progressView setFrame:CGRectMake(SIDE_PADDING, 34, cellWidth - SIDE_PADDING - 16 - (deleteButtonMargin + offset), 20)];

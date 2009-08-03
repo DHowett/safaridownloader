@@ -3,6 +3,7 @@
 
 @interface DownloadCell : BaseCell {
 	BOOL finished;
+	BOOL failed;
 	UIProgressView *progressView;
 	NSString *nameLabel;
 	NSString *progressLabel;
@@ -18,5 +19,6 @@
 @property (nonatomic, retain) UIImage  *icon;
 @property (nonatomic, retain) UIProgressView *progressView;
 @property (nonatomic, assign) BOOL finished;
+@property (nonatomic, assign) BOOL failed;
 
 @end
