@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "NSURLDownload.h"
+#import "WebUI/AuthenticationView.h"
 
 @protocol DownloadOperationDelegate
 - (NSURLRequest *)urlReq;
@@ -9,14 +10,21 @@
 - (void)setComplete:(BOOL)comp;
 - (void)setSize:(long long)size;
 - (void)setProgress:(float)prg speed:(float)spd;
+- (void)downloadDidReceiveAuthenticationChallenge;
 - (void)downloadStarted;
 - (void)downloadFailedWithError:(NSError *)err;
 - (void)downloadCancelled;
 @end
 
+@interface MyAuthenticationView : AuthenticationView
+
+@end
+
+
 @interface DownloadOperation : NSOperation {
   id             _delegate;
   NSURLDownload* _downloader;
+  NSURLCredential*  _authCredential;
   NSURLResponse* _response;
   NSTimeInterval _start;
   BOOL           _keepAlive;
@@ -24,9 +32,13 @@
   NSTimer*       _timer;
   int            _retryCount;
   BOOL           _noUpdate;
-  BOOL		 _wasResumed;
-  long long	 _resumedFrom;
+  BOOL           _wasResumed;
+  long long      _resumedFrom;
+  float          _downloadedBytes;
+  BOOL           _requiresAuthentication;
 }
+
++ (id)authView;
 
 @property (assign) id<DownloadOperationDelegate> delegate;
 

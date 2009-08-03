@@ -1,9 +1,70 @@
+#import "DHHookCommon.h"
 #import "DownloadOperation.h"
 #import "NSURLDownload.h"
+#import "ModalAlert.h"
+#import "WebUI/WebUI.h"
 
 #ifndef DEBUG
 #define NSLog(...)
 #endif
+
+//static DownloadOperation* _currentOp = nil;
+//@class BrowserController;
+//HOOK(BrowserController, logInFromAuthenticationView$withCredential$, void, id view, NSURLCredential* credential) {
+//  NSLog(@"logInFromAuthenticationView");
+//  if (_currentOp == nil || ![_currentOp requiresAuth]) {
+//    NSLog(@"using default authentication");
+//    CALL_ORIG(BrowserController, logInFromAuthenticationView$withCredential$, view, credential);
+//  }
+//  else {
+//    NSLog(@"using our authentication with credential: %@", credential);
+//    [_currentOp setCredential:credential];
+//  }
+//}
+
+@interface DownloadOperation (extra)
+AuthenticationView* _authenticationView;
+@end
+
+@implementation MyAuthenticationView
+
+- (void)didShowBrowserPanel {
+  NSLog(@"didShowBrowserPanel!!");
+  
+  //  NSLog(@"navbar subviews: %@", [navBar subviews]);
+  //  
+  //  UIView* rightView = nil, * leftView = nil;
+  //  object_getInstanceVariable(navBar, "_rightView", (void**)&rightView);
+  //  object_getInstanceVariable(navBar, "_leftView", (void**)&leftView);
+  //  
+  //  NSLog(@"item rightBarButtonItem: %@", rightView);
+  //  NSLog(@"item leftBarButtonItem: %@", leftView);
+  //  
+  //  [leftView retain]; [rightView retain];
+  //  [leftView removeFromSuperview];
+  //  [rightView removeFromSuperview];
+  //  
+  //  [navBar addSubview:rightView];
+  //  [navBar addSubview:leftView];
+  //  
+  //  NSLog(@"navbar NEW subviews: %@", [navBar subviews]);
+  
+  UINavigationBar* navBar = nil;
+  object_getInstanceVariable(self, "_navigationBar", (void**)&navBar);
+  
+  UINavigationItem* navItem = [[UINavigationItem alloc] initWithTitle:@"Secure Website"];
+  [navItem setPrompt:@"This download requires authentication"];
+  UIBarButtonItem* loginItem = [[UIBarButtonItem alloc] initWithTitle:@"Log In" style:UIBarButtonItemStyleDone target:self action:@selector(_logIn)];
+  UIBarButtonItem* cancelItem = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(_cancel)];
+  navItem.rightBarButtonItem = loginItem;
+  navItem.leftBarButtonItem = cancelItem;
+  [navBar popNavigationItemAnimated:NO];
+  [navBar pushNavigationItem:navItem animated:NO];
+  
+}
+
+@end
+
 
 @implementation DownloadOperation
 @synthesize delegate = _delegate;
@@ -29,7 +90,7 @@
   if (_keepAlive && _response && !_noUpdate) {
     long long expectedLength = [_response expectedContentLength];
     if(_wasResumed) expectedLength += _resumedFrom;
-    float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
+    float avspd = (float)(_downloadedBytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
     float percentComplete=(float)(_bytes/expectedLength);
     
 #if 0
@@ -52,6 +113,45 @@
   }
 }
 
+-(void)cancelFromAuthenticationView:(id)authenticationView {
+  [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];
+  _requiresAuthentication = NO;
+}
+
+-(void)logInFromAuthenticationView:(id)authenticationView withCredential:(id)credential {
+  [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];
+  [self setCredential:credential];
+  _requiresAuthentication = NO;
+}
+
++ (MyAuthenticationView*)authView {
+  return _authenticationView; 
+}
+
+- (BOOL)requiresAuth {
+  return _requiresAuthentication; 
+}
+
+- (void)setCredential:(NSURLCredential*)cred {
+  _authCredential = [cred retain]; 
+}
+
+- (void)showAuthenticationChallenge:(NSURLAuthenticationChallenge*)challenge {
+  //-(void)logInFromAuthenticationView:(id)authenticationView withCredential:(id)credential
+  //  GET_CLASS(BrowserController);
+  //  HOOK_MESSAGE_F(BrowserController, logInFromAuthenticationView:withCredential:, logInFromAuthenticationView$withCredential$);
+  //  [ModalAlert showAuthViewWithChallenge:challenge];
+  //  _authDict = [[ModalAlert showAuthAlertViewWithTitle:[_delegate filename]
+  //                                             message:@"Please enter your credentials"
+  //                                        cancelButton:@"Cancel"
+  //                                            okButton:@"OK"
+  //                                            delegate:self] retain];
+  [[objc_getClass("BrowserController") sharedBrowserController] showBrowserPanelType:88];
+  [_authenticationView setChallenge:challenge];
+  [_authenticationView layoutSubviews];
+  [_authenticationView setNeedsDisplay];
+}
+
 #pragma mark -
 #pragma mark NSURLDownload Delegates
 
@@ -62,13 +162,53 @@
   _response = aDownloadResponse;
 }
 
+-(void)download:(NSURLDownload *)download
+didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+  NSLog(@"didReceiveAuthenticationChallenge!: %@", challenge);
+  [_delegate downloadDidReceiveAuthenticationChallenge];
+  _requiresAuthentication = YES;
+  _authenticationView = [[MyAuthenticationView alloc] initWithDelegate:self];
+  NSLog(@"checking authview challenge: %@", [_authenticationView challenge]);
+  
+  [self performSelectorOnMainThread:@selector(showAuthenticationChallenge:) 
+                         withObject:challenge 
+                      waitUntilDone:YES];
+  
+  while (_authCredential == nil && _requiresAuthentication) {
+    [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+  }
+  NSLog(@"got credential: %@", _authCredential);
+  
+  if (!_authCredential) {
+    [[challenge sender] cancelAuthenticationChallenge:challenge];
+  }
+  else {
+    if ([challenge previousFailureCount] == 0) {
+      [[challenge sender] useCredential:_authCredential
+             forAuthenticationChallenge:challenge];
+    }
+    else {
+      [[challenge sender] cancelAuthenticationChallenge:challenge];
+      // inform the user that the user name and password
+      // in the preferences are incorrect
+      NSLog(@"previousFailureCount FAIL!!!");
+    }
+  }
+  _requiresAuthentication = NO;
+  [_authenticationView release];
+  _authenticationView = nil;
+  [_authCredential release];
+  _authCredential = nil;
+}
+
 - (void)downloadDidBegin:(NSURLDownload *)download
 {
   _keepAlive = YES;
   NSLog(@"download started!"); 
   _start = [NSDate timeIntervalSinceReferenceDate]; 
   [_delegate downloadStarted];
-  _timer = [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(progressHeartbeat:) userInfo:nil repeats:YES];
+  _timer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(progressHeartbeat:) userInfo:nil repeats:YES];
 }
 
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename
@@ -87,6 +227,7 @@
   NSLog(@"Received response: %@", resp);
 	long long expectedContentLength = [resp expectedContentLength];
   [_delegate setSize:expectedContentLength];
+  _resumedFrom = 0.0;
 	_start = [NSDate timeIntervalSinceReferenceDate];
   [self setDownloadResponse:resp];
 }
@@ -94,25 +235,26 @@
 - (void)download:(NSURLDownload *)download didReceiveDataOfLength:(unsigned)length
 {
   _keepAlive = YES;
-  _bytes += length;
-  NSLog(@"didReceiveDataOfLength: %llu, _bytes now = %f", length, _bytes);
+  _bytes += (float)length;
+  _downloadedBytes += (float)length;
+  NSLog(@"didReceiveDataOfLength: %u, _bytes now = %.1f", length, _bytes);
   
-  float avspd = (float)(_bytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
-  if (avspd > 300 && avspd < 2048) { // throttle
-    NSUInteger sleepTime = 50000*((avspd-300)/1000);
+  float avspd = (float)(_downloadedBytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
+  if (avspd > 500 && avspd < 2048) { // throttle
+    NSUInteger sleepTime = 50000*((avspd-500)/1000);
     usleep(sleepTime);
   }
 }
 
 - (void)download:(NSURLDownload *)download willResumeWithResponse:(NSURLResponse *)resp fromByte:(long long)startingByte;
 {
-  NSLog(@"willResumeWithResponse: %@ fromByte: %llu", resp, startingByte);
+  NSLog(@"willResumeWithResponse: %@ fromByte: %ll", resp, startingByte);
   _keepAlive = YES;
 	long long expectedContentLength = [resp expectedContentLength];
   [_delegate setSize:expectedContentLength + startingByte];
 	_start = [NSDate timeIntervalSinceReferenceDate];
   [self setDownloadResponse:resp];
-  if(startingByte > 0) { // If we're actually resuming at all...
+  if (startingByte > 0) { // If we're actually resuming at all...
     _bytes = startingByte;
     _resumedFrom = startingByte;
     _wasResumed = YES;
@@ -155,7 +297,7 @@
   }
   else
     goto fail;
-
+  
 fail:
   NSLog(@"we have failed!");
   _noUpdate = YES;
@@ -211,6 +353,7 @@ fail:
     }
     _start = [NSDate timeIntervalSinceReferenceDate];
     _bytes = 0.0;
+    _resumedFrom = 0.0;
   }
   
   return YES;
@@ -245,7 +388,7 @@ fail:
   }
   else
   {
-    NSLog(@"Resuming download from length: %u", [resumeData length]);
+    NSLog(@"Resuming download from data: %@", resumeData);
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
     _start = [NSDate timeIntervalSinceReferenceDate];

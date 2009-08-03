@@ -74,8 +74,7 @@ failed      = _failed;
   [coder encodeBool:   _failed         forKey:@"failed"  ];
 }
 
-- (void)setSize:(NSInteger)length
-{
+- (void)setSize:(NSInteger)length {
   double rSize = (double)(length/((double)1024)); // kb
   NSString *ord = @"K";
   if (rSize > 1024.0) {
@@ -94,8 +93,7 @@ failed      = _failed;
 }
 
 - (void)setProgress:(float)prog 
-              speed:(float)spd
-{
+              speed:(float)spd {
   self.progress = prog; self.speed = spd;
   [_delegate performSelectorOnMainThread:@selector(downloadDidUpdate:) withObject:self waitUntilDone:YES];
 }
@@ -107,32 +105,31 @@ failed      = _failed;
     [_delegate performSelectorOnMainThread:@selector(downloadDidFinish:) withObject:self waitUntilDone:NO];
 }
 
-- (void)downloadStarted
-{
+- (void)downloadDidReceiveAuthenticationChallenge {
+  [_delegate performSelectorOnMainThread:@selector(downloadDidReceiveAuthenticationChallenge:) withObject:self waitUntilDone:NO];
+}
+
+- (void)downloadStarted {
   [_delegate performSelectorOnMainThread:@selector(downloadDidBegin:) withObject:self waitUntilDone:NO];
 }
 
-- (void)downloadCancelled
-{
+- (void)downloadCancelled {
   [_delegate performSelectorOnMainThread:@selector(downloadDidCancel:) withObject:self waitUntilDone:NO];
 }
 
-- (void)downloadFailedWithError:(NSError *)err
-{
+- (void)downloadFailedWithError:(NSError *)err {
   NSLog(@"FAILED WITH ERROR: %@", [err localizedDescription]);
   self.failed = YES;
   [_delegate performSelectorOnMainThread:@selector(downloadDidFail:) withObject:self waitUntilDone:NO];
 }
 
-- (BOOL)isEqual:(SafariDownload*)comparator
-{
+- (BOOL)isEqual:(SafariDownload*)comparator {
   if ([self.urlReq URL] == nil || [comparator.urlReq URL] == nil)
     return NO;
   return [[self.urlReq URL] isEqual:[comparator.urlReq URL]];
 }
 
-- (void) dealloc
-{
+- (void) dealloc {
   NSLog(@"SAFARI DOWNLOAD DEALLOC!");
   _delegate = nil;
   [_urlRequest release];

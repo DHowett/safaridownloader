@@ -1,3 +1,4 @@
+#import "DHHookCommon.h"
 #include "substrate.h"
 #import <objc/runtime.h>
 #import "Safari/BrowserController.h"
@@ -8,11 +9,11 @@
 #import "Safari/Application.h"
 #import "WebPolicyDelegate.h"
 #import "DownloadManager.h"
+#import "ModalAlert.h"
 #import "UIKitExtra/UIToolbarButton.h"
 #import "Safari/BrowserController.h"
 #import "Safari/BrowserButtonBar.h"
 #import <QuartzCore/QuartzCore.h>
-#import "DHHookCommon.h"
 
 // Numerical and Structural String Formatting Macros
 #define iF(i) [NSString stringWithFormat:@"%d", i]
@@ -23,69 +24,6 @@
 #ifndef DEBUG
 #define NSLog(...)
 #endif
-
-@interface ModalAlert : NSObject @end
-@implementation ModalAlert
-+ (void)block:(UIView *)view
-{
-  view.hidden=FALSE;
-  while (!view.hidden && view.superview != nil)
-    [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
-}
-
-+ (void)showAlertViewWithTitle:(NSString*)title 
-                       message:(NSString *)message 
-                  cancelButton:(NSString*)cancel 
-                      okButton:(NSString*)okButton 
-                      delegate:(id)delegate
-{
-  UIAlertView *alert= [[UIAlertView alloc] initWithTitle:title
-                                                 message:message
-                                                delegate:delegate 
-                                       cancelButtonTitle:cancel 
-                                       otherButtonTitles:okButton, nil];
-  [alert show];
-  [alert release];
-  [ModalAlert block:alert];	
-}
-
-+ (void)showActionSheetWithTitle:(NSString*)title 
-                         message:(NSString *)message 
-                    cancelButton:(NSString*)cancel 
-                     destructive:(NSString*)destructive
-                           other:(NSString*)other 
-                        delegate:(id)delegate
-{
-
-  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:title
-                                                       delegate:delegate
-                                              cancelButtonTitle:cancel
-                                         destructiveButtonTitle:destructive
-                                              otherButtonTitles:other, nil];
-  [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
-  
-  UILabel *nameLabel = MSHookIvar<UILabel *>(ohmygod, "_bodyTextLabel");;
-  UIFont *filenameFont = [nameLabel font];
-  CGSize filenameSize = [message sizeWithFont:filenameFont];
-  CGRect screenRect = [[UIScreen mainScreen] bounds];
-  CGRect nameLabelRect = CGRectMake((screenRect.size.width / 2) - (filenameSize.width / 2), filenameSize.height,
-                                   filenameSize.width, filenameSize.height);
-  [nameLabel setFrame:nameLabelRect];
-  [nameLabel setText:message];
-  
-  UIImageView *iconImageView = [[UIImageView alloc]
-                              initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension]]];
-  iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
-  [ohmygod addSubview:iconImageView];
-  [iconImageView release];
-  
-  //[ohmygod showFromToolbar:[[objc_getClass("BrowserController") sharedBrowserController] buttonBar]];
-  [ohmygod showInView:[[objc_getClass("BrowserController") sharedBrowserController] window]];
-  [ohmygod release];
-  
-  [ModalAlert block:ohmygod];	
-}
-@end
 
 @class Downloader;
 static Downloader *downloader = nil;
@@ -205,10 +143,20 @@ static SDActionType _actionType = SDActionTypeView;
   
   if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"]) {
     NSLog(@"not a valid http url, continue.");
-    [originalDelegate webView:webView decidePolicyForNavigationAction:action
-                      request:request
-                        frame:frame
-             decisionListener:listener];
+    if (action) 
+    {
+      [originalDelegate webView:webView decidePolicyForNavigationAction:action
+                        request:request
+                          frame:frame
+               decisionListener:listener];
+    }
+    else
+    {
+      [originalDelegate webView:webView decidePolicyForMIMEType:mimeType
+                        request:request
+                          frame:frame
+               decisionListener:listener];
+    }
     return;
   }
   
@@ -249,6 +197,9 @@ static SDActionType _actionType = SDActionTypeView;
     else if (_actionType == SDActionTypeDownload)
     {
       [listener ignore];
+      NSLog(@"going back!");
+      [frame stopLoading:nil];
+      [webView goBack];
       if ([[DownloadManager sharedManager] addDownloadWithRequest:request])
         NSLog(@"successfully added download");
       else
@@ -256,8 +207,8 @@ static SDActionType _actionType = SDActionTypeView;
     }
     else
     {
+      [listener ignore];
       [frame stopLoading];
-      [listener ignore]; 
     }
   }
   else
@@ -425,6 +376,8 @@ HOOK(UIToolbarButton, setFrame$, void, CGRect frame) {
 HOOK(BrowserController, _panelForPanelType$, id, int type) {
   if(type == 44)
     return [[DownloadManager sharedManager] browserPanel];
+  if (type == 88)
+    return [DownloadOperation authView];
   return CALL_ORIG(BrowserController, _panelForPanelType$, type);
 }
 

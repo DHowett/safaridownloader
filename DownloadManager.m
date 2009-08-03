@@ -10,6 +10,7 @@
 #import "DownloadManager.h"
 #import "DownloadCell.h"
 #import "DownloaderCommon.h"
+#import "ModalAlert.h"
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
 
 #ifndef DEBUG
@@ -448,6 +449,11 @@ static SafariDownload *curDownload = nil;
   cell.completionLabel = @"0%";
 }
 
+- (void)downloadDidReceiveAuthenticationChallenge:(SafariDownload *)download {
+  DownloadCell *cell = [self cellForDownload:download];
+  cell.progressLabel = @"Awaiting Authentication...";
+}
+
 - (void)downloadDidProvideFilename:(SafariDownload*)download
 {
   DownloadCell *cell = [self cellForDownload:download];
@@ -478,7 +484,8 @@ static SafariDownload *curDownload = nil;
   if (_currentDownloads.count > 0) {
     [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_finishedDownloads.count-1 inSection:1]]
                       withRowAnimation:UITableViewRowAnimationFade];
-  } else {
+  } 
+  else {
     [_tableView reloadData];
   }
   
@@ -486,9 +493,24 @@ static SafariDownload *curDownload = nil;
   [self saveData];
 }
 
+// not used, too much of an overhead :<
+- (void)updateProgressForDownload:(SafariDownload*)download {
+  DownloadCell* cell = [self cellForDownload:download];
+  float progress = cell.progressView.progress;
+  progress += (download.progress - progress)/4;
+  cell.progressView.progress = progress;
+  if (progress < download.progress) { // :o recursive method with delay :o
+    [self performSelector:@selector(updateProgressForDownload:) 
+               withObject:download 
+               afterDelay:0.1];
+  }
+}
+
 - (void)downloadDidUpdate:(SafariDownload*)download
 {
   DownloadCell* cell = [self cellForDownload:download];
+//  [[NSRunLoop currentRunLoop] cancelPerformSelector:@selector(updateProgressForDownload:) target:self argument:download]; 
+//  [self updateProgressForDownload:download];
   cell.progressView.progress = download.progress;
   cell.completionLabel = [NSString stringWithFormat:@"%d%%", (int)(download.progress*100.0f)];
   cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
@@ -778,7 +800,7 @@ static int animationType = 0;
 
     [_finishedDownloads removeObjectAtIndex:row];
     [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
-    [[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
+    [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
   } else if([button isEqualToString:@"Retry"]) {
     int row = [_finishedDownloads indexOfObject:curDownload];
     int section = (_currentDownloads.count > 0) ? 1 : 0;

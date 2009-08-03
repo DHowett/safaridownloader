@@ -13,6 +13,7 @@
 @protocol SafariDownloadDelegate
 
 - (void)downloadDidBegin:(SafariDownload*)download;
+- (void)downloadDidReceiveAuthenticationChallenge:(SafariDownload*)download;
 - (void)downloadDidProvideFilename:(SafariDownload*)download;
 - (void)downloadDidFinish:(SafariDownload*)download;
 - (void)downloadDidUpdate:(SafariDownload*)download;
