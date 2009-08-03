@@ -198,7 +198,7 @@ static SDActionType _actionType = SDActionTypeView;
     {
       [listener ignore];
       NSLog(@"going back!");
-      [frame stopLoading:nil];
+      [frame stopLoading];
       [webView goBack];
       if ([[DownloadManager sharedManager] addDownloadWithRequest:request])
         NSLog(@"successfully added download");
