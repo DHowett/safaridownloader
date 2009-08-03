@@ -1,9 +1,9 @@
-#import "DHHookCommon.h"
 #import "DownloadManager.h"
 #import "DownloadOperation.h"
 #import "NSURLDownload.h"
 #import "ModalAlert.h"
 #import "WebUI/WebUI.h"
+#import "Safari/BrowserController.h"
 
 #ifndef DEBUG
 #define NSLog(...)
