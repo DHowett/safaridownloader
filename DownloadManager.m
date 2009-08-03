@@ -680,8 +680,8 @@ static int animationType = 0;
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if(tableView.numberOfSections == 2 && indexPath.section == 0) return 75;
-  else return 56;
+  if(tableView.numberOfSections == 2 && indexPath.section == 0) return 74;
+  else return 58;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
