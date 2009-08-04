@@ -92,7 +92,18 @@ static UIImage* savedIcon = nil;
   // Get the relevant frames.
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
   UIView *enclosingView = keyWindow;
-  CGRect cellFrame = CGRectMake(260, 440, 34, 36);
+
+  Class BrowserController = objc_getClass("BrowserController");
+  int orientation = [[BrowserController sharedBrowserController] orientation];
+  NSLog(@"Orientation = %d.", orientation);
+  UIView *button = (orientation == 0 ? ([[DownloadManager sharedManager] portraitDownloadButton]) : ([[DownloadManager sharedManager] landscapeDownloadButton]));
+  CGRect tempCellFrame = [button frame];
+  CGRect cellFrame;
+  if(!button) cellFrame = CGRectMake(260, 440, 34, 36);
+  else cellFrame = [[[BrowserController sharedBrowserController] buttonBar] convertRect:tempCellFrame toView:keyWindow];
+  NSLog(@"%@", NSStringFromCGRect(cellFrame));
+
+//  CGRect cellFrame = GRectMake(260, 440, 34, 36);
   CGRect buttonFrame = [activeInstance convertRect:CGRectMake(18, 14, 22, 22) toView:keyWindow];
   
   /*
