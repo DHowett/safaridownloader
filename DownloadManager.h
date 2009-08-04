@@ -42,7 +42,8 @@
 }
 
 @property (nonatomic, retain) UINavigationItem* navItem;
-@property (assign) BOOL isShown;
+@property (nonatomic, assign) UIToolbarButton *portraitDownloadButton;
+@property (nonatomic, assign) UIToolbarButton *landscapeDownloadButton;
 
 + (id)sharedManager;
 - (void)updateFileTypes;
@@ -67,7 +68,5 @@
 - (UIImage *)iconForExtension:(NSString *)extension;
 
 // This seems hackish, but is for badging purposes.
-- (void)setPortraitDownloadButton:(id)portraitButton;
-- (void)setLandscapeDownloadButton:(id)landscapeButton;
 - (void)updateBadges;
 @end

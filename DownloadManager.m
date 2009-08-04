@@ -49,7 +49,7 @@ static BOOL doRot = YES;
 @end
 
 @implementation DownloadManager
-@synthesize navItem = _navItem;
+@synthesize navItem = _navItem, portraitDownloadButton = _portraitDownloadButton, landscapeDownloadButton = _landscapeDownloadButton;
 
 #pragma mark -
 #pragma mark Singleton Methods/*{{{*/
@@ -827,14 +827,6 @@ static int animationType = 0;
     [[Application sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", action, path]]];
   }
   curDownload = nil;
-}
-
-- (void)setPortraitDownloadButton:(id)portraitButton {
-  _portraitDownloadButton = portraitButton;
-}
-
-- (void)setLandscapeDownloadButton:(id)landscapeButton {
-  _landscapeDownloadButton = landscapeButton;
 }
 
 - (void)updateBadges {
