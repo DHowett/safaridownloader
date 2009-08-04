@@ -15,6 +15,8 @@
 #import "Safari/BrowserButtonBar.h"
 #import <QuartzCore/QuartzCore.h>
 
+#import "Safari/TabDocument.h"
+
 // Numerical and Structural String Formatting Macros
 #define iF(i) [NSString stringWithFormat:@"%d", i]
 #define fF(f) [NSString stringWithFormat:@"%.2f", f]
@@ -27,6 +29,7 @@
 
 @class Downloader;
 static Downloader *downloader = nil;
+static id _currentRequest;
 
 @class BrowserButtonBar;
 @interface BrowserButtonBar (mine)
@@ -39,9 +42,7 @@ static Downloader *downloader = nil;
 
 static id originalDelegate = nil;
 
-@interface Downloader : NSObject <UIActionSheetDelegate>
-{
-  NSURLRequest* _currentRequest;
+@interface Downloader : NSObject <UIActionSheetDelegate> {
 }
 
 @end
@@ -60,7 +61,6 @@ static id originalDelegate = nil;
 
 - (void)dealloc
 {
-  [_currentRequest release];
   [super dealloc]; 
 }
 
@@ -132,7 +132,8 @@ static SDActionType _actionType = SDActionTypeView;
 #pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
 
 // WebPolicyDelegate SafariDownloader Addition
-- (void) webView:(WebView *)webView 
+//BOOL decidePolicy(WebView *webView, NSDictionary *action, NSURLRequest *request, NSString *mimeType, WebFrame *frame, id<WebPolicyDecisionListener> listener) {
+- (BOOL) webView:(WebView *)webView 
     decideAction:(NSDictionary*)action
       forRequest:(NSURLRequest *)request 
     withMimeType:(NSString *)mimeType 
@@ -143,25 +144,10 @@ static SDActionType _actionType = SDActionTypeView;
   
   if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"] && ![url hasPrefix:@"ftp://"]) {
     NSLog(@"not a valid http url, continue.");
-    if (action) 
-    {
-      [originalDelegate webView:webView decidePolicyForNavigationAction:action
-                        request:request
-                          frame:frame
-               decisionListener:listener];
-    }
-    else
-    {
-      [originalDelegate webView:webView decidePolicyForMIMEType:mimeType
-                        request:request
-                          frame:frame
-               decisionListener:listener];
-    }
-    return;
+    return NO;
   }
   
-  if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:mimeType])
-  {
+  if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:mimeType]) {
     NSString *filename = [[DownloadManager sharedManager] fileNameForURL:[request URL]];
     if (filename == nil) {
       filename = [[request URL] absoluteString];
@@ -177,167 +163,26 @@ static SDActionType _actionType = SDActionTypeView;
                                    other:other
                                 delegate:self];
     
-    if (_actionType == SDActionTypeView) 
-    {      
-      if (action) 
-      {
-        [originalDelegate webView:webView decidePolicyForNavigationAction:action
-                          request:request
-                            frame:frame
-                 decisionListener:listener];
-      }
-      else
-      {
-        [originalDelegate webView:webView decidePolicyForMIMEType:mimeType
-                          request:request
-                            frame:frame
-                 decisionListener:listener];
-      }
-    }
-    else if (_actionType == SDActionTypeDownload)
-    {
-      [listener ignore];
-      NSLog(@"going back!");
-      [frame stopLoading];
-      [webView goBack];
-      if ([[DownloadManager sharedManager] addDownloadWithRequest:request])
-        NSLog(@"successfully added download");
-      else
-        NSLog(@"add download failed");
-    }
-    else
-    {
-      [listener ignore];
-      [frame stopLoading];
-    }
-  }
-  else
-  {
-    if (action) 
-    {
-      [originalDelegate webView:webView decidePolicyForNavigationAction:action
-                        request:request
-                          frame:frame
-               decisionListener:listener];
-    }
-    else
-    {
-      [originalDelegate webView:webView decidePolicyForMIMEType:mimeType
-                        request:request
-                          frame:frame
-               decisionListener:listener];
-    }
-  }  
-}
-///////////////////////////////////////////////////
-
-- (void) webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)action 
-         request:(NSURLRequest *)request 
-    newFrameName:(NSString *)name 
-decisionListener:(id<WebPolicyDecisionListener>)listener {
-  NSString *url = [[request URL] absoluteString];
-  
-  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"] && ![url hasPrefix:@"ftp://"]) {
-    NSLog(@"not a valid http url, continue.");
-    [originalDelegate webView:sender decidePolicyForNewWindowAction:action
-                      request:request
-                 newFrameName:name
-             decisionListener:listener];
-    return;
-  }
-  
-  if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:nil]) {
-    NSString *filename = [[DownloadManager sharedManager] fileNameForURL:[request URL]];
-    if (filename == nil) {
-      filename = [[request URL] absoluteString];
-    }
-    
-    NSString *other = @"View";
-    
-    [ModalAlert showActionSheetWithTitle:@"What would you like to do?"
-                                 message:filename
-                            cancelButton:@"Cancel"
-                             destructive:@"Download"
-                                   other:other
-                                delegate:self];
-    
-    if (_actionType == SDActionTypeView) {      
-      [originalDelegate webView:sender decidePolicyForNewWindowAction:action
-                        request:request
-                   newFrameName:name
-               decisionListener:listener];
-    } 
+    if (_actionType == SDActionTypeView) return NO;
     else if (_actionType == SDActionTypeDownload) {
       [listener ignore];
+      [frame stopLoading];
       if ([[DownloadManager sharedManager] addDownloadWithRequest:request])
         NSLog(@"successfully added download");
       else
         NSLog(@"add download failed");
-    } 
-    else {
-      [listener ignore]; 
+    } else {
+      [listener ignore];
+      [frame stopLoading];
     }
-  } 
-  else {
-    [listener use]; 
-  }  
-}
-
-- (void) webView:(WebView *)webView decidePolicyForMIMEType:(NSString *)type 
-         request:(NSURLRequest *)request 
-           frame:(WebFrame *)frame 
-decisionListener:(id<WebPolicyDecisionListener>)listener {
-  NSLog(@"MIME: decidePolicyForMIMEType!!!!!!");
-  NSLog(@"MIME: type: %@", type);
-  NSLog(@"MIME: request: %@", request);
-  NSLog(@"MIME: Listener!: %@", listener);
-  NSLog(@"URLSTRING: %@", [[request URL] absoluteString]);
-  
-  if (_currentRequest != nil && [_currentRequest isEqual:request]) 
-  {
-    [_currentRequest release];
-    _currentRequest = nil;
-    [listener use];
-    return;
   }
-
-  [self webView:webView 
-   decideAction:nil 
-     forRequest:request 
-   withMimeType:type 
-        inFrame:frame 
-   withListener:listener];
-  
-}
-
-- (void) webView:(WebView *)webView decidePolicyForNavigationAction:(NSDictionary *)action 
-         request:(NSURLRequest *)request 
-           frame:(WebFrame *)frame 
-decisionListener:(id<WebPolicyDecisionListener>)listener {
-  
-  NSLog(@"NAV: decidePolicyForNavigationAction!!!!!!");
-  NSLog(@"NAV: action: %@", action);
-  NSLog(@"NAV: request: %@", request);
-  NSLog(@"NAV: Listener!: %@", listener);
-  
-  [self webView:webView 
-   decideAction:action 
-     forRequest:request 
-   withMimeType:nil 
-        inFrame:frame 
-   withListener:listener];
+  else return NO;
 }
 #pragma mark -/*}}}*/
 @end
 
 #pragma mark Renamed Methods/*{{{*/
 @class WebView;
-HOOK(WebView, setPolicyDelegate$, void, id delegate) {
-  NSLog(@"wants to set delegate: %@", delegate);
-  originalDelegate = [delegate retain];
-  CALL_ORIG(WebView, setPolicyDelegate$, downloader);
-}
-
 HOOK(Application, applicationDidFinishLaunching$, void, UIApplication *application) {
   CALL_ORIG(Application, applicationDidFinishLaunching$, application);
   [downloader loadCustomToolbar];
@@ -396,13 +241,82 @@ HOOK(BrowserController, _panelForPanelType$, id, int type) {
 }
 
 #pragma mark -/*}}}*/
+#pragma mark Hooked WebViewPolicyDelegate Methods (TabDocument)/*{{{*/
+HOOK(TabDocument, webView$decidePolicyForNavigationAction$request$frame$decisionListener$, void, WebView *view, NSDictionary *action, NSURLRequest *request, WebFrame *frame, id<WebPolicyDecisionListener> decisionListener) {
+  NSLog(@"NAV: decidePolicyForNavigationAction!!!!!!");
+  NSLog(@"NAV: action: %@", action);
+  NSLog(@"NAV: request: %@", request);
+  NSLog(@"NAV: Listener!: %@", decisionListener);
+  
+  BOOL handled = [downloader webView:view decideAction:action forRequest:request withMimeType:nil inFrame:frame withListener:decisionListener];
+  if(!handled) CALL_ORIG(TabDocument, webView$decidePolicyForNavigationAction$request$frame$decisionListener$, view, action, request, frame, decisionListener);
+}
+
+HOOK(TabDocument, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$, void, WebView *view, NSDictionary *action, NSURLRequest *request, NSString *newFrameName, id<WebPolicyDecisionListener> decisionListener) {
+  NSString *url = [[request URL] absoluteString];
+  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"] && ![url hasPrefix:@"ftp://"]) {
+    NSLog(@"not a valid http url, continue.");
+    CALL_ORIG(TabDocument, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$, view, action, request, newFrameName, decisionListener);
+    return;
+  }
+  
+  if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:nil]) {
+    NSString *filename = [[DownloadManager sharedManager] fileNameForURL:[request URL]];
+    if (filename == nil) {
+      filename = [[request URL] absoluteString];
+    }
+    
+    NSString *other = @"View";
+    
+    [ModalAlert showActionSheetWithTitle:@"What would you like to do?"
+                                 message:filename
+                            cancelButton:@"Cancel"
+                             destructive:@"Download"
+                                   other:other
+                                delegate:self];
+    
+    if (_actionType == SDActionTypeView) {      
+      CALL_ORIG(TabDocument, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$, view, action, request, newFrameName, decisionListener);
+    } 
+    else if (_actionType == SDActionTypeDownload) {
+      [decisionListener ignore];
+      if ([[DownloadManager sharedManager] addDownloadWithRequest:request])
+        NSLog(@"successfully added download");
+      else
+        NSLog(@"add download failed");
+    } 
+    else {
+      [decisionListener ignore]; 
+    }
+  } 
+  else {
+    [decisionListener use]; 
+  }  
+}
+
+HOOK(TabDocument, webView$decidePolicyForMIMEType$request$frame$decisionListener$, void, WebView *view, NSString *type, NSURLRequest *request, WebFrame *frame, id<WebPolicyDecisionListener> decisionListener) {
+  NSLog(@"MIME: decidePolicyForMIMEType!!!!!!");
+  NSLog(@"MIME: type: %@", type);
+  NSLog(@"MIME: request: %@", request);
+  NSLog(@"MIME: Listener!: %@", decisionListener);
+  NSLog(@"URLSTRING: %@", [[request URL] absoluteString]);
+  
+  if (_currentRequest != nil && [_currentRequest isEqual:request]) 
+  {
+    [_currentRequest release];
+    _currentRequest = nil;
+    CALL_ORIG(TabDocument, webView$decidePolicyForMIMEType$request$frame$decisionListener$, view, type, request, frame, decisionListener);
+    return;
+  }
+
+  BOOL handled = [downloader webView:view decideAction:nil forRequest:request withMimeType:type inFrame:frame withListener:decisionListener];
+  if(!handled) CALL_ORIG(TabDocument, webView$decidePolicyForMIMEType$request$frame$decisionListener$, view, type, request, frame, decisionListener);
+}
+#pragma mark -/*}}}*/
 
 extern "C" void DownloaderInitialize() {	
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
   downloader = [[Downloader alloc] init];
-  GET_CLASS(WebView);
-  HOOK_MESSAGE_F(WebView, setPolicyDelegate:, setPolicyDelegate$);
-
   GET_CLASS(Application);
   HOOK_MESSAGE_F(Application, applicationDidFinishLaunching:, applicationDidFinishLaunching$);
   HOOK_MESSAGE_F(Application, applicationResume:, applicationResume$);
@@ -416,6 +330,11 @@ extern "C" void DownloaderInitialize() {
 
   GET_CLASS(BrowserController);
   HOOK_MESSAGE_F(BrowserController, _panelForPanelType:, _panelForPanelType$);
+
+  GET_CLASS(TabDocument);
+  HOOK_MESSAGE_F(TabDocument, webView:decidePolicyForNavigationAction:request:frame:decisionListener:, webView$decidePolicyForNavigationAction$request$frame$decisionListener$);
+  HOOK_MESSAGE_F(TabDocument, webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$);
+  HOOK_MESSAGE_F(TabDocument, webView:decidePolicyForMIMEType:request:frame:decisionListener:, webView$decidePolicyForMIMEType$request$frame$decisionListener$);
   [pool release];
 }
 
