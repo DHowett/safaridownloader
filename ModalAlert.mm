@@ -12,6 +12,10 @@
 #import "Safari/BrowserController.h"
 #import <QuartzCore/QuartzCore.h>
 
+#ifndef DEBUG
+#define NSLog(...)
+#endif
+
 @interface ModalAlert (priv)
 UIAlertView* activeInstance;
 @end

@@ -8,6 +8,10 @@
 
 #import "SafariDownload.h"
 
+#ifndef DEBUG
+#define NSLog(...)
+#endif
+
 @implementation SafariDownload
 @synthesize
 delegate    = _delegate,
