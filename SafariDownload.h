@@ -37,9 +37,11 @@
   BOOL           _useSuggested;
   BOOL           _complete;
   BOOL           _failed;
+  DownloadOperation *downloadOperation;
 }
 
 @property (assign)            id<SafariDownloadDelegate> delegate;
+@property (nonatomic, retain) DownloadOperation *downloadOperation;
 @property (nonatomic, retain) NSURLRequest    *urlReq;
 @property (nonatomic, retain) NSDate          *startDate;
 @property (nonatomic, retain) NSString        *filename;

@@ -24,6 +24,8 @@ useSuggest  = _useSuggested,
 complete    = _complete,
 failed      = _failed;
 
+@synthesize downloadOperation;
+
 - (id)initWithRequest:(NSURLRequest*)urlRequest 
                  name:(NSString *)name 
              delegate:(id)del

@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "SafariDownload.h"
-#import "WebUI/BrowserPanel.h"
+#import "Safari/BrowserPanel.h"
 #import "UIKitExtra/UIToolbarButton.h"
 
 #define kProgressViewTag 238823
@@ -42,6 +42,7 @@
 }
 
 @property (nonatomic, retain) UINavigationItem* navItem;
+@property (assign) BOOL isShown;
 
 + (id)sharedManager;
 - (void)updateFileTypes;

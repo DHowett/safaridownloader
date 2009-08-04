@@ -148,6 +148,7 @@ static id savedPanel = nil;
   [_authenticationView setChallenge:challenge];
   [_authenticationView layoutSubviews];
   [_authenticationView setNeedsDisplay];
+  [ModalAlert dismissLoadingAlert];
 }
 
 #pragma mark -
@@ -220,6 +221,7 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 
 - (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)resp
 {
+  [ModalAlert dismissLoadingAlert];
   _keepAlive = YES;
   NSLog(@"Received response: %@", resp);
 	long long expectedContentLength = [resp expectedContentLength];
@@ -234,7 +236,7 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
   _keepAlive = YES;
   _bytes += (float)length;
   _downloadedBytes += (float)length;
-  NSLog(@"didReceiveDataOfLength: %u, _bytes now = %.1f", length, _bytes);
+  //NSLog(@"didReceiveDataOfLength: %u, _bytes now = %.1f", length, _bytes);
   
   float avspd = (float)(_downloadedBytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
   if (avspd > 500 && avspd < 2048) { // throttle
@@ -245,6 +247,7 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 
 - (void)download:(NSURLDownload *)download willResumeWithResponse:(NSURLResponse *)resp fromByte:(long long)startingByte;
 {
+  [ModalAlert dismissLoadingAlert];
   NSLog(@"willResumeWithResponse: %@ fromByte: %ll", resp, startingByte);
   _keepAlive = YES;
 	long long expectedContentLength = [resp expectedContentLength];

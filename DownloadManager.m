@@ -80,6 +80,46 @@ static SafariDownload *curDownload = nil;
     _downloadQueue = [NSOperationQueue new];
     [_downloadQueue setMaxConcurrentOperationCount:5];
     [self updateFileTypes];
+    
+    CGRect frame = [[UIScreen mainScreen] applicationFrame];
+    self.view = [[UIView alloc] initWithFrame:frame];
+    
+    self.view.autoresizingMask =   UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
+    UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
+    UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth       | 
+    UIViewAutoresizingFlexibleHeight;
+    
+    self.view.autoresizesSubviews = YES;
+    _navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
+    _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
+    UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
+    UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
+    self.navItem = [[UINavigationItem alloc] initWithTitle:@"Downloads"];
+    
+    UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc]  initWithBarButtonSystemItem:UIBarButtonSystemItemDone 
+                                                                                     target:self 
+                                                                                     action:@selector(hideDownloadManager)];
+    self.navItem.leftBarButtonItem = doneItemButton;
+    UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
+                                                                     style:UIBarButtonItemStyleBordered 
+                                                                    target:self 
+                                                                    action:@selector(cancelAllDownloads)];    
+    self.navItem.rightBarButtonItem = cancelButton;
+    self.navItem.rightBarButtonItem.enabled = YES;
+    
+    [_navBar pushNavigationItem:self.navItem animated:NO];
+    [self.view addSubview:_navBar];
+    
+    frame.origin.y = _navBar.frame.size.height;
+    frame.size.height = self.view.frame.size.height - _navBar.frame.size.height;
+    
+    _tableView = [[UITableView alloc] initWithFrame:frame style:UITableViewStylePlain];
+    _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    _tableView.rowHeight = 56;
+    [self.view addSubview:_tableView]; 
   }
   return self;
 }
@@ -141,45 +181,7 @@ static SafariDownload *curDownload = nil;
 
 - (void)loadView
 {
-  CGRect frame = [[UIScreen mainScreen] applicationFrame];
-  self.view = [[UIView alloc] initWithFrame:frame];
-  
-  self.view.autoresizingMask =   UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
-                                 UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-                                 UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth       | 
-                                 UIViewAutoresizingFlexibleHeight;
-  
-  self.view.autoresizesSubviews = YES;
-  _navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
-  _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
-  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
-  self.navItem = [[UINavigationItem alloc] initWithTitle:@"Downloads"];
-  
-  UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc]  initWithBarButtonSystemItem:UIBarButtonSystemItemDone 
-                                                                                   target:self 
-                                                                                   action:@selector(hideDownloadManager)];
-  self.navItem.leftBarButtonItem = doneItemButton;
-  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
-                                                                   style:UIBarButtonItemStyleBordered 
-                                                                  target:self 
-                                                                  action:@selector(cancelAllDownloads)];    
-  self.navItem.rightBarButtonItem = cancelButton;
-  self.navItem.rightBarButtonItem.enabled = YES;
-  
-  [_navBar pushNavigationItem:self.navItem animated:NO];
-  [self.view addSubview:_navBar];
-  
-  frame.origin.y = _navBar.frame.size.height;
-  frame.size.height = self.view.frame.size.height - _navBar.frame.size.height;
-  
-  _tableView = [[UITableView alloc] initWithFrame:frame style:UITableViewStylePlain];
-  _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  _tableView.delegate = self;
-  _tableView.dataSource = self;
-  _tableView.rowHeight = 56;
-  [self.view addSubview:_tableView]; 
+
 }
 
 - (DownloadManagerPanel*)browserPanel
@@ -289,7 +291,7 @@ static SafariDownload *curDownload = nil;
       [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
                         withRowAnimation:UITableViewRowAnimationFade];
     }
-    [self updateBadges];
+    [ModalAlert showLoadingAlertWithIconName:download.filename];
     return YES;
   }
   return NO;
@@ -353,8 +355,10 @@ static SafariDownload *curDownload = nil;
     
     @try 
     {
-      DownloadOperation *op = [[_downloadQueue operations] objectAtIndex:index];
+//      DownloadOperation *op = [[_downloadQueue operations] objectAtIndex:index];
+      DownloadOperation *op = download.downloadOperation;
       [op cancel];
+      download.downloadOperation = nil;
     }
     @catch (id nothing) 
     { 
@@ -433,7 +437,12 @@ static SafariDownload *curDownload = nil;
 
 - (DownloadCell*)cellForDownload:(SafariDownload*)download
 {
+  NSLog(@"download: %@", download);
+  NSLog(@"current Downloads: %@", _currentDownloads);
+  NSLog(@"tableView: %@", _tableView);
+  NSLog(@"tableview visible cells: %@", [_tableView visibleCells]);
   NSUInteger row = [_currentDownloads indexOfObject:download];
+  NSLog(@"row: %d", row);
   DownloadCell *cell = (DownloadCell*)[_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
   return cell;
 }
@@ -465,9 +474,11 @@ static SafariDownload *curDownload = nil;
   NSLog(@"downloadDidFinish");
   DownloadCell* cell = [self cellForDownload:download];
   if (cell == nil) {
-    return;
+    NSLog(@"cell is nil!");
+//    return;
   }
   
+  download.downloadOperation = nil; // no-op atm
   cell.progressLabel = @"Download Complete";
   NSUInteger row = [_currentDownloads indexOfObject:download];
   [_currentDownloads removeObject:download];
@@ -521,6 +532,7 @@ static SafariDownload *curDownload = nil;
 {    
   [self updateBadges];
   [self saveData];  
+  download.downloadOperation = nil;
 }
 
 - (void)downloadDidFail:(SafariDownload*)download
@@ -530,7 +542,7 @@ static SafariDownload *curDownload = nil;
   if (cell == nil) {
     return;
   }
-  
+  download.downloadOperation = nil;
   cell.progressLabel = @"Download Failed";
   NSUInteger row = [_currentDownloads indexOfObject:download];
   [_currentDownloads removeObject:download];
