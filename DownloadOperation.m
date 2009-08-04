@@ -165,6 +165,8 @@ static id savedPanel = nil;
 didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
   NSLog(@"didReceiveAuthenticationChallenge!: %@", challenge);
+  NSLog(@"challenge sender: %@", [challenge sender]);
+
   [_delegate downloadDidReceiveAuthenticationChallenge];
   _requiresAuthentication = YES;
   _authenticationView = [[MyAuthenticationView alloc] initWithDelegate:self];
@@ -177,7 +179,7 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
     [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
   }
   NSLog(@"got credential: %@", _authCredential);
-  
+    
   if (!_authCredential) {
     [[challenge sender] cancelAuthenticationChallenge:challenge];
   }

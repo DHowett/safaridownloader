@@ -141,7 +141,7 @@ static SDActionType _actionType = SDActionTypeView;
 {
   NSString *url = [[request URL] absoluteString];
   
-  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"]) {
+  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"] && ![url hasPrefix:@"ftp://"]) {
     NSLog(@"not a valid http url, continue.");
     if (action) 
     {
@@ -237,7 +237,7 @@ static SDActionType _actionType = SDActionTypeView;
 decisionListener:(id<WebPolicyDecisionListener>)listener {
   NSString *url = [[request URL] absoluteString];
   
-  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"]) {
+  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"] && ![url hasPrefix:@"ftp://"]) {
     NSLog(@"not a valid http url, continue.");
     [originalDelegate webView:sender decidePolicyForNewWindowAction:action
                       request:request
