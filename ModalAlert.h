@@ -1,5 +1,8 @@
 @interface ModalAlert : NSObject 
 
++ (void)showLoadingAlertWithIconName:(NSString*)name;
++ (void)dismissLoadingAlert;
+
 + (void)showAlertViewWithTitle:(NSString*)title 
                        message:(NSString *)message 
                   cancelButton:(NSString*)cancel 

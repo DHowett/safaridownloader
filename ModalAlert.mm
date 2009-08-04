@@ -10,8 +10,14 @@
 #import "ModalAlert.h"
 #import "DownloadManager.h"
 #import "Safari/BrowserController.h"
+#import <QuartzCore/QuartzCore.h>
+
+@interface ModalAlert (priv)
+UIAlertView* activeInstance;
+@end
 
 @implementation ModalAlert
+
 + (void)block:(UIView *)view
 {
   view.hidden = FALSE;
@@ -35,6 +41,113 @@
   [alert release];
   
   [ModalAlert block:alert];	
+}
+
++ (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag
+{
+  [[DownloadManager sharedManager] updateBadges];
+  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+  UIView *v = [keyWindow viewWithTag:12345];
+  [v removeFromSuperview];
+  [activeInstance dismissWithClickedButtonIndex:0 animated:YES];
+  activeInstance = nil;
+}
+
+static UIImage* savedIcon = nil;
+
++ (void)showLoadingAlertWithIconName:(NSString*)name {
+  activeInstance = [[UIAlertView alloc]
+                       initWithTitle:@"Loading..."
+                       message:nil
+                       delegate:self
+                       cancelButtonTitle:nil
+                       otherButtonTitles:nil];
+  
+	UIActivityIndicatorView *listingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+	CGRect frame = listingIndicator.frame;
+	frame.origin.x = 220;
+	frame.origin.y = 15;
+	frame.size.width = 22;
+	frame.size.height = 22;
+	listingIndicator.frame = frame;
+	[activeInstance addSubview:listingIndicator];
+  [listingIndicator release];
+  
+  savedIcon = [[[DownloadManager sharedManager] iconForExtension:[name pathExtension]] retain];
+  
+  UIImageView* icon = [[UIImageView alloc] initWithImage:savedIcon];
+  icon.frame = CGRectMake(18, 14, 22, 22);
+  [activeInstance addSubview:icon];
+  [icon release];
+  
+	[activeInstance setNumberOfRows:0];
+	[activeInstance setTransform:CGAffineTransformMakeScale(1, 1.1)];
+	[activeInstance show];
+  [activeInstance release];
+	[listingIndicator startAnimating];   
+}
+
++ (void)dismissLoadingAlert {
+  
+  // Get the relevant frames.
+  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+  UIView *enclosingView = keyWindow;
+  CGRect cellFrame = CGRectMake(260, 440, 34, 36);
+  CGRect buttonFrame = [activeInstance convertRect:CGRectMake(18, 14, 22, 22) toView:keyWindow];
+  
+  /*
+   * Icon animation
+   */
+    
+  // Determine the animation's path.
+	CGPoint startPoint = CGPointMake(buttonFrame.origin.x + buttonFrame.size.width / 2, buttonFrame.origin.y + buttonFrame.size.height / 2);
+	CGPoint curvePoint1 = CGPointMake(startPoint.x + 90, startPoint.y - 150);
+	CGPoint endPoint = CGPointMake(cellFrame.origin.x, cellFrame.origin.y);
+	CGPoint curvePoint2 = CGPointMake(startPoint.x + 140, endPoint.y - 40);
+  
+  if ([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeLeft
+      || [[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeRight) {
+    endPoint.x *= 1.5;
+  }
+  
+  // Create the animation's path.
+  CGPathRef path = NULL;
+  CGMutablePathRef mutablepath = CGPathCreateMutable();
+  CGPathMoveToPoint(mutablepath,  NULL, 
+                    startPoint.x, startPoint.y);
+  
+  CGPathAddCurveToPoint(mutablepath,   NULL, 
+                        curvePoint1.x, curvePoint1.y,
+                        curvePoint2.x, curvePoint2.y,
+                        endPoint.x,    endPoint.y);
+  
+  path = CGPathCreateCopy(mutablepath);
+  CGPathRelease(mutablepath);
+  
+  // Create animated icon view.
+  
+  UIImageView* animatedLabel = [[UIImageView alloc] initWithImage:savedIcon];
+  animatedLabel.tag = 12345;
+  [enclosingView addSubview:animatedLabel];
+  [animatedLabel release];
+  CALayer *iconViewLayer = animatedLabel.layer;
+  
+  CAKeyframeAnimation *animatedIconAnimation = [CAKeyframeAnimation animationWithKeyPath: @"position"];
+  animatedIconAnimation.removedOnCompletion = YES;
+  animatedIconAnimation.duration = 0.5;
+  animatedIconAnimation.delegate = self;
+  animatedIconAnimation.path = path;
+  animatedIconAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+  [iconViewLayer addAnimation:animatedIconAnimation forKey:@"animateIcon"];
+  
+  // Start the icon animation.
+  [iconViewLayer setPosition:CGPointMake(endPoint.x, endPoint.y)];
+  
+  [UIView beginAnimations:nil context:NULL];
+  [UIView setAnimationCurve:UIViewAnimationCurveEaseIn];
+  [UIView setAnimationDuration:0.3];
+  [animatedLabel setTransform:CGAffineTransformMakeScale(0.3, 0.3)];
+  [UIView commitAnimations];  
 }
 
 + (void)showAuthViewWithChallenge:(NSURLAuthenticationChallenge*)challenge {
