@@ -842,7 +842,7 @@ static int animationType = 0;
   if(_currentDownloads.count > 0) val = [NSString stringWithFormat:@"%d", _currentDownloads.count];
   [_portraitDownloadButton _setBadgeValue:val];
   [_landscapeDownloadButton _setBadgeValue:val];
-  [[UIApplication sharedApplication] setApplicationIconBadgeNumber:_currentDownloads.count];
+  [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 }
 @end
 

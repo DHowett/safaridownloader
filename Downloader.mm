@@ -341,6 +341,7 @@ HOOK(WebView, setPolicyDelegate$, void, id delegate) {
 HOOK(Application, applicationDidFinishLaunching$, void, UIApplication *application) {
   CALL_ORIG(Application, applicationDidFinishLaunching$, application);
   [downloader loadCustomToolbar];
+  [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 }
 
 HOOK(Application, applicationResume$, void, GSEventRef event) {
