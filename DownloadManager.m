@@ -767,7 +767,7 @@ static int animationType = 0;
       }
     }
     launch.cancelButtonIndex = [launch addButtonWithTitle:@"Cancel"];
-    [launch showInView:_tableView];
+    [launch showInView:self.view];
     [launch release];
   }
   // Navigation logic may go here. Create and push another view controller.
