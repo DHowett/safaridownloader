@@ -130,17 +130,17 @@ static SafariDownload *curDownload = nil;
   NSArray *disabledItems = [userPrefs objectForKey:@"DisabledItems"];
   NSDictionary *customTypes = [userPrefs objectForKey:@"CustomItems"];
   if(customTypes) [globalFileTypes setValue:customTypes forKey:@"CustomItems"];
-
+  
   if(_mimeTypes) [_mimeTypes release];
   if(_extensions) [_extensions release];
   if(_classMappings) [_classMappings release];
   _mimeTypes = [[NSMutableSet alloc] init];
   _extensions = [[NSMutableSet alloc] init];
   _classMappings = [[NSMutableDictionary alloc] init];
-
+  
   BOOL disabled = [[userPrefs objectForKey:@"Disabled"] boolValue];
   if(disabled) return;
-
+  
   for(NSDictionary *fileClassName in globalFileTypes) {
     NSDictionary *fileClass = [globalFileTypes objectForKey:fileClassName];
     for(NSString *fileTypeName in fileClass) {
@@ -148,7 +148,7 @@ static SafariDownload *curDownload = nil;
         NSLog(@"Skipping %@...", fileTypeName);
         continue;
       }
-
+      
       NSDictionary *fileType = [fileClass objectForKey:fileTypeName];
       NSArray *mimes = [fileType objectForKey:@"Mimetypes"];
       NSArray *exts = [fileType objectForKey:@"Extensions"];
@@ -161,12 +161,12 @@ static SafariDownload *curDownload = nil;
   NSLog(@"%@", _mimeTypes);
   
   /*
-  NSDictionary *disableShit = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
-  [_mimeTypes removeObjectsInArray:[disableShit objectForKey:@"DisabledMimetypes"]];
-  NSLog(@"%@ - %@", _extensions, [disableShit objectForKey:@"DisabledExtensions"]);
-  [_extensions removeObjectsInArray:[disableShit objectForKey:@"DisabledExtensions"]];
-  NSLog(@"%@", _extensions);
-  */
+   NSDictionary *disableShit = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
+   [_mimeTypes removeObjectsInArray:[disableShit objectForKey:@"DisabledMimetypes"]];
+   NSLog(@"%@ - %@", _extensions, [disableShit objectForKey:@"DisabledExtensions"]);
+   [_extensions removeObjectsInArray:[disableShit objectForKey:@"DisabledExtensions"]];
+   NSLog(@"%@", _extensions);
+   */
   NSFileManager *fm = [NSFileManager defaultManager];
   if(_launchActions) [_launchActions release];
   _launchActions = [[NSMutableDictionary alloc] init];
@@ -181,7 +181,7 @@ static SafariDownload *curDownload = nil;
 
 - (void)loadView
 {
-
+  
 }
 
 - (DownloadManagerPanel*)browserPanel
@@ -317,7 +317,7 @@ static SafariDownload *curDownload = nil;
 }
 
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request {
-//  NSLog(@"addDownloadWithRequest: %@", request);
+  //  NSLog(@"addDownloadWithRequest: %@", request);
   BOOL use = NO;
   NSString *filename = [self fileNameForURL:[request URL]];
   if (filename == nil) {
@@ -327,7 +327,7 @@ static SafariDownload *curDownload = nil;
   
   if ([self downloadWithURL:[request URL]])
     return NO;
-
+  
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
                                                                 name:filename
                                                             delegate:self
@@ -339,7 +339,7 @@ static SafariDownload *curDownload = nil;
   NSURLRequest*   request  = [info objectForKey:@"request"];
   if ([self downloadWithURL:[request URL]])
     return NO;
-
+  
   SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
                                                                 name:[info objectForKey:@"name"]
                                                             delegate:self
@@ -355,7 +355,7 @@ static SafariDownload *curDownload = nil;
     
     @try 
     {
-//      DownloadOperation *op = [[_downloadQueue operations] objectAtIndex:index];
+      //      DownloadOperation *op = [[_downloadQueue operations] objectAtIndex:index];
       DownloadOperation *op = download.downloadOperation;
       [op cancel];
       download.downloadOperation = nil;
@@ -374,7 +374,7 @@ static SafariDownload *curDownload = nil;
       [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
                         withRowAnimation:UITableViewRowAnimationFade];
     }
-
+    
     [self updateBadges];
   }
   return NO;
@@ -419,20 +419,20 @@ static SafariDownload *curDownload = nil;
                              cancelButtonTitle:@"OK"
                              otherButtonTitles:nil];
   }
-
+  
   [alert show];
   [alert release];
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
- if (buttonIndex == 1) {
-   if (_currentDownloads.count > 0) {
-     [self saveData];
-     [_downloadQueue cancelAllOperations];
-     [_currentDownloads removeAllObjects];
-     [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-   }
- } 
+  if (buttonIndex == 1) {
+    if (_currentDownloads.count > 0) {
+      [self saveData];
+      [_downloadQueue cancelAllOperations];
+      [_currentDownloads removeAllObjects];
+      [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+    }
+  } 
 }
 
 - (DownloadCell*)cellForDownload:(SafariDownload*)download
@@ -473,35 +473,36 @@ static SafariDownload *curDownload = nil;
 {
   NSLog(@"downloadDidFinish");
   DownloadCell* cell = [self cellForDownload:download];
-  if (cell == nil) {
-    NSLog(@"cell is nil!");
-//    return;
-  }
   
   download.downloadOperation = nil; // no-op atm
   cell.progressLabel = @"Download Complete";
   NSUInteger row = [_currentDownloads indexOfObject:download];
   [_currentDownloads removeObject:download];
-  
-  if (_currentDownloads.count == 0) {
-    [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-  } else {
-    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
-                      withRowAnimation:UITableViewRowAnimationFade];
-  }
-  
   [_finishedDownloads addObject:download];
-  
-  if (_currentDownloads.count > 0) {
-    [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_finishedDownloads.count-1 inSection:1]]
-                      withRowAnimation:UITableViewRowAnimationFade];
-  } 
-  else {
-    [_tableView reloadData];
-  }
   
   [self updateBadges];
   [self saveData];
+  
+  if (cell == nil) {
+    NSLog(@"cell is nil!");
+    return;
+  }
+  
+  [_tableView beginUpdates];
+  {
+    if (_currentDownloads.count == 0) {
+      [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_finishedDownloads.count-1 inSection:0]]
+                        withRowAnimation:UITableViewRowAnimationFade];
+      [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+    } 
+    else {
+      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
+                        withRowAnimation:UITableViewRowAnimationFade];
+      [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_finishedDownloads.count-1 inSection:1]]
+                        withRowAnimation:UITableViewRowAnimationFade];
+    }
+  }
+  [_tableView endUpdates];
 }
 
 // not used, too much of an overhead :<
@@ -520,8 +521,8 @@ static SafariDownload *curDownload = nil;
 - (void)downloadDidUpdate:(SafariDownload*)download
 {
   DownloadCell* cell = [self cellForDownload:download];
-//  [[NSRunLoop currentRunLoop] cancelPerformSelector:@selector(updateProgressForDownload:) target:self argument:download]; 
-//  [self updateProgressForDownload:download];
+  //  [[NSRunLoop currentRunLoop] cancelPerformSelector:@selector(updateProgressForDownload:) target:self argument:download]; 
+  //  [self updateProgressForDownload:download];
   cell.progressView.progress = download.progress;
   cell.completionLabel = [NSString stringWithFormat:@"%d%%", (int)(download.progress*100.0f)];
   cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
@@ -539,32 +540,35 @@ static SafariDownload *curDownload = nil;
 {
   NSLog(@"downloadDidFail");
   DownloadCell* cell = [self cellForDownload:download];
-  if (cell == nil) {
-    return;
-  }
+  
   download.downloadOperation = nil;
   cell.progressLabel = @"Download Failed";
   NSUInteger row = [_currentDownloads indexOfObject:download];
   [_currentDownloads removeObject:download];
-  
-  if (_currentDownloads.count == 0) {
-    [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-  } else {
-    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
-                      withRowAnimation:UITableViewRowAnimationFade];
-  }
-  
   [_finishedDownloads addObject:download];
   
-  if (_currentDownloads.count > 0) {
-    [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_finishedDownloads.count-1 inSection:1]]
-                      withRowAnimation:UITableViewRowAnimationFade];
-  } else {
-    [_tableView reloadData];
+  [self updateBadges];
+  [self saveData];
+  
+  if (cell == nil) {
+    return;
   }
   
-  [self updateBadges];
-  [self saveData];  
+  [_tableView beginUpdates];
+  {
+    if (_currentDownloads.count == 0) {
+      [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_finishedDownloads.count-1 inSection:0]]
+                        withRowAnimation:UITableViewRowAnimationFade];
+      [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+    } 
+    else {
+      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
+                        withRowAnimation:UITableViewRowAnimationFade];
+      [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_finishedDownloads.count-1 inSection:1]]
+                        withRowAnimation:UITableViewRowAnimationFade];
+    }
+  }
+  [_tableView endUpdates];
 }
 
 #pragma mark -/*}}}*/
@@ -656,7 +660,7 @@ static int animationType = 0;
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-//  NSLog(@"shouldAutorotateToInterfaceOrientation? %d", doRot);
+  //  NSLog(@"shouldAutorotateToInterfaceOrientation? %d", doRot);
   return doRot; // do not rotate if safari rotations are disabled (i.e. panel is currently up)
 }
 
@@ -809,7 +813,7 @@ static int animationType = 0;
     NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
     int row = [_finishedDownloads indexOfObject:curDownload];
     int section = (_currentDownloads.count > 0) ? 1 : 0;
-
+    
     [_finishedDownloads removeObjectAtIndex:row];
     [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
     [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
