@@ -23,6 +23,9 @@ DEBUG_CFLAGS=-DDEBUG -ggdb
 STRIP=/bin/true
 endif
 
+STOREPACKAGE=1
+export STOREPACKAGE
+
 CFLAGS:=-include $(TOP_DIR)/Downloader_Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include
 export FRAMEWORKDIR
 export CFLAGS
