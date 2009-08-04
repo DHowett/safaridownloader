@@ -90,6 +90,7 @@ static UIImage* savedIcon = nil;
 + (void)dismissLoadingAlert {
   
   // Get the relevant frames.
+  if(!activeInstance) return;
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
   UIView *enclosingView = keyWindow;
 

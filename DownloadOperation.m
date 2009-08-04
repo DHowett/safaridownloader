@@ -305,6 +305,7 @@ fail:
   _timer = nil;
   _keepAlive = NO;
   [_delegate downloadFailedWithError:error];
+  [ModalAlert dismissLoadingAlert];
 }
 
 - (void)downloadDidFinish:(NSURLDownload *)download
