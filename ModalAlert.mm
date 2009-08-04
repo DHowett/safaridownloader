@@ -243,7 +243,7 @@ static UIImage* savedIcon = nil;
   [ohmygod addSubview:iconImageView];
   [iconImageView release];
   
-  [ohmygod showInView:[[objc_getClass("BrowserController") sharedBrowserController] window]];
+  [ohmygod showInView:[[objc_getClass("BrowserController") sharedBrowserController] browserLayer]];
   [ohmygod release];
   
   [ModalAlert block:ohmygod];	
