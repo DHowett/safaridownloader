@@ -101,7 +101,6 @@ static UIImage* savedIcon = nil;
   CGRect cellFrame;
   if(!button) cellFrame = CGRectMake(260, 440, 34, 36);
   else cellFrame = [[[BrowserController sharedBrowserController] buttonBar] convertRect:tempCellFrame toView:keyWindow];
-  NSLog(@"%@", NSStringFromCGRect(cellFrame));
 
 //  CGRect cellFrame = GRectMake(260, 440, 34, 36);
   CGRect buttonFrame = [activeInstance convertRect:CGRectMake(18, 14, 22, 22) toView:keyWindow];
@@ -113,13 +112,8 @@ static UIImage* savedIcon = nil;
   // Determine the animation's path.
 	CGPoint startPoint = CGPointMake(buttonFrame.origin.x + buttonFrame.size.width / 2, buttonFrame.origin.y + buttonFrame.size.height / 2);
 	CGPoint curvePoint1 = CGPointMake(startPoint.x + 90, startPoint.y - 150);
-	CGPoint endPoint = CGPointMake(cellFrame.origin.x, cellFrame.origin.y);
+	CGPoint endPoint = CGPointMake(CGRectGetMidX(cellFrame), CGRectGetMidY(cellFrame));
 	CGPoint curvePoint2 = CGPointMake(startPoint.x + 140, endPoint.y - 40);
-  
-  if ([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeLeft
-      || [[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeRight) {
-    endPoint.x *= 1.5;
-  }
   
   // Create the animation's path.
   CGPathRef path = NULL;
