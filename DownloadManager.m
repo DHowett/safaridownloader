@@ -767,7 +767,7 @@ static int animationType = 0;
       }
     }
     launch.cancelButtonIndex = [launch addButtonWithTitle:@"Cancel"];
-    [launch showInView:[[objc_getClass("BrowserController") sharedBrowserController] window]];
+    [launch showInView:_tableView];
     [launch release];
   }
   // Navigation logic may go here. Create and push another view controller.
