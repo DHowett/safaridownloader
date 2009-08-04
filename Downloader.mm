@@ -175,6 +175,7 @@ static SDActionType _actionType = SDActionTypeView;
       [listener ignore];
       [frame stopLoading];
     }
+    return YES;
   }
   else return NO;
 }
@@ -253,45 +254,8 @@ HOOK(TabDocument, webView$decidePolicyForNavigationAction$request$frame$decision
 }
 
 HOOK(TabDocument, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$, void, WebView *view, NSDictionary *action, NSURLRequest *request, NSString *newFrameName, id<WebPolicyDecisionListener> decisionListener) {
-  NSString *url = [[request URL] absoluteString];
-  if (![url hasPrefix:@"http://"] && ![url hasPrefix:@"https://"] && ![url hasPrefix:@"ftp://"]) {
-    NSLog(@"not a valid http url, continue.");
-    CALL_ORIG(TabDocument, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$, view, action, request, newFrameName, decisionListener);
-    return;
-  }
-  
-  if ([[DownloadManager sharedManager] supportedRequest:request withMimeType:nil]) {
-    NSString *filename = [[DownloadManager sharedManager] fileNameForURL:[request URL]];
-    if (filename == nil) {
-      filename = [[request URL] absoluteString];
-    }
-    
-    NSString *other = @"View";
-    
-    [ModalAlert showActionSheetWithTitle:@"What would you like to do?"
-                                 message:filename
-                            cancelButton:@"Cancel"
-                             destructive:@"Download"
-                                   other:other
-                                delegate:self];
-    
-    if (_actionType == SDActionTypeView) {      
-      CALL_ORIG(TabDocument, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$, view, action, request, newFrameName, decisionListener);
-    } 
-    else if (_actionType == SDActionTypeDownload) {
-      [decisionListener ignore];
-      if ([[DownloadManager sharedManager] addDownloadWithRequest:request])
-        NSLog(@"successfully added download");
-      else
-        NSLog(@"add download failed");
-    } 
-    else {
-      [decisionListener ignore]; 
-    }
-  } 
-  else {
-    [decisionListener use]; 
-  }  
+  BOOL handled = [downloader webView:view decideAction:action forRequest:request withMimeType:nil inFrame:nil withListener:decisionListener];
+  if(!handled) CALL_ORIG(TabDocument, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$, view, action, request, newFrameName, decisionListener);
 }
 
 HOOK(TabDocument, webView$decidePolicyForMIMEType$request$frame$decisionListener$, void, WebView *view, NSString *type, NSURLRequest *request, WebFrame *frame, id<WebPolicyDecisionListener> decisionListener) {
