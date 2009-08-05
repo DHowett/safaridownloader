@@ -575,6 +575,10 @@ static int animationType = 0;
 {    
   NSLog(@"showDownloadManager!");
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+  if(!keyWindow) {
+    Class BrowserController = objc_getClass("BrowserController");
+    keyWindow = [[BrowserController sharedBrowserController] window];
+  }
   self.view.frame = [[UIScreen mainScreen] applicationFrame];
   UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
   NSString *transition = kCATransitionFromTop;
