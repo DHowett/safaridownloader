@@ -5,4 +5,31 @@
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
     #import <UIKit/UIKit.h>
+
+// Comment this out for release builds
+//#define __DEBUG__
+
+// Numerical and Structural String Formatting Macros
+#define iF(i) [NSString stringWithFormat:@"%d", i]
+#define fF(f) [NSString stringWithFormat:@"%.2f", f]
+#define bF(b) [NSString stringWithFormat:@"%@", b ? @"true" : @"false"]
+#define sF(inset) NSStringFromUIEdgeInsets(inset)
+
+#define CLASS(cls) objc_getClass(#cls)
+
+#ifdef __DEBUG__
+#define CMLog(format, ...) NSLog(@"(%s) in [%s:%d] ::: %@", __PRETTY_FUNCTION__, __FILE__, __LINE__, [NSString stringWithFormat:format, ## __VA_ARGS__])
+#define MARK	CMLog(@"%s", __PRETTY_FUNCTION__);
+#define START_TIMER NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
+#define END_TIMER(msg) 	NSTimeInterval stop = [NSDate timeIntervalSinceReferenceDate]; CMLog([NSString stringWithFormat:@"%@ Time = %f", msg, stop-start])
+#else
+#define CMLog(format, ...)
+#define MARK
+#define START_TIMER
+#define END_TIMER(msg)
+#endif
+
+#define NB [NSBundle mainBundle]
+#define UD [NSUserDefaults standardUserDefaults]
+#define FM [NSFileManager defaultManager]
 #endif
