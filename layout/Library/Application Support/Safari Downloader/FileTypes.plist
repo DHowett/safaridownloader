@@ -191,7 +191,16 @@
 	};
     };
     Media = {
-	"AAC, M4*" = {
+	"3GPP Video" = {
+	    Extensions = (
+		3gp,
+		3gpp
+	    );
+	    Mimetypes = (
+		video/3gpp
+	    );
+	};
+	"AAC, M4* Audio" = {
 	    Extensions = (
 		m4a,
 		m4b,
@@ -199,12 +208,12 @@
 		mp4,
 		m4v,
 		m4r,
-		3gp,
 		aac
 	    );
 	    Mimetypes = (
 		audio/aac,
-		audio/aacp
+		audio/aacp,
+		audio/mp4
 	    );
 	};
 	AVI = {
@@ -215,6 +224,20 @@
 		video/avi,
 		video/msvideo,
 		"video/x-msvideo"
+	    );
+	};
+	"Flash & MP4 Video" = {
+	    Extensions = (
+		flv,
+		f4v,
+		f4p,
+		f4a,
+		f4b
+	    );
+	    Mimetypes = (
+		"video/x-flv",
+		video/mp4,
+		"video/x-m4v"
 	    );
 	};
 	"MPEG Audio" = {
