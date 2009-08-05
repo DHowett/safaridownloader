@@ -75,25 +75,20 @@ static id _currentRequest;
   id x = [BrowserButtonBar imageButtonItemWithName:@"NavBookmarks.png" tag:61 action:nil target:nil];
   id y = [BrowserButtonBar imageButtonItemWithName:@"NavBookmarksSmall.png" tag:62 action:nil target:nil];
   
-  id spacer1 = [BrowserButtonBar imageButtonItemWithName:@"spacer" tag:66 action:nil target:nil];
-  id spacer2 = [BrowserButtonBar imageButtonItemWithName:@"spacer" tag:67 action:nil target:nil];
-  
   NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
   [mutButtonItems addObject:x];
   [mutButtonItems addObject:y];
-  [mutButtonItems addObject:spacer1];
-  [mutButtonItems addObject:spacer2];
   [buttonBar setButtonItems:mutButtonItems];
   [mutButtonItems release];
   
-  int portraitGroup[]  = {5, 66, 7, 66, 15, 66, 1, 66, 61, 66, 3};
-  int landscapeGroup[] = {6, 67, 8, 67, 16, 67, 2, 67, 62, 67, 4};
+  int portraitGroup[]  = {5, 7, 15, 1, 61, 3};
+  int landscapeGroup[] = {6, 8, 16, 2, 62, 4};
   
   CFDictionaryRemoveValue(_groups, (void*)1);
   CFDictionaryRemoveValue(_groups, (void*)2);
   
-  [buttonBar registerButtonGroup:1 withButtons:portraitGroup withCount:11];
-  [buttonBar registerButtonGroup:2 withButtons:landscapeGroup withCount:11];
+  [buttonBar registerButtonGroup:1 withButtons:portraitGroup withCount:6];
+  [buttonBar registerButtonGroup:2 withButtons:landscapeGroup withCount:6];
   
   if (cg == 1 || cg == 2)
     [buttonBar showButtonGroup:cg withDuration:0]; // duration appears to either be ignored or is somehow related to animations
@@ -222,27 +217,35 @@ HOOK(BrowserButtonBar, createButtonWithDescription$, id, id description) {
     [ret addTarget:[DownloadManager sharedManager] action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
     [[DownloadManager sharedManager] setLandscapeDownloadButton:ret];
   }
-  else if (tag == 66) // portrait spacer
-    ret.frame = CGRectMake(ret.frame.origin.x, ret.frame.origin.y, 15, ret.frame.size.height);
-  else if (tag == 67) // landscape spacer
-    ret.frame = CGRectMake(ret.frame.origin.x, ret.frame.origin.y, 45, ret.frame.size.height);
   return ret;
 }
 
-HOOK(UIToolbarButton, hitTest$withEvent$, id, CGPoint point, id event) {
-  if ([self tag] == 66 || [self tag] == 67)
-    return nil;
-  return CALL_ORIG(UIToolbarButton, hitTest$withEvent$, point, event); 
+HOOK(BrowserButtonBar, positionButtons$tags$count$group$, void, id buttons, int *tags, int count, int group) {
+  CALL_ORIG(BrowserButtonBar, positionButtons$tags$count$group$, buttons, tags, count, group);
+  if(group != 1 && group != 2) {
+    return;
+  }
+
+  NSLog(@"Button array: %@", [buttons description]);
+  float maxWidth = self.frame.size.width;
+  float buttonBoxWidth = floorf(maxWidth / count);
+  if((int)buttonBoxWidth % 2 == 1) buttonBoxWidth -= 1.0f;
+  float curX = 0;
+  float maxX = buttonBoxWidth;
+  int curButton = 0;
+  float YOrigin = 2; //(group == 1) ? 2 : 0;
+  for(UIToolbarButton *button in buttons) {
+    curX = curButton * buttonBoxWidth;
+    maxX = curX + buttonBoxWidth;
+    float curWidth = button.frame.size.width;
+    float curHeight = button.frame.size.height;
+    float newXOrigin = maxX - (buttonBoxWidth / 2.0) - (curWidth / 2.0);
+    [button setFrame:CGRectMake(newXOrigin, YOrigin, curWidth, curHeight)];
+    curButton++;
+  }
+  return;
 }
 
-HOOK(UIToolbarButton, setFrame$, void, CGRect frame) {
-  if (self.tag == 61)
-    CALL_ORIG(UIToolbarButton, setFrame$, CGRectOffset(frame, 3, 0));
-  else if (self.tag == 62)
-    CALL_ORIG(UIToolbarButton, setFrame$, CGRectOffset(frame, 8, 0));
-  else
-    CALL_ORIG(UIToolbarButton, setFrame$, frame);
-}
 
 HOOK(BrowserController, _panelForPanelType$, id, int type) {
   if(type == 44)
@@ -319,10 +322,7 @@ extern "C" void DownloaderInitialize() {
 
   GET_CLASS(BrowserButtonBar);
   HOOK_MESSAGE_F(BrowserButtonBar, createButtonWithDescription:, createButtonWithDescription$);
-
-  GET_CLASS(UIToolbarButton);
-  HOOK_MESSAGE_F(UIToolbarButton, hitTest:withEvent:, hitTest$withEvent$);
-  HOOK_MESSAGE_F(UIToolbarButton, setFrame:, setFrame$);
+  HOOK_MESSAGE_F(BrowserButtonBar, positionButtons:tags:count:group:, positionButtons$tags$count$group$);
 
   GET_CLASS(BrowserController);
   HOOK_MESSAGE_F(BrowserController, _panelForPanelType:, _panelForPanelType$);
