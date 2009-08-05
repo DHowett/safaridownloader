@@ -72,10 +72,17 @@ static id _currentRequest;
   int cg = MSHookIvar<int>(buttonBar, "_currentButtonGroup");
   NSArray *_buttonItems = [buttonBar buttonItems];
   
-  id x = [BrowserButtonBar imageButtonItemWithName:@"NavBookmarks.png" tag:61 action:nil target:nil];
-  id y = [BrowserButtonBar imageButtonItemWithName:@"NavBookmarksSmall.png" tag:62 action:nil target:nil];
+  id x = [BrowserButtonBar imageButtonItemWithName:@"Download.png"
+                                               tag:61
+                                            action:@selector(showDownloadManager)
+                                            target:[NSValue valueWithPointer:[DownloadManager sharedManager]]];
+  id y = [BrowserButtonBar imageButtonItemWithName:@"DownloadSmall.png"
+                                               tag:62
+                                            action:@selector(showDownloadManager)
+                                            target:[NSValue valueWithPointer:[DownloadManager sharedManager]]];
   
   NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
+
   [mutButtonItems addObject:x];
   [mutButtonItems addObject:y];
   [buttonBar setButtonItems:mutButtonItems];
@@ -201,25 +208,6 @@ HOOK(Application, applicationResume$, void, GSEventRef event) {
   [[DownloadManager sharedManager] updateFileTypes];
 }
 
-HOOK(BrowserButtonBar, createButtonWithDescription$, id, id description) {
-  UIToolbarButton* ret = CALL_ORIG(BrowserButtonBar, createButtonWithDescription$, description);
-  NSInteger tag = [[description objectForKey:@"UIButtonBarButtonTag"] intValue];
-  
-  if (tag == 61) // portrait buton
-  {
-    [ret setImage:[UIImage imageNamed:@"Download.png"]];
-    [ret addTarget:[DownloadManager sharedManager] action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
-    [[DownloadManager sharedManager] setPortraitDownloadButton:ret];
-  }
-  else if (tag == 62) // landscape button
-  {
-    [ret setImage:[UIImage imageNamed:@"DownloadSmall.png"]];
-    [ret addTarget:[DownloadManager sharedManager] action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
-    [[DownloadManager sharedManager] setLandscapeDownloadButton:ret];
-  }
-  return ret;
-}
-
 HOOK(BrowserButtonBar, positionButtons$tags$count$group$, void, id buttons, int *tags, int count, int group) {
   CALL_ORIG(BrowserButtonBar, positionButtons$tags$count$group$, buttons, tags, count, group);
   if(group != 1 && group != 2) {
@@ -245,7 +233,6 @@ HOOK(BrowserButtonBar, positionButtons$tags$count$group$, void, id buttons, int 
   }
   return;
 }
-
 
 HOOK(BrowserController, _panelForPanelType$, id, int type) {
   if(type == 44)
@@ -321,7 +308,6 @@ extern "C" void DownloaderInitialize() {
   HOOK_MESSAGE_F(Application, applicationResume:, applicationResume$);
 
   GET_CLASS(BrowserButtonBar);
-  HOOK_MESSAGE_F(BrowserButtonBar, createButtonWithDescription:, createButtonWithDescription$);
   HOOK_MESSAGE_F(BrowserButtonBar, positionButtons:tags:count:group:, positionButtons$tags$count$group$);
 
   GET_CLASS(BrowserController);
