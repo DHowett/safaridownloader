@@ -19,10 +19,11 @@
 
 + (void)showDownloadActionSheetWithTitle:(NSString*)title 
                                  message:(NSString*)message 
-                                mimetype:(NSString*)mimetype 
+                                mimetype:(NSString*)mimetype
                             cancelButton:(NSString*)cancel 
                              destructive:(NSString*)destructive
                                    other:(NSString*)other 
+                                     tag:(NSInteger)tag
                                 delegate:(id)delegate;
 
 @end

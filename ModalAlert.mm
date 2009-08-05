@@ -228,6 +228,7 @@ static UIImage* savedIcon = nil;
                             cancelButton:(NSString*)cancel 
                              destructive:(NSString*)destructive
                                    other:(NSString*)other 
+                                     tag:(NSInteger)tag
                                 delegate:(id)delegate
 {
   
@@ -237,6 +238,7 @@ static UIImage* savedIcon = nil;
                                          destructiveButtonTitle:destructive
                                               otherButtonTitles:other, nil];
   [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
+  ohmygod.tag = tag;
   
   UILabel *nameLabel = MSHookIvar<UILabel *>(ohmygod, "_bodyTextLabel");;
   UIFont *filenameFont = [nameLabel font];

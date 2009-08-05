@@ -5,17 +5,17 @@
 //  Created by Youssef Francis on 7/23/09.
 //  Copyright 2009 Brancipater Software. All rights reserved.
 //
+#import "DHHookCommon.h"
 #import <QuartzCore/QuartzCore.h>
 #import "Safari/BrowserController.h"
 #import "DownloadManager.h"
 #import "DownloadCell.h"
 #import "DownloaderCommon.h"
 #import "ModalAlert.h"
-#define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
 
-#ifndef DEBUG
-#define NSLog(...)
-#endif
+#define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
+#define kDownloadSheet 993349
+#define kActionSheet 903403
 
 static BOOL doRot = YES;
 
@@ -49,13 +49,16 @@ static BOOL doRot = YES;
 @end
 
 @implementation DownloadManager
-@synthesize navItem = _navItem, portraitDownloadButton = _portraitDownloadButton, landscapeDownloadButton = _landscapeDownloadButton;
+@synthesize 
+navItem = _navItem, 
+portraitDownloadButton = _portraitDownloadButton, 
+landscapeDownloadButton = _landscapeDownloadButton,
+currentRequest;
 
 #pragma mark -
 #pragma mark Singleton Methods/*{{{*/
 static id sharedManager = nil;
 static id resourceBundle = nil;
-static SafariDownload *curDownload = nil;
 
 + (void)initialize  {
   if (self == [DownloadManager class])
@@ -73,7 +76,6 @@ static SafariDownload *curDownload = nil;
   if([self initWithNibName:nil bundle:nil] != nil) 
   {    
     _panel = [[DownloadManagerPanel alloc] init];
-    // THIS IS A STATIC RESOURCE BUT IT WAS NULL WHEN I PUT IT IN INITIALIZE, W T F. TODO DHOWETT GODDAMNIT WHY
     resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
     _currentDownloads = [NSMutableArray new];
     _finishedDownloads = [NSMutableArray new];
@@ -158,20 +160,155 @@ static SafariDownload *curDownload = nil;
   NSRange range = [filename rangeOfString: @"?"];
   if (range.location != NSNotFound)
     filename = [filename substringToIndex:range.location];
-  if (filename.length == 0 || [[filename pathExtension] isEqualToString:@"php"])
+  if (filename.length == 0 || 
+      [[filename pathExtension] isEqualToString:@"php"]  ||
+      [[filename pathExtension] isEqualToString:@"asp"]  ||
+      [[filename pathExtension] isEqualToString:@"aspx"] ||
+      [[filename pathExtension] isEqualToString:@"html"])
     return nil;
   return filename;
+}
+
+- (void)loadCustomToolbar
+{
+  Class BrowserController = objc_getClass("BrowserController");
+  Class BrowserButtonBar = objc_getClass("BrowserButtonBar");
+  BrowserController *bcont = [BrowserController sharedBrowserController];
+  BrowserButtonBar *buttonBar = MSHookIvar<BrowserButtonBar *>(bcont, "_buttonBar");
+  CFMutableDictionaryRef _groups = MSHookIvar<CFMutableDictionaryRef>(buttonBar, "_groups");
+  int cg = MSHookIvar<int>(buttonBar, "_currentButtonGroup");
+  NSArray *_buttonItems = [buttonBar buttonItems];
+  
+  id x = [BrowserButtonBar imageButtonItemWithName:@"Download.png"
+                                               tag:61
+                                            action:@selector(showDownloadManager)
+                                            target:[NSValue valueWithNonretainedObject:[DownloadManager sharedManager]]];
+  id y = [BrowserButtonBar imageButtonItemWithName:@"DownloadSmall.png"
+                                               tag:62
+                                            action:@selector(showDownloadManager)
+                                            target:[NSValue valueWithNonretainedObject:[DownloadManager sharedManager]]];
+  
+  NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
+  
+  [mutButtonItems addObject:x];
+  [mutButtonItems addObject:y];
+  [buttonBar setButtonItems:mutButtonItems];
+  [mutButtonItems release];
+  
+  int portraitGroup[]  = {5, 7, 15, 1, 61, 3};
+  int landscapeGroup[] = {6, 8, 16, 2, 62, 4};
+  
+  CFDictionaryRemoveValue(_groups, (void*)1);
+  CFDictionaryRemoveValue(_groups, (void*)2);
+  
+  [buttonBar registerButtonGroup:1 
+                     withButtons:portraitGroup 
+                       withCount:6];
+  [buttonBar registerButtonGroup:2 
+                     withButtons:landscapeGroup 
+                       withCount:6];
+  
+  if (cg == 1 || cg == 2)
+    [buttonBar showButtonGroup:cg
+                  withDuration:0];
+}
+
+#pragma mark -/*}}}*/
+#pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
+static SDActionType _actionType = SDActionTypeNone;
+
+// WebPolicyDelegate SafariDownloader Addition
+- (SDActionType) webView:(WebView *)webView 
+            decideAction:(NSDictionary*)action
+              forRequest:(NSURLRequest *)request 
+            withMimeType:(NSString *)mimeType 
+                 inFrame:(WebFrame *)frame
+            withListener:(id<WebPolicyDecisionListener>)listener
+{
+  NSLog(@"WE GOT CALLED!!!!");
+  
+  NSString *url = [[request URL] absoluteString];
+  
+  if (![url hasPrefix:@"http://"] && 
+      ![url hasPrefix:@"https://"] && 
+      ![url hasPrefix:@"ftp://"]) {
+    NSLog(@"not a valid url, continue.");
+    return SDActionTypeNone;
+  }
+  
+  if ([self supportedRequest:request 
+                withMimeType:mimeType]) {
+    
+    NSLog(@"WE SUPPORT THE REQUEST: %@", request);
+    
+    NSString *filename = [self fileNameForURL:[request URL]];
+    if (filename == nil) {
+      filename = [[request URL] absoluteString];
+    }
+    
+    NSString *other = nil;
+    if(mimeType) 
+      other = [objc_getClass("WebView") canShowMIMEType:mimeType] ? @"View" : nil;
+    else 
+      other = @"View";
+    
+    [ModalAlert showDownloadActionSheetWithTitle:@"What would you like to do?"
+                                         message:filename
+                                        mimetype:mimeType
+                                    cancelButton:@"Cancel"
+                                     destructive:@"Download"
+                                           other:other
+                                             tag:kDownloadSheet
+                                        delegate:self];
+    
+    if (_actionType == SDActionTypeView) 
+    {
+      return SDActionTypeView;
+    }
+    else if (_actionType == SDActionTypeDownload) 
+    {
+      [listener ignore];
+      [frame stopLoading];
+      BOOL downloadAdded = NO;
+      if(mimeType != nil)
+        downloadAdded = [self addDownloadWithRequest:request 
+                                         andMimeType:mimeType];
+      else
+        downloadAdded = [self addDownloadWithRequest:request];
+      
+      if (downloadAdded)
+        NSLog(@"successfully added download");
+      else
+        NSLog(@"add download failed");
+      return SDActionTypeDownload;
+    } 
+    else 
+    {
+      [listener ignore];
+      [frame stopLoading];
+      return SDActionTypeCancel;
+    }
+  }
+  else {
+    NSLog(@"Request %@ unsupported", request);
+    return SDActionTypeNone;
+  }
+  NSLog(@"RETURNING NO!");
+  return SDActionTypeNone;
 }
 
 #pragma mark -/*}}}*/
 #pragma mark Filetype Support Management/*{{{*/
 
 - (void)updateFileTypes {
-  NSMutableDictionary *globalFileTypes = [NSMutableDictionary dictionaryWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" ofType:@"plist"]];
+  NSMutableDictionary *globalFileTypes = 
+  [NSMutableDictionary dictionaryWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" 
+                                                                             ofType:@"plist"]];
   NSDictionary *userPrefs = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
   NSArray *disabledItems = [userPrefs objectForKey:@"DisabledItems"];
   NSDictionary *customTypes = [userPrefs objectForKey:@"CustomItems"];
-  if(customTypes) [globalFileTypes setValue:customTypes forKey:@"CustomItems"];
+  if(customTypes) 
+    [globalFileTypes setValue:customTypes forKey:@"CustomItems"];
   
   if(_mimeTypes) [_mimeTypes release];
   if(_extensions) [_extensions release];
@@ -182,7 +319,7 @@ static SafariDownload *curDownload = nil;
   
   BOOL disabled = [[userPrefs objectForKey:@"Disabled"] boolValue];
   if(disabled) return;
-
+  
   BOOL useExtensions = [[userPrefs objectForKey:@"UseExtensions"] boolValue];
   
   for(NSDictionary *fileClassName in globalFileTypes) {
@@ -206,13 +343,6 @@ static SafariDownload *curDownload = nil;
   }
   NSLog(@"%@", _mimeTypes);
   
-  /*
-   NSDictionary *disableShit = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
-   [_mimeTypes removeObjectsInArray:[disableShit objectForKey:@"DisabledMimetypes"]];
-   NSLog(@"%@ - %@", _extensions, [disableShit objectForKey:@"DisabledExtensions"]);
-   [_extensions removeObjectsInArray:[disableShit objectForKey:@"DisabledExtensions"]];
-   NSLog(@"%@", _extensions);
-   */
   NSFileManager *fm = [NSFileManager defaultManager];
   if(_launchActions) [_launchActions release];
   _launchActions = [[NSMutableDictionary alloc] init];
@@ -228,23 +358,29 @@ static SafariDownload *curDownload = nil;
 - (NSString *)iconPathForName:(NSString *)name {
   NSString *iconPath = nil;
   if(name && [name length] > 0) {
-    iconPath = [resourceBundle pathForResource:name ofType:@"png" inDirectory:@"FileIcons"];
+    iconPath = [resourceBundle pathForResource:name 
+                                        ofType:@"png" 
+                                   inDirectory:@"FileIcons"];
     NSString *t;
     if(!iconPath) {
       t = [_classMappings objectForKey:name];
-      if(t != nil) iconPath = [resourceBundle pathForResource:[@"Class-" stringByAppendingString:t] ofType:@"png" inDirectory:@"FileIcons"];
+      if(t != nil) iconPath = 
+        [resourceBundle pathForResource:[@"Class-" stringByAppendingString:t] 
+                                 ofType:@"png" inDirectory:@"FileIcons"];
     }
   }
   return iconPath;
 }
 
-- (UIImage *)iconForExtension:(NSString *)extension orMimeType:(NSString *)mimeType {
+- (UIImage *)iconForExtension:(NSString *)extension 
+                   orMimeType:(NSString *)mimeType {
   NSString *mimeIconPath = [self iconPathForName:mimeType];
   NSString *extIconPath = [self iconPathForName:extension];
   NSString *iconPath;
   if(extIconPath) iconPath = extIconPath;
   if(mimeIconPath) iconPath = mimeIconPath;
-  if(!iconPath) iconPath = [resourceBundle pathForResource:@"unknownfile" ofType:@"png"];
+  if(!iconPath) iconPath = [resourceBundle pathForResource:@"unknownfile" 
+                                                    ofType:@"png"];
   return [UIImage imageWithContentsOfFile:iconPath];
 }
 
@@ -252,14 +388,20 @@ static SafariDownload *curDownload = nil;
             withMimeType:(NSString *)mimeType
 {
   NSString *urlString = [[request URL] absoluteString];
+  NSLog(urlString);
   NSString *extension = [urlString pathExtension];
-  if (mimeType != nil && [_mimeTypes containsObject:mimeType]) 
-  {
+  NSLog(extension);
+  
+  NSLog(@"mimetype count: %d", [_mimeTypes count]);
+  NSLog(@"extensions count: %d", [_extensions count]);
+  
+  if (mimeType != nil && [_mimeTypes containsObject:mimeType]) {
+    NSLog(@"mimeType: %@ supported!", mimeType);
     return YES;
   }
   else  // eventually have this read from a prefs array on disk
-    if ([_extensions containsObject:extension])
-    {
+    if ([_extensions containsObject:extension]) {
+      NSLog(@"extensions contain %@, supported!", extension);
       return YES;
     }
   return NO;
@@ -297,7 +439,8 @@ static SafariDownload *curDownload = nil;
     [_currentDownloads addObject:download];
     if(_currentDownloads.count == 1) {
       [_tableView insertSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-    } else {
+    } 
+    else {
       [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
                         withRowAnimation:UITableViewRowAnimationFade];
     }
@@ -464,12 +607,12 @@ static SafariDownload *curDownload = nil;
 
 - (DownloadCell*)cellForDownload:(SafariDownload*)download
 {
-  NSLog(@"download: %@", download);
-  NSLog(@"current Downloads: %@", _currentDownloads);
-  NSLog(@"tableView: %@", _tableView);
-  NSLog(@"tableview visible cells: %@", [_tableView visibleCells]);
+  //  NSLog(@"download: %@", download);
+  //  NSLog(@"current Downloads: %@", _currentDownloads);
+  //  NSLog(@"tableView: %@", _tableView);
+  //  NSLog(@"tableview visible cells: %@", [_tableView visibleCells]);
   NSUInteger row = [_currentDownloads indexOfObject:download];
-  NSLog(@"row: %d", row);
+  //  NSLog(@"row: %d", row);
   DownloadCell *cell = (DownloadCell*)[_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
   return cell;
 }
@@ -548,8 +691,6 @@ static SafariDownload *curDownload = nil;
 - (void)downloadDidUpdate:(SafariDownload*)download
 {
   DownloadCell* cell = [self cellForDownload:download];
-  //  [[NSRunLoop currentRunLoop] cancelPerformSelector:@selector(updateProgressForDownload:) target:self argument:download]; 
-  //  [self updateProgressForDownload:download];
   cell.progressView.progress = download.progress;
   cell.completionLabel = [NSString stringWithFormat:@"%d%%", (int)(download.progress*100.0f)];
   cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
@@ -697,8 +838,7 @@ static int animationType = 0;
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-  //  NSLog(@"shouldAutorotateToInterfaceOrientation? %d", doRot);
-  return doRot; // do not rotate if safari rotations are disabled (i.e. panel is currently up)
+  return doRot;
 }
 
 - (void)didReceiveMemoryWarning
@@ -811,10 +951,6 @@ static int animationType = 0;
     [launch showInView:self.view];
     [launch release];
   }
-  // Navigation logic may go here. Create and push another view controller.
-	// AnotherViewController *anotherViewController = [[AnotherViewController alloc] initWithNibName:@"AnotherView" bundle:nil];
-	// [self.navigationController pushViewController:anotherViewController];
-	// [anotherViewController release];
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -829,7 +965,6 @@ static int animationType = 0;
     return @"Clear";
 }
 
-// Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
   if (editingStyle == UITableViewCellEditingStyleDelete) {
     if (tableView.numberOfSections == 2 && indexPath.section == 0)
@@ -844,30 +979,44 @@ static int animationType = 0;
 /*}}}*/
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-  NSString *button = [actionSheet buttonTitleAtIndex:buttonIndex];
-  NSString *action = [_launchActions objectForKey:button];
-  if([button isEqualToString:@"Delete"]) {
-    NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
-    int row = [_finishedDownloads indexOfObject:curDownload];
-    int section = (_currentDownloads.count > 0) ? 1 : 0;
-    
-    [_finishedDownloads removeObjectAtIndex:row];
-    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
-    [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
-  } else if([button isEqualToString:@"Retry"]) {
-    int row = [_finishedDownloads indexOfObject:curDownload];
-    int section = (_currentDownloads.count > 0) ? 1 : 0;
-    [_finishedDownloads removeObjectAtIndex:row];
-    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
-    curDownload.failed = NO;
-    curDownload.useSuggest = NO;
-    [self addDownload:curDownload];
-  } else if(action) {
-    Class Application = objc_getClass("Application");
-    NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
-    [[Application sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", action, path]]];
+  
+  if (actionSheet.tag == kDownloadSheet) {
+    if([[actionSheet buttonTitleAtIndex:buttonIndex] 
+        isEqualToString:@"Cancel"])
+      _actionType = SDActionTypeCancel;
+    else if([[actionSheet buttonTitleAtIndex:buttonIndex]
+             isEqualToString:@"View"]) 
+      _actionType = SDActionTypeView;
+    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] 
+              isEqualToString:@"Download"])
+      _actionType = SDActionTypeDownload;
   }
-  curDownload = nil;
+  else if (actionSheet.tag == kActionSheet) {
+    NSString *button = [actionSheet buttonTitleAtIndex:buttonIndex];
+    NSString *action = [_launchActions objectForKey:button];
+    if([button isEqualToString:@"Delete"]) {
+      NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
+      int row = [_finishedDownloads indexOfObject:curDownload];
+      int section = (_currentDownloads.count > 0) ? 1 : 0;
+      
+      [_finishedDownloads removeObjectAtIndex:row];
+      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
+      [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+    } else if([button isEqualToString:@"Retry"]) {
+      int row = [_finishedDownloads indexOfObject:curDownload];
+      int section = (_currentDownloads.count > 0) ? 1 : 0;
+      [_finishedDownloads removeObjectAtIndex:row];
+      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
+      curDownload.failed = NO;
+      curDownload.useSuggest = NO;
+      [self addDownload:curDownload];
+    } else if(action) {
+      Class Application = objc_getClass("Application");
+      NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
+      [[Application sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", action, path]]];
+    }
+    curDownload = nil;
+  }
 }
 
 - (void)updateBadges {

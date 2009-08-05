@@ -1,368 +1,368 @@
 {
-    Archives = {
-	BZip2 = {
-	    Extensions = (
-		bz2,
-		bzip2,
-		tbz,
-		tbz2
-	    );
-	    Mimetypes = (
-		"application/x-bzip",
-		"application/x-bzip2"
-	    );
+	Archives = {
+		BZip2 = {
+			Extensions = (
+				bz2,
+				bzip2,
+				tbz,
+				tbz2,
+			);
+			Mimetypes = (
+				"application/x-bzip",
+				"application/x-bzip2",
+			);
+		};
+		"Debian Package" = {
+			Extensions = (
+				deb,
+			);
+			Mimetypes = (
+				"application/x-deb",
+				"application/x-debian-package",
+			);
+		};
+		GZIP = {
+			Extensions = (
+				gz,
+				tgz,
+			);
+			Mimetypes = (
+				"application/x-gzip",
+			);
+		};
+		RAR = {
+			Extensions = (
+				rar,
+			);
+			Mimetypes = (
+				"application/rar",
+			);
+		};
+		TAR = {
+			Extensions = (
+				tar,
+			);
+			Mimetypes = (
+				"application/x-tar",
+			);
+		};
+		ZIP = {
+			Extensions = (
+				zip,
+			);
+			Mimetypes = (
+				"application/zip",
+			);
+		};
 	};
-	"Debian Package" = {
-	    Extensions = (
-		deb
-	    );
-	    Mimetypes = (
-		"application/x-deb",
-		"application/x-debian-package"
-	    );
+	Documents = {
+		"Microsoft Office" = {
+			ForceExtension = YES;
+			Extensions = (
+				doc,
+				docx,
+				ppt,
+				pptx,
+				xls,
+				xlsx,
+			);
+			Mimetypes = (
+				"application/ms-powerpoint",
+				"application/msexcel",
+				"application/mspowerpnt",
+				"application/mspowerpoint",
+				"application/msword",
+				"application/powerpoint",
+				"application/vnd-mspowerpoint",
+				"application/vnd.ms-excel",
+				"application/vnd.ms-powerpoint",
+				"application/winword",
+				"application/word",
+				"application/x-dos_ms_excel",
+				"application/x-excel",
+				"application/x-ms-excel",
+				"application/x-msexcel",
+				"application/x-mspowerpoint",
+				"application/x-powerpoint",
+				"application/x-xls",
+				"application/xls",
+				"zz-application/zz-winassoc-xls",
+				"application/doc",
+			);
+		};
+		OpenOffice = {
+			Extensions = (
+				odp,
+				ods,
+				odt,
+				odb,
+				odg,
+			);
+			Mimetypes = (
+				"application/vnd.oasis.opendocument.text",
+				"application/vnd.oasis.opendocument.presentation",
+				"application/vnd.oasis.opendocument.spreadsheet",
+				"application/vnd.oasis.opendocument.graphics",
+				"application/vnd.oasis.opendocument.database",
+			);
+		};
+		PDF = {
+			Extensions = (
+				pdf,
+			);
+			Mimetypes = (
+				"application/pdf",
+				"application/x-gzpdf",
+				"application/x-bzpdf",
+				"text/pdf",
+			);
+		};
+		Text = {
+			Mimetypes = (
+				"appl/text",
+				"application/text",
+				"text/plain",
+			);
+		};
+		Torrent = {
+			Extensions = (
+				torrent,
+			);
+			Mimetypes = (
+				"application/x-bittorrent",
+			);
+		};
+		XML = {
+			Mimetypes = (
+				"application/xml",
+				"text/xml",
+			);
+		};
 	};
-	GZIP = {
-	    Extensions = (
-		gz,
-		tgz
-	    );
-	    Mimetypes = (
-		"application/x-gzip"
-	    );
+	Images = {
+		GIF = {
+			Extensions = (
+				gif,
+			);
+			Mimetypes = (
+				"image/gif",
+			);
+		};
+		JPEG = {
+			Extensions = (
+				jpeg,
+				jpe,
+				jif,
+				jfif,
+				jfi,
+				jpg,
+			);
+			Mimetypes = (
+				"image/jpeg",
+				"image/jpg",
+			);
+		};
+		PNG = {
+			Extensions = (
+				png,
+			);
+			Mimetypes = (
+				"image/png",
+			);
+		};
+		TIFF = {
+			Extensions = (
+				tif,
+				tiff,
+			);
+			Mimetypes = (
+				"image/tiff",
+				"image/tiff-fx",
+			);
+		};
+		Targa = {
+			Extensions = (
+				tga,
+				tpic,
+			);
+			Mimetypes = (
+				"image/x-targa",
+				"image/x-tga",
+			);
+		};
+		"Windows Icon" = {
+			Extensions = (
+				ico,
+			);
+			Mimetypes = (
+				"image/vnd.microsoft.icon",
+				"image/x-icon",
+			);
+		};
 	};
-	RAR = {
-	    Extensions = (
-		rar
-	    );
-	    Mimetypes = (
-		application/rar
-	    );
+	Media = {
+		"3GPP Video" = {
+			Extensions = (
+				3gp,
+				3gpp,
+			);
+			Mimetypes = (
+				"video/3gpp",
+			);
+		};
+		"AAC, M4* Audio" = {
+			Extensions = (
+				m4a,
+				m4b,
+				m4p,
+				mp4,
+				m4v,
+				m4r,
+				aac,
+			);
+			Mimetypes = (
+				"audio/aac",
+				"audio/aacp",
+				"audio/mp4",
+			);
+		};
+		AVI = {
+			Extensions = (
+				avi,
+			);
+			Mimetypes = (
+				"video/avi",
+				"video/msvideo",
+				"video/x-msvideo",
+			);
+		};
+		"Flash + MP4 Video" = {
+			Extensions = (
+				flv,
+				f4v,
+				f4p,
+				f4a,
+				f4b,
+			);
+			Mimetypes = (
+				"video/x-flv",
+				"video/mp4",
+				"video/x-m4v",
+			);
+		};
+		"MPEG Audio" = {
+			Extensions = (
+				mp3,
+				m1a,
+				m2a,
+				mpa,
+			);
+			Mimetypes = (
+				"audio/mpeg",
+			);
+		};
+		"MPEG Video" = {
+			Extensions = (
+				mpeg,
+				mpg,
+				m1v,
+				mpv,
+				mp1,
+				mp2,
+			);
+			Mimetypes = (
+				"video/mpeg",
+			);
+		};
+		OGG = {
+			Extensions = (
+				ogg,
+				ogv,
+				oga,
+				ogx,
+				spx,
+			);
+			Mimetypes = (
+				"audio/ogg",
+				"video/ogg",
+				"application/ogg",
+				"audio/vorbis",
+				"audio/vorbis-config",
+			);
+		};
+		"Quicktime Video" = {
+			Extensions = (
+				mov,
+				qt,
+			);
+			Mimetypes = (
+				"video/quicktime",
+			);
+		};
+		"WAVE Audio" = {
+			Extensions = (
+				wav,
+				pcm,
+			);
+			Mimetypes = (
+				"audio/wav",
+				"audio/wave",
+				"audio/x-wav",
+				"audio/x-pn-wav",
+			);
+		};
+		WMA = {
+			Extensions = (
+				wma,
+			);
+			Mimetypes = (
+				"audio/x-ms-wma",
+			);
+		};
+		WMV = {
+			Extensions = (
+				wmv,
+			);
+			Mimetypes = (
+				"video/x-ms-wmv",
+			);
+		};
 	};
-	TAR = {
-	    Extensions = (
-		tar
-	    );
-	    Mimetypes = (
-		"application/x-tar"
-	    );
+	Miscellaneous = {
+		Binary = {
+			Mimetypes = (
+				"application/binary",
+				"application/bin",
+				"application/octet-stream",
+			);
+		};
+		"MS Download" = {
+			Mimetypes = (
+				"application/x-msdownload",
+			);
+		};
+		"Shell Script" = {
+			Extensions = (
+				sh,
+			);
+			Mimetypes = (
+				"text/x-sh",
+				"application/x-sh",
+			);
+		};
+		"Windows App" = {
+			Extensions = (
+				scr,
+				exe,
+				cpl,
+				dll,
+				ocx,
+				sys,
+				drv,
+			);
+			Mimetypes = (
+				"application/x-msdos-program",
+			);
+		};
 	};
-	ZIP = {
-	    Extensions = (
-		zip
-	    );
-	    Mimetypes = (
-		application/zip
-	    );
-	};
-    };
-    Documents = {
-	"Microsoft Office" = {
-	    ForceExtension = <*BY>;
-	    Extensions = (
-		doc,
-		docx,
-		ppt,
-		pptx,
-		xls,
-		xlsx
-	    );
-	    Mimetypes = (
-		"application/ms-powerpoint",
-		application/msexcel,
-		application/mspowerpnt,
-		application/mspowerpoint,
-		application/msword,
-		application/powerpoint,
-		"application/vnd-mspowerpoint",
-		"application/vnd.ms-excel",
-		"application/vnd.ms-powerpoint",
-		application/winword,
-		application/word,
-		"application/x-dos_ms_excel",
-		"application/x-excel",
-		"application/x-ms-excel",
-		"application/x-msexcel",
-		"application/x-mspowerpoint",
-		"application/x-powerpoint",
-		"application/x-xls",
-		application/xls,
-		"zz-application/zz-winassoc-xls",
-		application/doc
-	    );
-	};
-	OpenOffice = {
-	    Extensions = (
-		odp,
-		ods,
-		odt,
-		odb,
-		odg
-	    );
-	    Mimetypes = (
-		application/vnd.oasis.opendocument.text,
-		application/vnd.oasis.opendocument.presentation,
-		application/vnd.oasis.opendocument.spreadsheet,
-		application/vnd.oasis.opendocument.graphics,
-		application/vnd.oasis.opendocument.database
-	    );
-	};
-	PDF = {
-	    Extensions = (
-		pdf
-	    );
-	    Mimetypes = (
-		application/pdf,
-		"application/x-gzpdf",
-		"application/x-bzpdf",
-		text/pdf
-	    );
-	};
-	Text = {
-	    Mimetypes = (
-		appl/text,
-		application/text,
-		text/plain
-	    );
-	};
-	Torrent = {
-	    Extensions = (
-		torrent
-	    );
-	    Mimetypes = (
-		"application/x-bittorrent"
-	    );
-	};
-	XML = {
-	    Mimetypes = (
-		application/xml,
-		text/xml
-	    );
-	};
-    };
-    Images = {
-	GIF = {
-	    Extensions = (
-		gif
-	    );
-	    Mimetypes = (
-		image/gif
-	    );
-	};
-	JPEG = {
-	    Extensions = (
-		jpeg,
-		jpe,
-		jif,
-		jfif,
-		jfi,
-		jpg
-	    );
-	    Mimetypes = (
-		image/jpeg,
-		image/jpg
-	    );
-	};
-	PNG = {
-	    Extensions = (
-		png
-	    );
-	    Mimetypes = (
-		image/png
-	    );
-	};
-	TIFF = {
-	    Extensions = (
-		tif,
-		tiff
-	    );
-	    Mimetypes = (
-		image/tiff,
-		"image/tiff-fx"
-	    );
-	};
-	Targa = {
-	    Extensions = (
-		tga,
-		tpic
-	    );
-	    Mimetypes = (
-		"image/x-targa",
-		"image/x-tga"
-	    );
-	};
-	"Windows Icon" = {
-	    Extensions = (
-		ico
-	    );
-	    Mimetypes = (
-		image/vnd.microsoft.icon,
-		"image/x-icon"
-	    );
-	};
-    };
-    Media = {
-	"3GPP Video" = {
-	    Extensions = (
-		3gp,
-		3gpp
-	    );
-	    Mimetypes = (
-		video/3gpp
-	    );
-	};
-	"AAC, M4* Audio" = {
-	    Extensions = (
-		m4a,
-		m4b,
-		m4p,
-		mp4,
-		m4v,
-		m4r,
-		aac
-	    );
-	    Mimetypes = (
-		audio/aac,
-		audio/aacp,
-		audio/mp4
-	    );
-	};
-	AVI = {
-	    Extensions = (
-		avi
-	    );
-	    Mimetypes = (
-		video/avi,
-		video/msvideo,
-		"video/x-msvideo"
-	    );
-	};
-	"Flash & MP4 Video" = {
-	    Extensions = (
-		flv,
-		f4v,
-		f4p,
-		f4a,
-		f4b
-	    );
-	    Mimetypes = (
-		"video/x-flv",
-		video/mp4,
-		"video/x-m4v"
-	    );
-	};
-	"MPEG Audio" = {
-	    Extensions = (
-		mp3,
-		m1a,
-		m2a,
-		mpa
-	    );
-	    Mimetypes = (
-		audio/mpeg
-	    );
-	};
-	"MPEG Video" = {
-	    Extensions = (
-		mpeg,
-		mpg,
-		m1v,
-		mpv,
-		mp1,
-		mp2
-	    );
-	    Mimetypes = (
-		video/mpeg
-	    );
-	};
-	OGG = {
-	    Extensions = (
-		ogg,
-		ogv,
-		oga,
-		ogx,
-		spx
-	    );
-	    Mimetypes = (
-		audio/ogg,
-		video/ogg,
-		application/ogg,
-		audio/vorbis,
-		"audio/vorbis-config"
-	    );
-	};
-	"Quicktime Video" = {
-	    Extensions = (
-		mov,
-		qt
-	    );
-	    Mimetypes = (
-		video/quicktime
-	    );
-	};
-	"WAVE Audio" = {
-	    Extensions = (
-		wav,
-		pcm
-	    );
-	    Mimetypes = (
-		audio/wav,
-		audio/wave,
-		"audio/x-wav",
-		"audio/x-pn-wav"
-	    );
-	};
-	WMA = {
-	    Extensions = (
-		wma
-	    );
-	    Mimetypes = (
-		"audio/x-ms-wma"
-	    );
-	};
-	WMV = {
-	    Extensions = (
-		wmv
-	    );
-	    Mimetypes = (
-		"video/x-ms-wmv"
-	    );
-	};
-    };
-    Miscellaneous = {
-	Binary = {
-	    Mimetypes = (
-		application/binary,
-		application/bin,
-		"application/octet-stream"
-	    );
-	};
-	"MS Download" = {
-	    Mimetypes = (
-		"application/x-msdownload"
-	    );
-	};
-	"Shell Script" = {
-	    Extensions = (
-		sh
-	    );
-	    Mimetypes = (
-		"text/x-sh",
-		"application/x-sh"
-	    );
-	};
-	"Windows App" = {
-	    Extensions = (
-		scr,
-		exe,
-		cpl,
-		dll,
-		ocx,
-		sys,
-		drv
-	    );
-	    Mimetypes = (
-		"application/x-msdos-program"
-	    );
-	};
-    };
 }

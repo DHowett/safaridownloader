@@ -9,10 +9,25 @@
 #import <UIKit/UIKit.h>
 #import "SafariDownload.h"
 #import "Safari/BrowserPanel.h"
+#import "Safari/BrowserButtonBar.h"
+#import "WebPolicyDelegate.h"
 #import "UIKitExtra/UIToolbarButton.h"
 
 #define kProgressViewTag 238823
 #define progressViewForCell(cell) ((UIProgressView*)[cell viewWithTag:kProgressViewTag])
+
+@interface WebView : NSObject 
++ (BOOL)canShowMIMEType:(NSString*)type;
+@end
+
+@class BrowserButtonBar;
+@interface BrowserButtonBar (hidden)
+- (NSArray*)buttonItems;
+- (void)setButtonItems:(NSArray *)its;
+- (void)showButtonGroup:(int)group withDuration:(double)duration;
+- (void)registerButtonGroup:(int)group withButtons:(int*)buttons withCount:(int)count;
+- (id)$$createButtonWithDescription:(id)description;
+@end
 
 @interface UIActionSheet (hidden)
 - (void)setMessage:(id)message;
@@ -24,6 +39,14 @@
 }
 - (void)allowRotations:(BOOL)allow;
 @end
+
+typedef enum
+{
+  SDActionTypeNone = 0,
+  SDActionTypeView = 1,
+  SDActionTypeDownload = 2,
+  SDActionTypeCancel = 3,
+} SDActionType;
 
 @interface DownloadManager : UITableViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate> {
   UITableView*      _tableView;
@@ -39,11 +62,14 @@
   UINavigationItem* _navItem;
   UINavigationBar*  _navBar;
   DownloadManagerPanel *_panel;
+  NSURLRequest* currentRequest;
+  SafariDownload* curDownload;
 }
 
 @property (nonatomic, retain) UINavigationItem* navItem;
-@property (nonatomic, assign) UIToolbarButton *portraitDownloadButton;
-@property (nonatomic, assign) UIToolbarButton *landscapeDownloadButton;
+@property (nonatomic, assign) UIToolbarButton*  portraitDownloadButton;
+@property (nonatomic, assign) UIToolbarButton*  landscapeDownloadButton;
+@property (nonatomic, retain) NSURLRequest*     currentRequest;
 
 + (id)sharedManager;
 - (void)updateFileTypes;
@@ -53,6 +79,13 @@
             withMimeType:(NSString *)mimeType;
 
 - (NSString*)fileNameForURL:(NSURL*)url;
+- (void)loadCustomToolbar;
+- (SDActionType) webView:(WebView *)webView 
+            decideAction:(NSDictionary*)action
+              forRequest:(NSURLRequest *)request 
+            withMimeType:(NSString *)mimeType 
+                 inFrame:(WebFrame *)frame
+            withListener:(id<WebPolicyDecisionListener>)listener;
 
 - (BOOL)addDownloadWithInfo:(NSDictionary*)info;
 - (BOOL)addDownloadWithURL:(NSURL*)url;
