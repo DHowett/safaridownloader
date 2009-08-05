@@ -1,3 +1,4 @@
+#import <objc/runtime.h>
 #import "DownloadManager.h"
 #import "DownloadOperation.h"
 #import "NSURLDownload.h"
@@ -10,7 +11,7 @@
 #endif
 
 @interface DownloadOperation (extra)
-AuthenticationView* _authenticationView;
+MyAuthenticationView* _authenticationView;
 @end
 
 @implementation MyAuthenticationView
@@ -103,6 +104,10 @@ static id savedPanel = nil;
   _requiresAuthentication = NO;
 }
 
+- (void)setCredential:(NSURLCredential*)cred {
+  _authCredential = [cred retain]; 
+}
+
 -(void)logInFromAuthenticationView:(id)authenticationView withCredential:(id)credential {
   [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];
   [self setCredential:credential];
@@ -125,10 +130,6 @@ static id savedPanel = nil;
 
 - (BOOL)requiresAuth {
   return _requiresAuthentication; 
-}
-
-- (void)setCredential:(NSURLCredential*)cred {
-  _authCredential = [cred retain]; 
 }
 
 - (void)showAuthenticationChallenge:(NSURLAuthenticationChallenge*)challenge {
@@ -227,7 +228,7 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
   _keepAlive = YES;
   NSLog(@"Received response: %@", resp);
 	long long expectedContentLength = [resp expectedContentLength];
-  [_delegate setSize:expectedContentLength];
+  [_delegate setDownloadSize:expectedContentLength];
   _resumedFrom = 0.0;
 	_start = [NSDate timeIntervalSinceReferenceDate];
   [self setDownloadResponse:resp];
@@ -253,7 +254,7 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
   NSLog(@"willResumeWithResponse: %@ fromByte: %ll", resp, startingByte);
   _keepAlive = YES;
 	long long expectedContentLength = [resp expectedContentLength];
-  [_delegate setSize:expectedContentLength + startingByte];
+  [_delegate setDownloadSize:expectedContentLength + startingByte];
 	_start = [NSDate timeIntervalSinceReferenceDate];
   [self setDownloadResponse:resp];
   if (startingByte > 0) { // If we're actually resuming at all...

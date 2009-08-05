@@ -10,6 +10,8 @@
 #import "ModalAlert.h"
 #import "DownloadManager.h"
 #import "Safari/BrowserController.h"
+#import "Safari/TabDocument.h"
+#import "Safari/TabController.h"
 #import <QuartzCore/QuartzCore.h>
 
 #ifndef DEBUG
@@ -18,6 +20,10 @@
 
 @interface ModalAlert (priv)
 UIAlertView* activeInstance;
+@end
+
+@interface UIAlertView (priv)
+- (void)setNumberOfRows:(int)num;
 @end
 
 @implementation ModalAlert
@@ -162,11 +168,9 @@ static UIImage* savedIcon = nil;
 
 + (void)showAuthViewWithChallenge:(NSURLAuthenticationChallenge*)challenge {
   GET_CLASS(BrowserController);
-
-  id brCont = [$BrowserController sharedBrowserController];
-  id tabCont = [brCont tabController];
-  id tabDoc = [tabCont activeTabDocument];
-  //-(void)tabController:(id)controller tabDocument:(id)document didReceiveAuthenticationChallenge:(id)challenge;
+  BrowserController *brCont = [$BrowserController sharedBrowserController];
+  TabController* tabCont = [brCont tabController];
+  TabDocument* tabDoc = [tabCont activeTabDocument];
 
   [brCont tabController:tabCont tabDocument:tabDoc didReceiveAuthenticationChallenge:challenge];
 }
@@ -247,8 +251,8 @@ static UIImage* savedIcon = nil;
   iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
   [ohmygod addSubview:iconImageView];
   [iconImageView release];
-  
-  [ohmygod showInView:[[objc_getClass("BrowserController") sharedBrowserController] browserLayer]];
+  GET_CLASS(BrowserController);
+  [ohmygod showInView:(UIView*)[[$BrowserController sharedBrowserController] browserLayer]];
   [ohmygod release];
   
   [ModalAlert block:ohmygod];	

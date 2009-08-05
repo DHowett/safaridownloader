@@ -80,6 +80,10 @@ failed      = _failed;
   [coder encodeBool:   _failed         forKey:@"failed"  ];
 }
 
+- (void)setDownloadSize:(NSInteger)length {
+  [self setSize:length]; 
+}
+
 - (void)setSize:(NSInteger)length {
   double rSize = (double)(length/((double)1024)); // kb
   NSString *ord = @"K";

@@ -71,7 +71,7 @@ static SafariDownload *curDownload = nil;
 
 - (id)init {
   if([self initWithNibName:nil bundle:nil] != nil) 
-  {
+  {    
     _panel = [[DownloadManagerPanel alloc] init];
     // THIS IS A STATIC RESOURCE BUT IT WAS NULL WHEN I PUT IT IN INITIALIZE, W T F. TODO DHOWETT GODDAMNIT WHY
     resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
@@ -80,46 +80,6 @@ static SafariDownload *curDownload = nil;
     _downloadQueue = [NSOperationQueue new];
     [_downloadQueue setMaxConcurrentOperationCount:5];
     [self updateFileTypes];
-    
-    CGRect frame = [[UIScreen mainScreen] applicationFrame];
-    self.view = [[UIView alloc] initWithFrame:frame];
-    
-    self.view.autoresizingMask =   UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
-    UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-    UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth       | 
-    UIViewAutoresizingFlexibleHeight;
-    
-    self.view.autoresizesSubviews = YES;
-    _navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
-    _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
-    UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-    UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
-    self.navItem = [[UINavigationItem alloc] initWithTitle:@"Downloads"];
-    
-    UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc]  initWithBarButtonSystemItem:UIBarButtonSystemItemDone 
-                                                                                     target:self 
-                                                                                     action:@selector(hideDownloadManager)];
-    self.navItem.leftBarButtonItem = doneItemButton;
-    UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
-                                                                     style:UIBarButtonItemStyleBordered 
-                                                                    target:self 
-                                                                    action:@selector(cancelAllDownloads)];    
-    self.navItem.rightBarButtonItem = cancelButton;
-    self.navItem.rightBarButtonItem.enabled = YES;
-    
-    [_navBar pushNavigationItem:self.navItem animated:NO];
-    [self.view addSubview:_navBar];
-    
-    frame.origin.y = _navBar.frame.size.height;
-    frame.size.height = self.view.frame.size.height - _navBar.frame.size.height;
-    
-    _tableView = [[UITableView alloc] initWithFrame:frame style:UITableViewStylePlain];
-    _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _tableView.delegate = self;
-    _tableView.dataSource = self;
-    _tableView.rowHeight = 56;
-    [self.view addSubview:_tableView]; 
   }
   return self;
 }
@@ -181,7 +141,45 @@ static SafariDownload *curDownload = nil;
 
 - (void)loadView
 {
+  CGRect frame = [[UIScreen mainScreen] applicationFrame];
+  self.view = [[UIView alloc] initWithFrame:frame];
   
+  self.view.autoresizingMask =   UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
+  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
+  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth       | 
+  UIViewAutoresizingFlexibleHeight;
+  
+  self.view.autoresizesSubviews = YES;
+  _navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
+  _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
+  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
+  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
+  self.navItem = [[UINavigationItem alloc] initWithTitle:@"Downloads"];
+  
+  UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc]  initWithBarButtonSystemItem:UIBarButtonSystemItemDone 
+                                                                                   target:self 
+                                                                                   action:@selector(hideDownloadManager)];
+  self.navItem.leftBarButtonItem = doneItemButton;
+  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
+                                                                   style:UIBarButtonItemStyleBordered 
+                                                                  target:self 
+                                                                  action:@selector(cancelAllDownloads)];    
+  self.navItem.rightBarButtonItem = cancelButton;
+  self.navItem.rightBarButtonItem.enabled = YES;
+  
+  [_navBar pushNavigationItem:self.navItem animated:NO];
+  [self.view addSubview:_navBar];
+  
+  frame.origin.y = _navBar.frame.size.height;
+  frame.size.height = self.view.frame.size.height - _navBar.frame.size.height;
+  
+  _tableView = [[UITableView alloc] initWithFrame:frame style:UITableViewStylePlain];
+  _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  _tableView.delegate = self;
+  _tableView.dataSource = self;
+  _tableView.rowHeight = 56;
+  [self.view addSubview:_tableView];   
 }
 
 - (DownloadManagerPanel*)browserPanel
@@ -351,11 +349,8 @@ static SafariDownload *curDownload = nil;
 - (BOOL)cancelDownload:(SafariDownload *)download {
   if (download != nil)
   {
-    NSUInteger index = [_currentDownloads indexOfObject:download];
-    
     @try 
     {
-      //      DownloadOperation *op = [[_downloadQueue operations] objectAtIndex:index];
       DownloadOperation *op = download.downloadOperation;
       [op cancel];
       download.downloadOperation = nil;
@@ -578,6 +573,7 @@ static int animationType = 0;
 
 - (void)showDownloadManager
 {    
+  NSLog(@"showDownloadManager!");
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
   self.view.frame = [[UIScreen mainScreen] applicationFrame];
   UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
@@ -586,6 +582,8 @@ static int animationType = 0;
     transition = kCATransitionFromLeft;
   else if (orientation == UIDeviceOrientationLandscapeRight)
     transition = kCATransitionFromRight;
+  
+  NSLog(@"Checking Values:\nWindow: %@\nView: %@\nTable: %@", keyWindow, self.view, _tableView);
   
   CATransition *animation = [CATransition animation];
   [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
@@ -599,11 +597,13 @@ static int animationType = 0;
   animationType = 1;
   [keyWindow addSubview:self.view];
   if (self.interfaceOrientation == UIInterfaceOrientationPortrait) {
+    NSLog(@"%s portrait!", _cmd);
     _tableView.frame = CGRectMake(0, 44, 320, 416);
     _navBar.frame = CGRectMake(0, 0, 320, 44);
   }
   else
   {
+    NSLog(@"%s landscape!", _cmd);
     _tableView.frame = CGRectMake(0, 44, 480, 256);
     _navBar.frame = CGRectMake(0, 0, 480, 44);
   }
@@ -611,21 +611,22 @@ static int animationType = 0;
   for (DownloadCell* cell in [_tableView visibleCells]) {
     [cell setNeedsDisplay];
   }
-  
 }
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
 {
   Class BrowserController = objc_getClass("BrowserController");
-  
+  NSLog(@"animationDidStop!");
   if (animationType == 1) 
   {
+    NSLog(@"animationType == 1");
     [[BrowserController sharedBrowserController] showBrowserPanelType:44];
     [[BrowserController sharedBrowserController] _setBrowserPanel:_panel];
     [_panel allowRotations:NO];
   }
   else if (animationType == 2)
   {
+    NSLog(@"animationType == 2");
     [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
     [self.view removeFromSuperview];
     [_panel allowRotations:YES];

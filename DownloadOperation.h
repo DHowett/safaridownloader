@@ -8,7 +8,7 @@
 - (BOOL)useSuggest;
 - (void)setFilename:(NSString *)filename;
 - (void)setComplete:(BOOL)comp;
-- (void)setSize:(long long)size;
+- (void)setDownloadSize:(NSInteger)length;
 - (void)setProgress:(float)prg speed:(float)spd;
 - (void)downloadDidReceiveAuthenticationChallenge;
 - (void)downloadStarted;

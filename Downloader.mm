@@ -40,8 +40,6 @@ static id _currentRequest;
 - (id)$$createButtonWithDescription:(id)description;
 @end
 
-static id originalDelegate = nil;
-
 @interface Downloader : NSObject <UIActionSheetDelegate> {
 }
 
@@ -163,7 +161,8 @@ static SDActionType _actionType = SDActionTypeView;
                                    other:other
                                 delegate:self];
     
-    if (_actionType == SDActionTypeView) return NO;
+    if (_actionType == SDActionTypeView) 
+      return NO;
     else if (_actionType == SDActionTypeDownload) {
       [listener ignore];
       [frame stopLoading];
@@ -171,13 +170,17 @@ static SDActionType _actionType = SDActionTypeView;
         NSLog(@"successfully added download");
       else
         NSLog(@"add download failed");
-    } else {
+      return YES;
+    } 
+    else {
       [listener ignore];
       [frame stopLoading];
     }
     return YES;
   }
-  else return NO;
+  else 
+    return NO;
+  return NO;
 }
 #pragma mark -/*}}}*/
 @end
