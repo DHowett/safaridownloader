@@ -14,6 +14,7 @@
 #import "Safari/BrowserController.h"
 #import "Safari/BrowserButtonBar.h"
 #import <QuartzCore/QuartzCore.h>
+#import <WebKit/WebView.h>
 
 #import "Safari/TabDocument.h"
 
