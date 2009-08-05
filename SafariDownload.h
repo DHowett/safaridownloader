@@ -28,6 +28,7 @@
   NSURLRequest*  _urlRequest;
   NSDate*        _startDate;
   NSString*      _filename;
+  NSString*      _mimetype;
   NSString*      _sizeString;
   NSString*      _timeString;
   NSInteger      _size;
@@ -45,6 +46,7 @@
 @property (nonatomic, retain) NSURLRequest    *urlReq;
 @property (nonatomic, retain) NSDate          *startDate;
 @property (nonatomic, retain) NSString        *filename;
+@property (nonatomic, retain) NSString        *mimetype;
 @property (nonatomic, retain) NSString        *sizeString;
 @property (nonatomic, retain) NSString        *timeString;
 @property (assign) NSInteger  time;

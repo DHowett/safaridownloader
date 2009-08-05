@@ -1,6 +1,6 @@
 @interface ModalAlert : NSObject 
 
-+ (void)showLoadingAlertWithIconName:(NSString*)name;
++ (void)showLoadingAlertWithIconName:(NSString*)name orMimeType:(NSString *)mimeType;
 + (void)dismissLoadingAlert;
 
 + (void)showAlertViewWithTitle:(NSString*)title 
@@ -17,11 +17,12 @@
                                    okButton:(NSString*)okButton 
                                    delegate:(id)delegate;
 
-+ (void)showActionSheetWithTitle:(NSString*)title 
-                         message:(NSString *)message 
-                    cancelButton:(NSString*)cancel 
-                     destructive:(NSString*)destructive
-                           other:(NSString*)other 
-                        delegate:(id)delegate;
++ (void)showDownloadActionSheetWithTitle:(NSString*)title 
+                                 message:(NSString*)message 
+                                mimetype:(NSString*)mimetype 
+                            cancelButton:(NSString*)cancel 
+                             destructive:(NSString*)destructive
+                                   other:(NSString*)other 
+                                delegate:(id)delegate;
 
 @end

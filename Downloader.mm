@@ -154,19 +154,26 @@ static SDActionType _actionType = SDActionTypeView;
     //NSString *other = [objc_getClass("WebView") canShowMIMEType:mimeType] ? @"View" : nil;
     NSString *other = @"View";
     
-    [ModalAlert showActionSheetWithTitle:@"What would you like to do?"
-                                 message:filename
-                            cancelButton:@"Cancel"
-                             destructive:@"Download"
-                                   other:other
-                                delegate:self];
+    [ModalAlert showDownloadActionSheetWithTitle:@"What would you like to do?"
+                                         message:filename
+                                        mimetype:mimeType
+                                    cancelButton:@"Cancel"
+                                     destructive:@"Download"
+                                           other:other
+                                        delegate:self];
     
     if (_actionType == SDActionTypeView) 
       return NO;
     else if (_actionType == SDActionTypeDownload) {
       [listener ignore];
       [frame stopLoading];
-      if ([[DownloadManager sharedManager] addDownloadWithRequest:request])
+      BOOL downloadAdded;
+      if(mimeType != nil)
+        downloadAdded = [[DownloadManager sharedManager] addDownloadWithRequest:request andMimeType:mimeType];
+      else
+        downloadAdded = [[DownloadManager sharedManager] addDownloadWithRequest:request];
+
+      if (downloadAdded)
         NSLog(@"successfully added download");
       else
         NSLog(@"add download failed");

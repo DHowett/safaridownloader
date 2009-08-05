@@ -65,7 +65,7 @@ UIAlertView* activeInstance;
 
 static UIImage* savedIcon = nil;
 
-+ (void)showLoadingAlertWithIconName:(NSString*)name {
++ (void)showLoadingAlertWithIconName:(NSString*)name orMimeType:(NSString *)mimeType {
   activeInstance = [[UIAlertView alloc]
                        initWithTitle:@"Loading..."
                        message:nil
@@ -83,7 +83,7 @@ static UIImage* savedIcon = nil;
 	[activeInstance addSubview:listingIndicator];
   [listingIndicator release];
   
-  savedIcon = [[[DownloadManager sharedManager] iconForExtension:[name pathExtension]] retain];
+  savedIcon = [[[DownloadManager sharedManager] iconForExtension:[name pathExtension] orMimeType:mimeType] retain];
   
   UIImageView* icon = [[UIImageView alloc] initWithImage:savedIcon];
   icon.frame = CGRectMake(18, 14, 22, 22);
@@ -222,12 +222,13 @@ static UIImage* savedIcon = nil;
   return ret;
 }
 
-+ (void)showActionSheetWithTitle:(NSString*)title 
-                         message:(NSString *)message 
-                    cancelButton:(NSString*)cancel 
-                     destructive:(NSString*)destructive
-                           other:(NSString*)other 
-                        delegate:(id)delegate
++ (void)showDownloadActionSheetWithTitle:(NSString*)title 
+                                 message:(NSString*)message 
+                                mimetype:(NSString*)mimetype
+                            cancelButton:(NSString*)cancel 
+                             destructive:(NSString*)destructive
+                                   other:(NSString*)other 
+                                delegate:(id)delegate
 {
   
   UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:title
@@ -247,7 +248,7 @@ static UIImage* savedIcon = nil;
   [nameLabel setText:message];
   
   UIImageView *iconImageView = [[UIImageView alloc]
-                                initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension]]];
+	  initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension] orMimeType:mimetype]];
   iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
   [ohmygod addSubview:iconImageView];
   [iconImageView release];

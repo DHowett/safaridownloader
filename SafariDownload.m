@@ -18,6 +18,7 @@ delegate    = _delegate,
 urlReq      = _urlRequest,
 startDate   = _startDate,
 filename    = _filename, 
+mimetype    = _mimetype, 
 sizeString  = _sizeString,
 timeString  = _timeString,
 size        = _size,
@@ -61,6 +62,7 @@ failed      = _failed;
     self.complete   = [coder decodeBoolForKey: @"complete"];
     self.useSuggest = [coder decodeBoolForKey: @"suggest" ];
     self.failed     = [coder decodeBoolForKey: @"failed"  ];
+    self.mimetype   = [coder decodeObject];
   }
   return self;
 }
@@ -78,6 +80,7 @@ failed      = _failed;
   [coder encodeBool:   _complete       forKey:@"complete"];
   [coder encodeBool:   _useSuggested   forKey:@"suggest" ];
   [coder encodeBool:   _failed         forKey:@"failed"  ];
+  [coder encodeObject: _mimetype       ];
 }
 
 - (void)setDownloadSize:(NSInteger)length {

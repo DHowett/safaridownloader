@@ -84,61 +84,6 @@ static SafariDownload *curDownload = nil;
   return self;
 }
 
-- (void)updateFileTypes {
-  NSMutableDictionary *globalFileTypes = [NSMutableDictionary dictionaryWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" ofType:@"plist"]];
-  NSDictionary *userPrefs = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
-  NSArray *disabledItems = [userPrefs objectForKey:@"DisabledItems"];
-  NSDictionary *customTypes = [userPrefs objectForKey:@"CustomItems"];
-  if(customTypes) [globalFileTypes setValue:customTypes forKey:@"CustomItems"];
-  
-  if(_mimeTypes) [_mimeTypes release];
-  if(_extensions) [_extensions release];
-  if(_classMappings) [_classMappings release];
-  _mimeTypes = [[NSMutableSet alloc] init];
-  _extensions = [[NSMutableSet alloc] init];
-  _classMappings = [[NSMutableDictionary alloc] init];
-  
-  BOOL disabled = [[userPrefs objectForKey:@"Disabled"] boolValue];
-  if(disabled) return;
-  
-  for(NSDictionary *fileClassName in globalFileTypes) {
-    NSDictionary *fileClass = [globalFileTypes objectForKey:fileClassName];
-    for(NSString *fileTypeName in fileClass) {
-      if([disabledItems containsObject:fileTypeName]) {
-        NSLog(@"Skipping %@...", fileTypeName);
-        continue;
-      }
-      
-      NSDictionary *fileType = [fileClass objectForKey:fileTypeName];
-      NSArray *mimes = [fileType objectForKey:@"Mimetypes"];
-      NSArray *exts = [fileType objectForKey:@"Extensions"];
-      [_mimeTypes addObjectsFromArray:mimes];
-      [_extensions addObjectsFromArray:exts];
-      for(NSString *i in mimes) [_classMappings setObject:fileClassName forKey:i];
-      for(NSString *i in exts) [_classMappings setObject:fileClassName forKey:i];
-    }
-  }
-  NSLog(@"%@", _mimeTypes);
-  
-  /*
-   NSDictionary *disableShit = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
-   [_mimeTypes removeObjectsInArray:[disableShit objectForKey:@"DisabledMimetypes"]];
-   NSLog(@"%@ - %@", _extensions, [disableShit objectForKey:@"DisabledExtensions"]);
-   [_extensions removeObjectsInArray:[disableShit objectForKey:@"DisabledExtensions"]];
-   NSLog(@"%@", _extensions);
-   */
-  NSFileManager *fm = [NSFileManager defaultManager];
-  if(_launchActions) [_launchActions release];
-  _launchActions = [[NSMutableDictionary alloc] init];
-  if([fm fileExistsAtPath:@"/Applications/iFile.app"]) {
-    NSDictionary *iFile = [NSDictionary dictionaryWithContentsOfFile:@"/Applications/iFile.app/Info.plist"];
-    NSString *iFileVersion = [iFile objectForKey:@"CFBundleVersion"];
-    if(![iFileVersion isEqualToString:@"1.0.0"])
-      [_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
-  }
-  return;
-}
-
 - (void)loadView
 {
   CGRect frame = [[UIScreen mainScreen] applicationFrame];
@@ -218,23 +163,90 @@ static SafariDownload *curDownload = nil;
   return filename;
 }
 
-- (UIImage *)iconForExtension:(NSString *)extension {
-  NSString *iconPath = nil;
-  if(extension && [extension length] > 0) {
-    iconPath = [resourceBundle pathForResource:extension ofType:@"png" inDirectory:@"FileIcons"];
-    NSString *t;
-    if(!iconPath) {
-      t = [_classMappings objectForKey:extension];
-      if(t != nil)
-        iconPath = [resourceBundle pathForResource:[@"Class-" stringByAppendingString:t] ofType:@"png" inDirectory:@"FileIcons"];
+#pragma mark -/*}}}*/
+#pragma mark Filetype Support Management/*{{{*/
+
+- (void)updateFileTypes {
+  NSMutableDictionary *globalFileTypes = [NSMutableDictionary dictionaryWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" ofType:@"plist"]];
+  NSDictionary *userPrefs = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
+  NSArray *disabledItems = [userPrefs objectForKey:@"DisabledItems"];
+  NSDictionary *customTypes = [userPrefs objectForKey:@"CustomItems"];
+  if(customTypes) [globalFileTypes setValue:customTypes forKey:@"CustomItems"];
+  
+  if(_mimeTypes) [_mimeTypes release];
+  if(_extensions) [_extensions release];
+  if(_classMappings) [_classMappings release];
+  _mimeTypes = [[NSMutableSet alloc] init];
+  _extensions = [[NSMutableSet alloc] init];
+  _classMappings = [[NSMutableDictionary alloc] init];
+  
+  BOOL disabled = [[userPrefs objectForKey:@"Disabled"] boolValue];
+  if(disabled) return;
+
+  BOOL useExtensions = [[userPrefs objectForKey:@"UseExtensions"] boolValue];
+  
+  for(NSDictionary *fileClassName in globalFileTypes) {
+    NSDictionary *fileClass = [globalFileTypes objectForKey:fileClassName];
+    for(NSString *fileTypeName in fileClass) {
+      if([disabledItems containsObject:fileTypeName]) {
+        NSLog(@"Skipping %@...", fileTypeName);
+        continue;
+      }
+      
+      NSDictionary *fileType = [fileClass objectForKey:fileTypeName];
+      NSArray *mimes = [fileType objectForKey:@"Mimetypes"];
+      [_mimeTypes addObjectsFromArray:mimes];
+      for(NSString *i in mimes) [_classMappings setObject:fileClassName forKey:i];
+      if(useExtensions) {
+        NSArray *exts = [fileType objectForKey:@"Extensions"];
+        [_extensions addObjectsFromArray:exts];
+        for(NSString *i in exts) [_classMappings setObject:fileClassName forKey:i];
+      }
     }
   }
+  NSLog(@"%@", _mimeTypes);
+  
+  /*
+   NSDictionary *disableShit = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
+   [_mimeTypes removeObjectsInArray:[disableShit objectForKey:@"DisabledMimetypes"]];
+   NSLog(@"%@ - %@", _extensions, [disableShit objectForKey:@"DisabledExtensions"]);
+   [_extensions removeObjectsInArray:[disableShit objectForKey:@"DisabledExtensions"]];
+   NSLog(@"%@", _extensions);
+   */
+  NSFileManager *fm = [NSFileManager defaultManager];
+  if(_launchActions) [_launchActions release];
+  _launchActions = [[NSMutableDictionary alloc] init];
+  if([fm fileExistsAtPath:@"/Applications/iFile.app"]) {
+    NSDictionary *iFile = [NSDictionary dictionaryWithContentsOfFile:@"/Applications/iFile.app/Info.plist"];
+    NSString *iFileVersion = [iFile objectForKey:@"CFBundleVersion"];
+    if(![iFileVersion isEqualToString:@"1.0.0"])
+      [_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
+  }
+  return;
+}
+
+- (NSString *)iconPathForName:(NSString *)name {
+  NSString *iconPath = nil;
+  if(name && [name length] > 0) {
+    iconPath = [resourceBundle pathForResource:name ofType:@"png" inDirectory:@"FileIcons"];
+    NSString *t;
+    if(!iconPath) {
+      t = [_classMappings objectForKey:name];
+      if(t != nil) iconPath = [resourceBundle pathForResource:[@"Class-" stringByAppendingString:t] ofType:@"png" inDirectory:@"FileIcons"];
+    }
+  }
+  return iconPath;
+}
+
+- (UIImage *)iconForExtension:(NSString *)extension orMimeType:(NSString *)mimeType {
+  NSString *mimeIconPath = [self iconPathForName:mimeType];
+  NSString *extIconPath = [self iconPathForName:extension];
+  NSString *iconPath;
+  if(extIconPath) iconPath = extIconPath;
+  if(mimeIconPath) iconPath = mimeIconPath;
   if(!iconPath) iconPath = [resourceBundle pathForResource:@"unknownfile" ofType:@"png"];
   return [UIImage imageWithContentsOfFile:iconPath];
 }
-
-#pragma mark -/*}}}*/
-#pragma mark Filetype Support Management/*{{{*/
 
 - (BOOL)supportedRequest:(NSURLRequest *)request
             withMimeType:(NSString *)mimeType
@@ -289,7 +301,7 @@ static SafariDownload *curDownload = nil;
       [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
                         withRowAnimation:UITableViewRowAnimationFade];
     }
-    [ModalAlert showLoadingAlertWithIconName:download.filename];
+    [ModalAlert showLoadingAlertWithIconName:download.filename orMimeType:download.mimetype];
     return YES;
   }
   return NO;
@@ -330,6 +342,26 @@ static SafariDownload *curDownload = nil;
                                                                 name:filename
                                                             delegate:self
                                                         useSuggested:use];
+  return [self addDownload:download];
+}
+
+- (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType {
+  //  NSLog(@"addDownloadWithRequest: %@", request);
+  BOOL use = NO;
+  NSString *filename = [self fileNameForURL:[request URL]];
+  if (filename == nil) {
+    filename = [[request URL] absoluteString];
+    use = YES;
+  }
+  
+  if ([self downloadWithURL:[request URL]])
+    return NO;
+  
+  SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
+                                                                name:filename
+                                                            delegate:self
+                                                        useSuggested:use];
+  download.mimetype = mimeType;
   return [self addDownload:download];
 }
 
@@ -735,7 +767,7 @@ static int animationType = 0;
   // Set up the cell...
   cell.finished = finished;
   cell.failed = download.failed;
-  cell.icon = [self iconForExtension:[download.filename pathExtension]];
+  cell.icon = [self iconForExtension:[download.filename pathExtension] orMimeType:download.mimetype];
 	cell.nameLabel = download.filename;
   cell.sizeLabel = download.sizeString;
   if(!finished && !download.failed) {

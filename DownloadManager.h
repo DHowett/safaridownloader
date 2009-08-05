@@ -47,7 +47,8 @@
 
 + (id)sharedManager;
 - (void)updateFileTypes;
-- (UIImage *)iconForExtension:(NSString *)extension;
+- (NSString *)iconPathForName:(NSString *)name;
+- (UIImage *)iconForExtension:(NSString *)extension orMimeType:(NSString *)mimeType;
 - (BOOL)supportedRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType;
 
@@ -56,6 +57,7 @@
 - (BOOL)addDownloadWithInfo:(NSDictionary*)info;
 - (BOOL)addDownloadWithURL:(NSURL*)url;
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)url;
+- (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType;
 - (BOOL)addDownload:(SafariDownload *)download;
 - (BOOL)cancelDownload:(SafariDownload *)download;
 - (BOOL)cancelDownloadWithURL:(NSURL *)url;
@@ -65,8 +67,5 @@
 - (void)showDownloadManager;
 - (IBAction)hideDownloadManager;
 
-- (UIImage *)iconForExtension:(NSString *)extension;
-
-// This seems hackish, but is for badging purposes.
 - (void)updateBadges;
 @end
