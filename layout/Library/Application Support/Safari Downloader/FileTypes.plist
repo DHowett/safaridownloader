@@ -1,6 +1,6 @@
 {
     Archives = {
-	"BZip2" = {
+	BZip2 = {
 	    Extensions = (
 		bz2,
 		bzip2,
@@ -8,6 +8,7 @@
 		tbz2
 	    );
 	    Mimetypes = (
+		"application/x-bzip",
 		"application/x-bzip2"
 	    );
 	};
@@ -16,26 +17,36 @@
 		deb
 	    );
 	    Mimetypes = (
-		"application/x-deb"
+		"application/x-deb",
+		"application/x-debian-package"
 	    );
 	};
-	"GZIP" = {
+	GZIP = {
 	    Extensions = (
 		gz,
 		tgz
+	    );
+	    Mimetypes = (
+		"application/x-gzip"
 	    );
 	};
 	RAR = {
 	    Extensions = (
 		rar
 	    );
+	    Mimetypes = (
+		application/rar
+	    );
 	};
-	"TAR" = {
+	TAR = {
 	    Extensions = (
 		tar
 	    );
+	    Mimetypes = (
+		"application/x-tar"
+	    );
 	};
-	"ZIP" = {
+	ZIP = {
 	    Extensions = (
 		zip
 	    );
@@ -78,27 +89,41 @@
 		application/doc
 	    );
 	};
-	"OpenOffice" = {
+	OpenOffice = {
 	    Extensions = (
 		odp,
 		ods,
-		odt
+		odt,
+		odb,
+		odg
+	    );
+	    Mimetypes = (
+		application/vnd.oasis.opendocument.text,
+		application/vnd.oasis.opendocument.presentation,
+		application/vnd.oasis.opendocument.spreadsheet,
+		application/vnd.oasis.opendocument.graphics,
+		application/vnd.oasis.opendocument.database
 	    );
 	};
-	"PDF" = {
+	PDF = {
+	    Extensions = (
+		pdf
+	    );
 	    Mimetypes = (
 		application/pdf,
+		"application/x-gzpdf",
+		"application/x-bzpdf",
 		text/pdf
 	    );
 	};
-	"Text" = {
+	Text = {
 	    Mimetypes = (
 		appl/text,
 		application/text,
 		text/plain
 	    );
 	};
-	"XML" = {
+	XML = {
 	    Mimetypes = (
 		application/xml,
 		text/xml
@@ -106,14 +131,21 @@
 	};
     };
     Images = {
-	"GIF" = {
+	GIF = {
 	    Extensions = (
 		gif
 	    );
+	    Mimetypes = (
+		image/gif
+	    );
 	};
-	"JPEG" = {
+	JPEG = {
 	    Extensions = (
 		jpeg,
+		jpe,
+		jif,
+		jfif,
+		jfi,
 		jpg
 	    );
 	    Mimetypes = (
@@ -121,7 +153,7 @@
 		image/jpg
 	    );
 	};
-	"PNG" = {
+	PNG = {
 	    Extensions = (
 		png
 	    );
@@ -129,60 +161,106 @@
 		image/png
 	    );
 	};
-	"TIFF" = {
+	TIFF = {
 	    Extensions = (
 		tif,
 		tiff
 	    );
 	    Mimetypes = (
-		image/tiff
+		image/tiff,
+		"image/tiff-fx"
 	    );
 	};
-	"Targa" = {
+	Targa = {
 	    Extensions = (
-		tga
+		tga,
+		tpic
 	    );
 	    Mimetypes = (
-		image/targa,
-		image/tga
+		"image/x-targa",
+		"image/x-tga"
+	    );
+	};
+	"Windows Icon" = {
+	    Extensions = (
+		ico
+	    );
+	    Mimetypes = (
+		image/vnd.microsoft.icon
 	    );
 	};
     };
     Media = {
-	AAC = {
+	"AAC, M4*" = {
 	    Extensions = (
+		m4a,
+		m4b,
+		m4p,
+		mp4,
+		m4v,
+		m4r,
+		3gp,
 		aac
+	    );
+	    Mimetypes = (
+		audio/aac,
+		audio/aacp
 	    );
 	};
 	AVI = {
 	    Extensions = (
 		avi
 	    );
-	};
-	MP3 = {
-	    Extensions = (
-		mp3
+	    Mimetypes = (
+		video/avi,
+		video/msvideo,
+		"video/x-msvideo"
 	    );
 	};
-	MP4 = {
+	"MPEG Audio" = {
 	    Extensions = (
-		mp4
+		mp3,
+		m1a,
+		m2a,
+		mpa
+	    );
+	    Mimetypes = (
+		audio/mpeg
 	    );
 	};
-	MPEG = {
+	"MPEG Video" = {
 	    Extensions = (
 		mpeg,
-		mpg
+		mpg,
+		m1v,
+		mpv,
+		mp1,
+		mp2
+	    );
+	    Mimetypes = (
+		video/mpeg
 	    );
 	};
 	OGG = {
 	    Extensions = (
-		ogg
+		ogg,
+		ogv,
+		oga,
+		ogx,
+		spx
+	    );
+	    Mimetypes = (
+		audio/ogg,
+		video/ogg,
+		application/ogg,
+		audio/vorbis,
+		"audio/vorbis-config"
 	    );
 	};
 	"Quicktime Video" = {
 	    Extensions = (
-	        mov
+		mov,
+		qt
 	    );
 	    Mimetypes = (
 		video/quicktime
@@ -193,10 +271,32 @@
 		wav,
 		pcm
 	    );
+	    Mimetypes = (
+		audio/wav,
+		audio/wave,
+		"audio/x-wav",
+		"audio/x-pn-wav"
+	    );
+	};
+	WMA = {
+	    Extensions = (
+		wma
+	    );
+	    Mimetypes = (
+		"audio/x-ms-wma"
+	    );
+	};
+	WMV = {
+	    Extensions = (
+		wmv
+	    );
+	    Mimetypes = (
+		"video/x-ms-wmv"
+	    );
 	};
     };
     Miscellaneous = {
-	"Binary" = {
+	Binary = {
 	    Mimetypes = (
 		application/binary,
 		application/bin,
@@ -206,6 +306,14 @@
 	"MS Download" = {
 	    Mimetypes = (
 		"application/x-msdownload"
+	    );
+	};
+	"Shell Script" = {
+	    Extensions = (
+		sh
+	    );
+	    Mimetypes = (
+		"text/x-sh"
 	    );
 	};
     };
