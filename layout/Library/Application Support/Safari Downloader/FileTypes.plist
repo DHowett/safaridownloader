@@ -123,6 +123,14 @@
 		text/plain
 	    );
 	};
+	Torrent = {
+	    Extensions = (
+		torrent
+	    );
+	    Mimetypes = (
+		"application/x-bittorrent"
+	    );
+	};
 	XML = {
 	    Mimetypes = (
 		application/xml,
@@ -187,7 +195,7 @@
 	    );
 	    Mimetypes = (
 		image/vnd.microsoft.icon,
-		image/x-icon
+		"image/x-icon"
 	    );
 	};
     };
