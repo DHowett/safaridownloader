@@ -151,8 +151,9 @@ static SDActionType _actionType = SDActionTypeView;
       filename = [[request URL] absoluteString];
     }
     
-    //NSString *other = [objc_getClass("WebView") canShowMIMEType:mimeType] ? @"View" : nil;
-    NSString *other = @"View";
+    NSString *other;
+    if(mimeType) other = [objc_getClass("WebView") canShowMIMEType:mimeType] ? @"View" : nil;
+    else other = @"View";
     
     [ModalAlert showDownloadActionSheetWithTitle:@"What would you like to do?"
                                          message:filename
