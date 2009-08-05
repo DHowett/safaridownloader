@@ -75,11 +75,11 @@ static id _currentRequest;
   id x = [BrowserButtonBar imageButtonItemWithName:@"Download.png"
                                                tag:61
                                             action:@selector(showDownloadManager)
-                                            target:[NSValue valueWithPointer:[DownloadManager sharedManager]]];
+                                            target:[NSValue valueWithNonretainedObject:[DownloadManager sharedManager]]];
   id y = [BrowserButtonBar imageButtonItemWithName:@"DownloadSmall.png"
                                                tag:62
                                             action:@selector(showDownloadManager)
-                                            target:[NSValue valueWithPointer:[DownloadManager sharedManager]]];
+                                            target:[NSValue valueWithNonretainedObject:[DownloadManager sharedManager]]];
   
   NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
 
