@@ -306,6 +306,10 @@ HOOK(TabDocument,
 }
 #pragma mark -/*}}}*/
 
+void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+  [[DownloadManager sharedManager] updateFileTypes];
+}
+
 extern "C" void DownloaderInitialize() {	
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
   downloader = [[Downloader alloc] init];
@@ -323,6 +327,10 @@ extern "C" void DownloaderInitialize() {
   HOOK_MESSAGE_F(TabDocument, webView:decidePolicyForNavigationAction:request:frame:decisionListener:, webView$decidePolicyForNavigationAction$request$frame$decisionListener$);
   HOOK_MESSAGE_F(TabDocument, webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$);
   HOOK_MESSAGE_F(TabDocument, webView:decidePolicyForMIMEType:request:frame:decisionListener:, webView$decidePolicyForMIMEType$request$frame$decisionListener$);
+
+  CFNotificationCenterRef r = CFNotificationCenterGetDarwinNotifyCenter();
+  CFNotificationCenterAddObserver(r, NULL, &ReloadPrefsNotification, CFSTR("net.howett.safaridownloader/ReloadPrefs"), NULL, 0);
+
   [pool release];
 }
 
