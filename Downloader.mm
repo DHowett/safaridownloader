@@ -246,7 +246,14 @@ HOOK(BrowserController, _panelForPanelType$, id, int type) {
 
 #pragma mark -/*}}}*/
 #pragma mark Hooked WebViewPolicyDelegate Methods (TabDocument)/*{{{*/
-HOOK(TabDocument, webView$decidePolicyForNavigationAction$request$frame$decisionListener$, void, WebView *view, NSDictionary *action, NSURLRequest *request, WebFrame *frame, id<WebPolicyDecisionListener> decisionListener) {
+HOOK(TabDocument,
+     webView$decidePolicyForNavigationAction$request$frame$decisionListener$,
+     void,
+     WebView *view,
+     NSDictionary *action,
+     NSURLRequest *request,
+     WebFrame *frame,
+     id<WebPolicyDecisionListener> decisionListener) {
   NSLog(@"NAV: decidePolicyForNavigationAction!!!!!!");
   NSLog(@"NAV: action: %@", action);
   NSLog(@"NAV: request: %@", request);
@@ -256,12 +263,26 @@ HOOK(TabDocument, webView$decidePolicyForNavigationAction$request$frame$decision
   if(!handled) CALL_ORIG(TabDocument, webView$decidePolicyForNavigationAction$request$frame$decisionListener$, view, action, request, frame, decisionListener);
 }
 
-HOOK(TabDocument, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$, void, WebView *view, NSDictionary *action, NSURLRequest *request, NSString *newFrameName, id<WebPolicyDecisionListener> decisionListener) {
+HOOK(TabDocument,
+     webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$,
+     void,
+     WebView *view,
+     NSDictionary *action,
+     NSURLRequest *request,
+     NSString *newFrameName,
+     id<WebPolicyDecisionListener> decisionListener) {
   BOOL handled = [downloader webView:view decideAction:action forRequest:request withMimeType:nil inFrame:nil withListener:decisionListener];
   if(!handled) CALL_ORIG(TabDocument, webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$, view, action, request, newFrameName, decisionListener);
 }
 
-HOOK(TabDocument, webView$decidePolicyForMIMEType$request$frame$decisionListener$, void, WebView *view, NSString *type, NSURLRequest *request, WebFrame *frame, id<WebPolicyDecisionListener> decisionListener) {
+HOOK(TabDocument,
+     webView$decidePolicyForMIMEType$request$frame$decisionListener$,
+     void,
+     WebView *view,
+     NSString *type,
+     NSURLRequest *request,
+     WebFrame *frame,
+     id<WebPolicyDecisionListener> decisionListener) {
   NSLog(@"MIME: decidePolicyForMIMEType!!!!!!");
   NSLog(@"MIME: type: %@", type);
   NSLog(@"MIME: request: %@", request);
