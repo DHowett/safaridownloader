@@ -229,6 +229,11 @@ HOOK(BrowserButtonBar, positionButtons$tags$count$group$, void, id buttons, int 
     float curHeight = button.frame.size.height;
     float newXOrigin = maxX - (buttonBoxWidth / 2.0) - (curWidth / 2.0);
     [button setFrame:CGRectMake(newXOrigin, YOrigin, curWidth, curHeight)];
+    
+    int tag = button.tag;
+    if(tag == 61) [[DownloadManager sharedManager] setPortraitDownloadButton:button];
+    else if(tag == 62) [[DownloadManager sharedManager] setLandscapeDownloadButton:button];
+
     curButton++;
   }
   return;
