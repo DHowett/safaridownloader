@@ -57,6 +57,7 @@
     };
     Documents = {
 	"Microsoft Office" = {
+	    ForceExtension = <*BY>;
 	    Extensions = (
 		doc,
 		docx,

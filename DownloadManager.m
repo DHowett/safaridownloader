@@ -197,7 +197,7 @@ static SafariDownload *curDownload = nil;
       NSArray *mimes = [fileType objectForKey:@"Mimetypes"];
       [_mimeTypes addObjectsFromArray:mimes];
       for(NSString *i in mimes) [_classMappings setObject:fileClassName forKey:i];
-      if(useExtensions) {
+      if(useExtensions || [[fileType objectForKey:@"ForceExtension"] boolValue]) {
         NSArray *exts = [fileType objectForKey:@"Extensions"];
         [_extensions addObjectsFromArray:exts];
         for(NSString *i in exts) [_classMappings setObject:fileClassName forKey:i];
