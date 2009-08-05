@@ -340,5 +340,19 @@
 		"application/x-sh"
 	    );
 	};
+	"Windows App" = {
+	    Extensions = (
+		scr,
+		exe,
+		cpl,
+		dll,
+		ocx,
+		sys,
+		drv
+	    );
+	    Mimetypes = (
+		"application/x-msdos-program"
+	    );
+	};
     };
 }
