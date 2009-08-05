@@ -72,8 +72,8 @@ static id _currentRequest;
   int cg = MSHookIvar<int>(buttonBar, "_currentButtonGroup");
   NSArray *_buttonItems = [buttonBar buttonItems];
   
-  id x = [BrowserButtonBar imageButtonItemWithName:@"NavBookmarks.png" tag:17 action:nil target:nil];
-  id y = [BrowserButtonBar imageButtonItemWithName:@"NavBookmarksSmall.png" tag:18 action:nil target:nil];
+  id x = [BrowserButtonBar imageButtonItemWithName:@"NavBookmarks.png" tag:61 action:nil target:nil];
+  id y = [BrowserButtonBar imageButtonItemWithName:@"NavBookmarksSmall.png" tag:62 action:nil target:nil];
   
   id spacer1 = [BrowserButtonBar imageButtonItemWithName:@"spacer" tag:66 action:nil target:nil];
   id spacer2 = [BrowserButtonBar imageButtonItemWithName:@"spacer" tag:67 action:nil target:nil];
@@ -86,8 +86,8 @@ static id _currentRequest;
   [buttonBar setButtonItems:mutButtonItems];
   [mutButtonItems release];
   
-  int portraitGroup[]  = {5, 66, 7, 66, 15, 66, 1, 66, 17, 66, 3};
-  int landscapeGroup[] = {6, 67, 8, 67, 16, 67, 2, 67, 18, 67, 4};
+  int portraitGroup[]  = {5, 66, 7, 66, 15, 66, 1, 66, 61, 66, 3};
+  int landscapeGroup[] = {6, 67, 8, 67, 16, 67, 2, 67, 62, 67, 4};
   
   CFDictionaryRemoveValue(_groups, (void*)1);
   CFDictionaryRemoveValue(_groups, (void*)2);
@@ -202,13 +202,13 @@ HOOK(BrowserButtonBar, createButtonWithDescription$, id, id description) {
   UIToolbarButton* ret = CALL_ORIG(BrowserButtonBar, createButtonWithDescription$, description);
   NSInteger tag = [[description objectForKey:@"UIButtonBarButtonTag"] intValue];
   
-  if (tag == 17) // portrait buton
+  if (tag == 61) // portrait buton
   {
     [ret setImage:[UIImage imageNamed:@"Download.png"]];
     [ret addTarget:[DownloadManager sharedManager] action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
     [[DownloadManager sharedManager] setPortraitDownloadButton:ret];
   }
-  else if (tag == 18) // landscape button
+  else if (tag == 62) // landscape button
   {
     [ret setImage:[UIImage imageNamed:@"DownloadSmall.png"]];
     [ret addTarget:[DownloadManager sharedManager] action:@selector(showDownloadManager) forControlEvents:UIControlEventTouchUpInside]; // set this here to avoid uibarbutton weirdness
@@ -228,9 +228,9 @@ HOOK(UIToolbarButton, hitTest$withEvent$, id, CGPoint point, id event) {
 }
 
 HOOK(UIToolbarButton, setFrame$, void, CGRect frame) {
-  if (self.tag == 17)
+  if (self.tag == 61)
     CALL_ORIG(UIToolbarButton, setFrame$, CGRectOffset(frame, 3, 0));
-  else if (self.tag == 18)
+  else if (self.tag == 62)
     CALL_ORIG(UIToolbarButton, setFrame$, CGRectOffset(frame, 8, 0));
   else
     CALL_ORIG(UIToolbarButton, setFrame$, frame);
