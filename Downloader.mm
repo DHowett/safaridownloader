@@ -71,7 +71,6 @@ HOOK(Application, applicationDidFinishLaunching$, void,
      UIApplication *application) {
   CALL_ORIG(Application, applicationDidFinishLaunching$, application);
   initCustomToolbar();
-  [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 }
 
 HOOK(Application, applicationResume$, void, GSEventRef event) {

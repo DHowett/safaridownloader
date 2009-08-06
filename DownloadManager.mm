@@ -733,11 +733,11 @@ static int animationType = 0;
     keyWindow = [[BrowserController sharedBrowserController] window];
   }
   self.view.frame = [[UIScreen mainScreen] applicationFrame];
-  UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+  int orientation = [[CLASS(BrowserController) sharedBrowserController] orientation];
   NSString *transition = kCATransitionFromTop;
-  if (orientation == UIDeviceOrientationLandscapeLeft)
+  if (orientation == 90)
     transition = kCATransitionFromLeft;
-  else if (orientation == UIDeviceOrientationLandscapeRight)
+  else if (orientation == -90)
     transition = kCATransitionFromRight;
   
   NSLog(@"Checking Values:\nWindow: %@\nView: %@\nTable: %@", keyWindow, self.view, _tableView);
@@ -753,7 +753,7 @@ static int animationType = 0;
   [[self.view layer] addAnimation:animation forKey:@"pushUp"];
   animationType = 1;
   [keyWindow addSubview:self.view];
-  if (self.interfaceOrientation == UIInterfaceOrientationPortrait) {
+  if (orientation == 0) {
     NSLog(@"%s portrait!", _cmd);
     _tableView.frame = CGRectMake(0, 44, 320, 416);
     _navBar.frame = CGRectMake(0, 0, 320, 44);
@@ -795,11 +795,11 @@ static int animationType = 0;
 - (void)hideDownloadManager
 {
   animationType = 2;
-  UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+  int orientation = [[CLASS(BrowserController) sharedBrowserController] orientation];
   NSString *transition = kCATransitionFromBottom;
-  if (orientation == UIDeviceOrientationLandscapeLeft)
+  if (orientation == 90)
     transition = kCATransitionFromRight;
-  else if (orientation == UIDeviceOrientationLandscapeRight)
+  else if (orientation == -90)
     transition = kCATransitionFromLeft;
   
   CATransition *animation = [CATransition animation];
