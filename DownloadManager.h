@@ -79,7 +79,6 @@ typedef enum
             withMimeType:(NSString *)mimeType;
 
 - (NSString*)fileNameForURL:(NSURL*)url;
-- (void)loadCustomToolbar;
 - (SDActionType) webView:(WebView *)webView 
             decideAction:(NSDictionary*)action
               forRequest:(NSURLRequest *)request 

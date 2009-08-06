@@ -19,7 +19,7 @@ LDFLAGS:=-lobjc -framework Foundation -framework UIKit -framework CoreFoundation
 	-F/opt/iphone-sdk-3.0/sysroot/System/Library/PrivateFrameworks -framework WebUI
 
 ifdef DEBUG
-DEBUG_CFLAGS=-DDEBUG -ggdb
+DEBUG_CFLAGS=-DDEBUG -ggdb -D__DEBUG__
 STRIP=/bin/true
 endif
 

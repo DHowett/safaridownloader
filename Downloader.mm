@@ -23,11 +23,54 @@
 #define NEWWINDOW_ORIG webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:
 #define NEWWINDOW_HOOK webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$
 
+static void initCustomToolbar(void) {
+  Class BrowserController = objc_getClass("BrowserController");
+  Class BrowserButtonBar = objc_getClass("BrowserButtonBar");
+  BrowserController *bcont = [BrowserController sharedBrowserController];
+  BrowserButtonBar *buttonBar = MSHookIvar<BrowserButtonBar *>(bcont, "_buttonBar");
+  CFMutableDictionaryRef _groups = MSHookIvar<CFMutableDictionaryRef>(buttonBar, "_groups");
+  int cg = MSHookIvar<int>(buttonBar, "_currentButtonGroup");
+  NSArray *_buttonItems = [buttonBar buttonItems];
+  
+  id x = [BrowserButtonBar imageButtonItemWithName:@"Download.png"
+                                               tag:61
+                                            action:@selector(showDownloadManager)
+                                            target:[NSValue valueWithNonretainedObject:[DownloadManager sharedManager]]];
+  id y = [BrowserButtonBar imageButtonItemWithName:@"DownloadSmall.png"
+                                               tag:62
+                                            action:@selector(showDownloadManager)
+                                            target:[NSValue valueWithNonretainedObject:[DownloadManager sharedManager]]];
+  
+  NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
+  
+  [mutButtonItems addObject:x];
+  [mutButtonItems addObject:y];
+  [buttonBar setButtonItems:mutButtonItems];
+  [mutButtonItems release];
+  
+  int portraitGroup[]  = {5, 7, 15, 1, 61, 3};
+  int landscapeGroup[] = {6, 8, 16, 2, 62, 4};
+  
+  CFDictionaryRemoveValue(_groups, (void*)1);
+  CFDictionaryRemoveValue(_groups, (void*)2);
+  
+  [buttonBar registerButtonGroup:1 
+                     withButtons:portraitGroup 
+                       withCount:6];
+  [buttonBar registerButtonGroup:2 
+                     withButtons:landscapeGroup 
+                       withCount:6];
+  
+  if (cg == 1 || cg == 2)
+    [buttonBar showButtonGroup:cg
+                  withDuration:0];
+}
+
 #pragma mark Renamed Methods/*{{{*/
 HOOK(Application, applicationDidFinishLaunching$, void, 
      UIApplication *application) {
   CALL_ORIG(Application, applicationDidFinishLaunching$, application);
-  [[DownloadManager sharedManager] loadCustomToolbar];
+  initCustomToolbar();
   [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 }
 
