@@ -27,6 +27,7 @@
 #define MARK
 #define START_TIMER
 #define END_TIMER(msg)
+#define NSLog(...)
 #endif
 
 #define NB [NSBundle mainBundle]
