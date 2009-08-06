@@ -929,6 +929,7 @@ static int animationType = 0;
     }
     launch.cancelButtonIndex = [launch addButtonWithTitle:@"Cancel"];
     [launch showInView:self.view];
+    launch.tag = kActionSheet;
     [launch release];
   }
 }
