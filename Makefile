@@ -26,7 +26,7 @@ endif
 STOREPACKAGE=1
 export STOREPACKAGE
 
-CFLAGS:=-include $(TOP_DIR)/Downloader_Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include
+CFLAGS:=-include $(TOP_DIR)/Downloader_Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include -I$(TOP_DIR)
 export FRAMEWORKDIR
 export CFLAGS
 
@@ -43,10 +43,10 @@ build/$(TARGET): $(OFILES:%.o=build/%.o)
 	$(STRIP) -x $@
 	CODESIGN_ALLOCATE=$(CODESIGN_ALLOCATE) ldid -S $@
 
-build/%.o: %.mm
+build/%.o: src/%.mm
 	$(CXX) -c $(CFLAGS) $< -o $@
 
-build/%.o: %.m
+build/%.o: src/%.m
 	$(CXX) -c $(CFLAGS) $< -o $@
 
 clean:
