@@ -66,7 +66,7 @@ static void initCustomToolbar(void) {
                   withDuration:0];
 }
 
-#pragma mark Renamed Methods/*{{{*/
+#pragma mark General Hooks/*{{{*/
 HOOK(Application, applicationDidFinishLaunching$, void, 
      UIApplication *application) {
   CALL_ORIG(Application, applicationDidFinishLaunching$, application);
@@ -263,6 +263,84 @@ HOOK(TabDocument,
   }
 }
 #pragma mark -/*}}}*/
+#pragma mark Hooks for Tap-Hold Download/*{{{*/
+struct interaction {
+  NSTimer* timer;
+  CGPoint location;
+  BOOL isBlocked;
+  BOOL isCancelled;
+  BOOL isOnWebThread;
+  BOOL isDisplayingHighlight;
+  BOOL attemptedClick;
+  BOOL isGestureScrolling;
+  CGPoint gestureScrollPoint;
+  CGPoint gestureCurrentPoint;
+  BOOL hasAttemptedGestureScrolling;
+  UIView* candidate;
+  BOOL forwardingGuard;
+  SEL mouseUpForwarder;
+  SEL mouseDraggedForwarder;
+  DOMNode* element;
+  BOOL defersCallbacksState;
+  UIInformalDelegate* delegate;
+  int interactionSheetType;
+  UIActionSheet* interactionSheet;
+  BOOL allowsImageSheet;
+  BOOL allowsDataDetectorsSheet;
+  struct {
+    BOOL active;
+    BOOL defaultPrevented;
+    NSMutableArray* regions;
+  } directEvents;
+};
+
+static NSURL *interactionURL = nil;
+
+HOOK(UIWebDocumentView, actionSheet$clickedButtonAtIndex$, void, UIActionSheet *sheet, int index) {
+  if(index == 1336) {
+    if(interactionURL)
+      [[DownloadManager sharedManager] addDownloadWithURL:interactionURL];
+  }
+  CALL_ORIG(UIWebDocumentView, actionSheet$clickedButtonAtIndex$, sheet, index);
+  [interactionURL release];
+  interactionURL = nil;
+}
+
+HOOK(UIWebDocumentView, showBrowserSheet$, void, id sheet) {
+  struct interaction i = MSHookIvar<struct interaction>(self, "_interaction");
+  Class DOMHTMLAnchorElement = CLASS(DOMHTMLAnchorElement);
+  int sheetType = i.interactionSheetType;
+//  if(sheetType == 3) {
+    UIActionSheet *iSheet = i.interactionSheet;
+    NSMutableArray *buttons = [sheet buttons];
+    id domElement = i.element;
+    id myButton;
+    if(![domElement isKindOfClass:DOMHTMLAnchorElement]) {
+      domElement = [domElement parentNode];
+    }
+    if([domElement isKindOfClass:DOMHTMLAnchorElement]) {
+      interactionURL = [[domElement absoluteLinkURL] copy];
+      NSString *scheme = [interactionURL scheme];
+      if([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]
+      || [scheme isEqualToString:@"ftp"]) {
+        [iSheet addButtonWithTitle:@"Download"];
+        myButton = [buttons lastObject];
+        [myButton retain];
+        [myButton setTag:1337];
+        [buttons removeObject:myButton];
+        [buttons insertObject:myButton atIndex:0];
+        [myButton release];
+        [iSheet setDestructiveButtonIndex:0];
+        [iSheet setCancelButtonIndex:([buttons count] - 1)];
+      } else {
+        [interactionURL release];
+        interactionURL = nil;
+      }
+    }
+//  }
+  CALL_ORIG(UIWebDocumentView, showBrowserSheet$, sheet);
+}
+#pragma mark -/*}}}*/
 
 void ReloadPrefsNotification (CFNotificationCenterRef center, 
                               void *observer, 
@@ -280,6 +358,7 @@ extern "C" void DownloaderInitialize() {
   GET_CLASS(BrowserButtonBar);
   GET_CLASS(BrowserController);
   GET_CLASS(TabDocument);
+  GET_CLASS(UIWebDocumentView);
 
   HOOK_MESSAGE_F(Application, applicationDidFinishLaunching:, applicationDidFinishLaunching$);
   HOOK_MESSAGE_F(Application, applicationResume:, applicationResume$);
@@ -288,6 +367,9 @@ extern "C" void DownloaderInitialize() {
   HOOK_MESSAGE_F(TabDocument, NAVACTION_ORIG, NAVACTION_HOOK);
   HOOK_MESSAGE_F(TabDocument, NEWWINDOW_ORIG, NEWWINDOW_HOOK); 
   HOOK_MESSAGE_F(TabDocument, MIMETYPE_ORIG,  MIMETYPE_HOOK);
+  
+  HOOK_MESSAGE_F(UIWebDocumentView, actionSheet:clickedButtonAtIndex:, actionSheet$clickedButtonAtIndex$);
+  HOOK_MESSAGE_F(UIWebDocumentView, showBrowserSheet:, showBrowserSheet$);
 
   CFNotificationCenterRef r = CFNotificationCenterGetDarwinNotifyCenter();
   CFNotificationCenterAddObserver(r, 
