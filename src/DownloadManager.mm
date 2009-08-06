@@ -53,6 +53,7 @@ static BOOL doRot = YES;
 navItem = _navItem, 
 portraitDownloadButton = _portraitDownloadButton, 
 landscapeDownloadButton = _landscapeDownloadButton,
+userPrefs = _userPrefs,
 currentRequest;
 
 #pragma mark -
@@ -168,6 +169,10 @@ static id resourceBundle = nil;
     return nil;
   return filename;
 }
+
+- (void)updateUserPreferences {
+  self.userPrefs = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
+}
 #pragma mark -/*}}}*/
 #pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
 static SDActionType _actionType = SDActionTypeNone;
@@ -259,9 +264,8 @@ static SDActionType _actionType = SDActionTypeNone;
   NSMutableDictionary *globalFileTypes = 
   [NSMutableDictionary dictionaryWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" 
                                                                              ofType:@"plist"]];
-  NSDictionary *userPrefs = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
-  NSArray *disabledItems = [userPrefs objectForKey:@"DisabledItems"];
-  NSDictionary *customTypes = [userPrefs objectForKey:@"CustomItems"];
+  NSArray *disabledItems = [_userPrefs objectForKey:@"DisabledItems"];
+  NSDictionary *customTypes = [_userPrefs objectForKey:@"CustomItems"];
   if(customTypes) 
     [globalFileTypes setValue:customTypes forKey:@"CustomItems"];
   
@@ -272,10 +276,10 @@ static SDActionType _actionType = SDActionTypeNone;
   _extensions = [[NSMutableSet alloc] init];
   _classMappings = [[NSMutableDictionary alloc] init];
   
-  BOOL disabled = [[userPrefs objectForKey:@"Disabled"] boolValue];
+  BOOL disabled = [[_userPrefs objectForKey:@"Disabled"] boolValue];
   if(disabled) return;
   
-  BOOL useExtensions = [[userPrefs objectForKey:@"UseExtensions"] boolValue];
+  BOOL useExtensions = [[_userPrefs objectForKey:@"UseExtensions"] boolValue];
   
   for(NSString *fileClassName in globalFileTypes) {
     NSDictionary *fileClass = [globalFileTypes objectForKey:fileClassName];

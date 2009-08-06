@@ -75,6 +75,7 @@ HOOK(Application, applicationDidFinishLaunching$, void,
 
 HOOK(Application, applicationResume$, void, GSEventRef event) {
   CALL_ORIG(Application, applicationResume$, event);
+  [[DownloadManager sharedManager] updateUserPreferences];
   [[DownloadManager sharedManager] updateFileTypes];
 }
 
@@ -268,6 +269,7 @@ void ReloadPrefsNotification (CFNotificationCenterRef center,
                               CFStringRef name, 
                               const void *object, 
                               CFDictionaryRef userInfo) {
+  [[DownloadManager sharedManager] updateUserPreferences];
   [[DownloadManager sharedManager] updateFileTypes];
 }
 

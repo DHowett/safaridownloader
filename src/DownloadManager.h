@@ -64,6 +64,7 @@ typedef enum
   DownloadManagerPanel *_panel;
   NSURLRequest* currentRequest;
   SafariDownload* curDownload;
+  NSDictionary      *_userPrefs;
 }
 
 @property (nonatomic, retain) UINavigationItem* navItem;
@@ -71,7 +72,10 @@ typedef enum
 @property (nonatomic, assign) UIToolbarButton*  landscapeDownloadButton;
 @property (nonatomic, retain) NSURLRequest*     currentRequest;
 
+@property (nonatomic, retain) NSDictionary*	userPrefs;
+
 + (id)sharedManager;
+- (void)updateUserPreferences;
 - (void)updateFileTypes;
 - (NSString *)iconPathForName:(NSString *)name;
 - (UIImage *)iconForExtension:(NSString *)extension orMimeType:(NSString *)mimeType;
