@@ -17,9 +17,6 @@ LDFLAGS:=-lobjc -bind_at_load -framework Foundation -framework CoreFoundation \
 	-multiply_defined suppress -dynamiclib -Wall \
 	-Werror -ObjC++ -fobjc-exceptions -fobjc-call-cxx-cdtors $(LDFLAGS)
 
-STOREPACKAGE=1
-export STOREPACKAGE
-
 CFLAGS:=-Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include
 export FRAMEWORKDIR
 export CFLAGS

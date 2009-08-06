@@ -1,15 +1,15 @@
 Package: net.howett.safaridownloadersbs
 Name: SDM SBSettings
 Pre-Depends: firmware (>= 3.0)
-Depends: sbsettings, net.howett.safaridownloader
-Version: 1.2.0
+Depends: net.howett.safaridownloader (>= 1.3.0-1), sbsettings (>= 1.0.7-5)
+Version: 1.0.0
 Architecture: iphoneos-arm
 Description: An SBSettings toggle for Safari Download Manager
 Maintainer: Dustin Howett <dustin@howett.net>
 Author: Dustin Howett <dustin@howett.net>
-Section: Tweaks
-Depiction: http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=safaridownloaderData
-Homepage: http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=safaridownloaderData
+Section: SBSettings Addons
+Depiction: http://howett.net/cydia/depict/sdm/toggle.html
+Homepage: http://howett.net/cydia/depict/sdm/toggle.html
 Sponsor: thebigboss.org <http://thebigboss.org>
 dev: dustinhowett
 tag: cydia::commercial
