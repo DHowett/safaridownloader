@@ -12,7 +12,7 @@ extern "C" BOOL isEnabled() {
 	return !disabled;
 }
 
-extern "C" float getDelayTime() { return 1.0f; }
+extern "C" float getDelayTime() { return 0.25f; }
 
 extern "C" void setState(BOOL enabled) {
 	BOOL disabled = !enabled;
