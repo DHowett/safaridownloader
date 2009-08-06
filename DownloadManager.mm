@@ -277,7 +277,7 @@ static SDActionType _actionType = SDActionTypeNone;
   
   BOOL useExtensions = [[userPrefs objectForKey:@"UseExtensions"] boolValue];
   
-  for(NSDictionary *fileClassName in globalFileTypes) {
+  for(NSString *fileClassName in globalFileTypes) {
     NSDictionary *fileClass = [globalFileTypes objectForKey:fileClassName];
     for(NSString *fileTypeName in fileClass) {
       if([disabledItems containsObject:fileTypeName]) {
@@ -289,7 +289,7 @@ static SDActionType _actionType = SDActionTypeNone;
       NSArray *mimes = [fileType objectForKey:@"Mimetypes"];
       [_mimeTypes addObjectsFromArray:mimes];
       for(NSString *i in mimes) [_classMappings setObject:fileClassName forKey:i];
-      if(useExtensions || [[fileType objectForKey:@"ForceExtension"] boolValue]) {
+      if(useExtensions || [[fileType objectForKey:@"ForceExtension"] boolValue] || [fileClassName isEqualToString:@"CustomItems"]) {
         NSArray *exts = [fileType objectForKey:@"Extensions"];
         [_extensions addObjectsFromArray:exts];
         for(NSString *i in exts) [_classMappings setObject:fileClassName forKey:i];
