@@ -310,30 +310,55 @@ static SDActionType _actionType = SDActionTypeNone;
   return;
 }
 
+- (NSString *)iconPathForClassOfType:(NSString *)name {
+  NSString *iconPath = nil;
+  if(!name || [name length] == 0) return nil;
+  NSString *t = [_classMappings objectForKey:name];
+  NSLog(@"Class is %@", t);
+  if(t != nil) iconPath = 
+    [resourceBundle pathForResource:[@"Class-" stringByAppendingString:t] 
+                             ofType:@"png" inDirectory:@"FileIcons"];
+  return iconPath;
+}
+
 - (NSString *)iconPathForName:(NSString *)name {
   NSString *iconPath = nil;
   if(name && [name length] > 0) {
     iconPath = [resourceBundle pathForResource:name 
                                         ofType:@"png" 
                                    inDirectory:@"FileIcons"];
-    NSString *t;
+    NSLog(@"name is %@", name);
+  }
+  return iconPath;
+}
+
+- (NSString *)iconPathForMIME:(NSString *)mime {
+  NSString *iconPath = nil;
+  if(mime && [mime length] > 0) {
+    NSString *sanitaryMime = [mime stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    NSString *mimeClass = [[mime componentsSeparatedByString:@"/"] objectAtIndex:0];
+    iconPath = [resourceBundle pathForResource:sanitaryMime
+                                        ofType:@"png" 
+                                   inDirectory:@"FileIcons"];
     if(!iconPath) {
-      t = [_classMappings objectForKey:name];
-      if(t != nil) iconPath = 
-        [resourceBundle pathForResource:[@"Class-" stringByAppendingString:t] 
-                                 ofType:@"png" inDirectory:@"FileIcons"];
+      iconPath = [resourceBundle pathForResource:mimeClass
+                                          ofType:@"png" 
+                                     inDirectory:@"FileIcons"];
     }
+    NSLog(@"Sanitized mime type is %@ mime class is %@", sanitaryMime, mimeClass);
   }
   return iconPath;
 }
 
 - (UIImage *)iconForExtension:(NSString *)extension 
                    orMimeType:(NSString *)mimeType {
-  NSString *mimeIconPath = [self iconPathForName:mimeType];
+  NSString *mimeIconPath = [self iconPathForMIME:mimeType];
   NSString *extIconPath = [self iconPathForName:extension];
-  NSString *iconPath;
-  if(extIconPath) iconPath = extIconPath;
-  if(mimeIconPath) iconPath = mimeIconPath;
+  NSString *iconPath = nil;
+  if(mimeIconPath != nil) iconPath = mimeIconPath;
+  if(extIconPath != nil) iconPath = extIconPath;
+  if(!iconPath) iconPath = [self iconPathForClassOfType:extension]; // Class-xxx lookup fallthrough
+  if(!iconPath) iconPath = [self iconPathForClassOfType:mimeType]; // Class-xxx lookup fallthrough
   if(!iconPath) iconPath = [resourceBundle pathForResource:@"unknownfile" 
                                                     ofType:@"png"];
   return [UIImage imageWithContentsOfFile:iconPath];
