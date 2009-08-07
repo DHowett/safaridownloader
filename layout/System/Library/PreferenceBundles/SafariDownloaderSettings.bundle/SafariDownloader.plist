@@ -6,6 +6,10 @@
     <array>
 	<dict>
 	    <key>cell</key>
+	    <string>PSGroupCell</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
 	    <string>PSSwitchCell</string>
 	    <key>default</key>
 	    <true/>
@@ -29,6 +33,20 @@
 	    <string>SDSettingsFileClassListController</string>
 	    <key>label</key>
 	    <string>File Types</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSLinkCell</string>
+	    <key>detail</key>
+	    <string>SDSettingsController</string>
+	    <key>label</key>
+	    <string>Auto-Retry Settings</string>
+	    <key>plist</key>
+	    <string>AutoRetry</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSGroupCell</string>
 	</dict>
 	<dict>
 	    <key>cell</key>

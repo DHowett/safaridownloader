@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//GNUstep//DTD plist 0.9//EN" "http://www.gnustep.org/plist-0_9.xml">
+<plist version="0.9">
+<dict>
+    <key>items</key>
+    <array>
+	<dict>
+	    <key>cell</key>
+	    <string>PSGroupCell</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSSwitchCell</string>
+	    <key>default</key>
+	    <true/>
+	    <key>defaults</key>
+	    <string>net.howett.safaridownloader</string>
+	    <key>key</key>
+	    <string>AutoRetryDisabled</string>
+	    <key>label</key>
+	    <string>Auto-Retry Failed</string>
+	    <key>negate</key>
+	    <true/>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSLinkListCell</string>
+	    <key>default</key>
+	    <integer>3</integer>
+	    <key>defaults</key>
+	    <string>net.howett.safaridownloader</string>
+	    <key>detail</key>
+	    <string>PSListItemsController</string>
+	    <key>key</key>
+	    <string>AutoRetryCount</string>
+	    <key>label</key>
+	    <string>Retry Attempts</string>
+	    <key>validTitles</key>
+	    <array>
+		<string>1 attempt</string>
+		<string>2 attempts</string>
+		<string>3 attempts</string>
+		<string>4 attempts</string>
+		<string>5 attempts</string>
+	    </array>
+	    <key>validValues</key>
+	    <array>
+		<integer>1</integer>
+		<integer>2</integer>
+		<integer>3</integer>
+		<integer>4</integer>
+		<integer>5</integer>
+	    </array>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSGroupCell</string>
+	    <key>label</key>
+	    <string>Auto-Retry Delay (Seconds)</string>
+	</dict>
+	<dict>
+	    <key>cell</key>
+	    <string>PSSliderCell</string>
+	    <key>default</key>
+	    <real>3</real>
+	    <key>defaults</key>
+	    <string>net.howett.safaridownloader</string>
+	    <key>key</key>
+	    <string>AutoRetryInterval</string>
+	    <key>label</key>
+	    <string>Delay</string>
+	    <key>max</key>
+	    <real>5</real>
+	    <key>min</key>
+	    <real>0</real>
+	    <key>showValue</key>
+	    <true/>
+	</dict>
+    </array>
+    <key>title</key>
+    <string>Auto-Retry</string>
+</dict>
+</plist>
