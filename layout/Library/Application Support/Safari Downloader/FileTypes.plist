@@ -329,6 +329,10 @@
 		};
 	};
 	Miscellaneous = {
+		"Apple Disk Image" = {
+			Extensions = ( dmg );
+			Mimetypes = ( "application/x-apple-diskimage" );
+		};
 		Binary = {
 			Mimetypes = (
 				"application/binary",
