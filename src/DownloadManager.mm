@@ -998,6 +998,7 @@ static int animationType = 0;
     } else if(action) {
       Class Application = objc_getClass("Application");
       NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
+      path = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
       [[Application sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", action, path]]];
     }
     curDownload = nil;
