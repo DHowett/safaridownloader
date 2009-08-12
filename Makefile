@@ -56,7 +56,7 @@ clean:
 package-local: build/$(TARGET)
 	cp build/$(TARGET) _/Library/MobileSubstrate/DynamicLibraries
 	cp preferences/SDSettings _/System/Library/PreferenceBundles/SafariDownloaderSettings.bundle
-	fakeroot-ng -p "$(TOP_DIR)/.debmake/fakeroot" chown 0.80 _ -R
 	-find _ -iname '*.plist' -print0 | xargs -0 /home/dustin/bin/plutil -convert binary1
+	fakeroot-ng -p "$(TOP_DIR)/.debmake/fakeroot" chown 0.80 _ -Rv
 
 include $(FRAMEWORKDIR)/makefiles/DebMakefile
