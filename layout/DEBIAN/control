@@ -4,7 +4,7 @@ Pre-Depends: firmware (>= 3.0)
 Depends: mobilesubstrate, preferenceloader
 Conflicts: net.howett.downloader
 Replaces: net.howett.downloader
-Version: 1.3.0
+Version: 1.3.99
 Architecture: iphoneos-arm
 Description: A full Download Manager for Mobile Safari.
 Maintainer: Dustin Howett <dustin@howett.net>
