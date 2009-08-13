@@ -26,6 +26,116 @@ UIAlertView* activeInstance;
 - (void)setNumberOfRows:(int)num;
 @end
 
+@implementation AlertPrompt
+@synthesize textField;
+@synthesize enteredText;
+- (id)initWithTitle:(NSString *)title message:(NSString *)message delegate:(id)delegate cancelButtonTitle:(NSString *)cancelButtonTitle okButtonTitle:(NSString *)okayButtonTitle
+{
+	if (self = [super initWithTitle:title 
+                          message:message
+                         delegate:delegate 
+                cancelButtonTitle:cancelButtonTitle
+                otherButtonTitles:okayButtonTitle, nil]) {
+		UITextField *theTextField = [[UITextField alloc] initWithFrame:CGRectMake(14.0, 45.0, 255.0, 32.0)]; 
+    theTextField.borderStyle = UITextBorderStyleBezel;
+		[theTextField setBackgroundColor:[UIColor whiteColor]]; 
+		[self addSubview:theTextField];
+		self.textField = theTextField;
+		[theTextField release];
+		CGAffineTransform translate = CGAffineTransformMakeTranslation(0.0, 130.0); 
+		[self setTransform:translate];
+	}
+	return self;
+}
+- (void)show
+{
+	[textField becomeFirstResponder];
+	[super show];
+}
+- (NSString *)enteredText
+{
+	return textField.text;
+}
+- (void)dealloc
+{
+	[textField release];
+	[super dealloc];
+}
+@end
+
+@implementation QuickAlert
+static UIAlertView* alertView = nil;
+static UIProgressView* progressView = nil;
+
++ (void)showMessage:(NSString*)msg {
+  [self createAlertWithTitle:msg message:nil];
+}
+
++ (void)showMessage:(NSString*)msg description:(NSString*)desc {
+  [self createAlertWithTitle:msg message:desc];
+}
+
++ (void)showError:(NSString*)msg {
+  [self createAlertWithTitle:@"Error" message:msg];
+}
+
++ (void)showSuccess:(NSString*)msg {
+  [self createAlertWithTitle:@"Success" message:msg];
+}
+
++ (void)showLoadingAlert {
+  alertView = [[UIAlertView alloc]
+               initWithTitle:@"Saving..."
+               message:nil
+               delegate:self
+               cancelButtonTitle:nil
+               otherButtonTitles:nil];
+  
+	UIActivityIndicatorView *listingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+	CGRect frame = listingIndicator.frame;
+	frame.origin.x = 240;
+	frame.origin.y = 15;
+	frame.size.width = 22;
+	frame.size.height = 22;
+	listingIndicator.frame = frame;
+	[alertView addSubview:listingIndicator];
+  [listingIndicator release];
+  
+  progressView = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
+  progressView.frame = CGRectMake(15.0f, 48.0f, 248.0f, 15.0f);
+  [alertView addSubview:progressView];
+  [progressView release];
+  
+  [alertView setNumberOfRows:1];
+	[alertView setTransform:CGAffineTransformMakeScale(1, 1.5)];
+	[alertView show];
+  [alertView release];
+	[listingIndicator startAnimating];   
+}
+
++ (void)updateProgress:(CGFloat)prog {
+  progressView.progress = prog;
+}
+
++ (void)dismissLoadingAlert {
+  [progressView removeFromSuperview];
+  progressView = nil;
+  [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+  alertView = nil;
+}
+
++ (void)createAlertWithTitle:(NSString*)title message:(NSString*)message {
+  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
+                                                  message:message
+                                                 delegate:nil
+                                        cancelButtonTitle:@"OK"
+                                        otherButtonTitles:nil];
+  [alert show];
+  [alert release];
+}
+
+@end
+
 @implementation ModalAlert
 
 + (void)block:(UIView *)view
