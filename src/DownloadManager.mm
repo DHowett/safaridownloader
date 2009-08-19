@@ -82,6 +82,7 @@ static id resourceBundle = nil;
     _finishedDownloads = [NSMutableArray new];
     _downloadQueue = [NSOperationQueue new];
     [_downloadQueue setMaxConcurrentOperationCount:5];
+    [self updateUserPreferences];
     [self updateFileTypes];
   }
   return self;
