@@ -65,6 +65,8 @@ typedef enum
   NSURLRequest* currentRequest;
   SafariDownload* curDownload;
   NSDictionary      *_userPrefs;
+  BOOL		     _visible;
+  NSURL		    *_loadingURL;
 }
 
 @property (nonatomic, retain) UINavigationItem* navItem;
@@ -73,6 +75,9 @@ typedef enum
 @property (nonatomic, retain) NSURLRequest*     currentRequest;
 
 @property (nonatomic, retain) NSDictionary*	userPrefs;
+
+@property (nonatomic, assign, getter=isVisible) BOOL visible;
+@property (nonatomic, retain) NSURL *loadingURL;
 
 + (id)sharedManager;
 - (void)updateUserPreferences;

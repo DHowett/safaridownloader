@@ -79,6 +79,16 @@ HOOK(Application, applicationResume$, void, GSEventRef event) {
   [[DownloadManager sharedManager] updateFileTypes];
 }
 
+HOOK(Application, applicationOpenURL$, void, NSURL *url) {
+  DownloadManager *shared = [DownloadManager sharedManager];
+  if([shared isVisible]) {
+    [shared hideDownloadManager];
+    shared.loadingURL = url;
+    return;
+  }
+  CALL_ORIG(Application, applicationOpenURL$, url);
+}
+
 HOOK(BrowserButtonBar, positionButtons$tags$count$group$, void, 
      id buttons, int *tags, int count, int group) {
   
@@ -362,6 +372,7 @@ extern "C" void DownloaderInitialize() {
 
   HOOK_MESSAGE_F(Application, applicationDidFinishLaunching:, applicationDidFinishLaunching$);
   HOOK_MESSAGE_F(Application, applicationResume:, applicationResume$);
+  HOOK_MESSAGE_F(Application, applicationOpenURL:, applicationOpenURL$);
   HOOK_MESSAGE_F(BrowserButtonBar, positionButtons:tags:count:group:, positionButtons$tags$count$group$);
   HOOK_MESSAGE_F(BrowserController, _panelForPanelType:, _panelForPanelType$);
   HOOK_MESSAGE_F(TabDocument, NAVACTION_ORIG, NAVACTION_HOOK);

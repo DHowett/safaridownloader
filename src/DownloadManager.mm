@@ -54,6 +54,8 @@ navItem = _navItem,
 portraitDownloadButton = _portraitDownloadButton, 
 landscapeDownloadButton = _landscapeDownloadButton,
 userPrefs = _userPrefs,
+visible = _visible,
+loadingURL = _loadingURL,
 currentRequest;
 
 #pragma mark -
@@ -84,6 +86,7 @@ static id resourceBundle = nil;
     [_downloadQueue setMaxConcurrentOperationCount:5];
     [self updateUserPreferences];
     [self updateFileTypes];
+    _visible = NO;
   }
   return self;
 }
@@ -785,6 +788,7 @@ static int animationType = 0;
     [[BrowserController sharedBrowserController] showBrowserPanelType:44];
     [[BrowserController sharedBrowserController] _setBrowserPanel:_panel];
     [_panel allowRotations:NO];
+    _visible = YES;
   }
   else if (animationType == 2)
   {
@@ -792,6 +796,11 @@ static int animationType = 0;
     [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
     [self.view removeFromSuperview];
     [_panel allowRotations:YES];
+    _visible = NO;
+    if(_loadingURL != nil) {
+      [[CLASS(Application) sharedApplication] applicationOpenURL:_loadingURL];
+      self.loadingURL = nil;
+    }
   }
   
   animationType = 0;
