@@ -19,14 +19,14 @@ LDFLAGS:=-lobjc -framework Foundation -framework UIKit -framework CoreFoundation
 	-F/opt/iphone-sdk-3.0/sysroot/System/Library/PrivateFrameworks -framework WebUI
 
 ifdef DEBUG
-DEBUG_CFLAGS=-DDEBUG -ggdb -D__DEBUG__
+DEBUG_CFLAGS=-DDEBUG -ggdb
 STRIP=/bin/true
 endif
 
 STOREPACKAGE=1
 export STOREPACKAGE
 
-CFLAGS:=-include $(TOP_DIR)/Downloader_Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include -I$(TOP_DIR)
+CFLAGS:=-include $(FRAMEWORKDIR)/Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include -I$(TOP_DIR)
 export FRAMEWORKDIR
 export CFLAGS
 
