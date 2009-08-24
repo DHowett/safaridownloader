@@ -6,6 +6,22 @@ static id resourceBundle = nil;
 static id fileTypesDict = nil;
 static id fileClassController = nil;
 
+
+#import <UIKit/UIPreferencesDeleteTableCell.h>
+@interface PSDeleteTableCell : UIPreferencesDeleteTableCell @end
+@implementation PSDeleteTableCell
+-(void)setValueChangedTarget:(id)target action:(SEL)action userInfo:(NSDictionary*)info {
+	[self setTarget:target];
+	[self setAction:action];
+}
+
+-(UILabel*)titleTextLabel {
+	UILabel* res = [super titleTextLabel];
+	res.textColor = [UIColor whiteColor];
+	return res;
+}
+@end
+
 @interface SDFileTypeSetupController : PSSetupController {
 }
 + (BOOL)isOverlay;
@@ -23,7 +39,6 @@ static id fileClassController = nil;
 	PSSpecifier *_nameSpec;
 	PSSpecifier *_newExtSpec;
 	PSSpecifier *_newMimeSpec;
-	UIPreferencesDeleteTableCell *_deleteCell;
 }
 - (id)specifiers;
 - (void)dealloc;
@@ -33,7 +48,6 @@ static id fileClassController = nil;
 - (NSString *)getOrigItem:(PSSpecifier *)spec;
 - (void)setNewItem:(NSString *)s forSpecifier:(PSSpecifier *)spec;
 - (void)deleteButtonPressed:(id)object;
-- (id)preferencesTable:(id)table cellForRow:(int)row inGroup:(int)group;
 @end
 
 @implementation SDFileTypeSetupController
@@ -49,29 +63,15 @@ static id fileClassController = nil;
 @implementation SDSettingsCustomFileTypeController
 - (id)initForContentSize:(CGSize)size {
 	if((self = [super initForContentSize:size])) {
-		_deleted = NO;
-		_deleteCell = [[UIPreferencesDeleteTableCell alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
-		[[_deleteCell button] setTitle:@"Delete this File Type"];
 		//[[_deleteCell button] addTarget:self action:@selector(deleteButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
 	}
 	return self;
-}
-
-- (id)preferencesTable:(id)table cellForRow:(int)row inGroup:(int)group {
-	static id deleteCell;
-	if(group == 3) {
-		[[_deleteCell button] setEnabled:YES];
-		[[_deleteCell button] addTarget:self action:@selector(deleteButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-		return _deleteCell;
-	}
-	else return [super preferencesTable:table cellForRow:row inGroup:group];
 }
 
 - (void)dealloc {
 	[_customEntry release];
 	[_extensions release];
 	[_mimetypes release];
-	[_deleteCell release];
 	[super dealloc];
 }
 
@@ -220,8 +220,6 @@ static id fileClassController = nil;
 }
 
 - (void)deleteButtonPressed:(id)object {
-	[object setEnabled:NO];
-	[object removeTarget:self action:NULL forControlEvents:UIControlEventTouchUpInside];
 	_deleted = YES;
 	[self updatePreferencesFile];
 	[self.parentController dismiss];
