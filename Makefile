@@ -14,8 +14,8 @@ CODESIGN_ALLOCATE=$(PREFIX)codesign_allocate
 export CC CXX STRIP CODESIGN_ALLOCATE
 
 LDFLAGS:=-lobjc -framework Foundation -framework UIKit -framework CoreFoundation -framework QuartzCore \
-	-framework CoreGraphics -multiply_defined suppress -dynamiclib -init _DownloaderInitialize -Wall \
-	-Werror -lsubstrate -lobjc -ObjC++ -fobjc-exceptions -fobjc-call-cxx-cdtors $(LDFLAGS) \
+	-framework CoreGraphics -multiply_defined suppress -dynamiclib -Wall \
+	-Werror -lsubstrate -ObjC++ -fobjc-exceptions -fobjc-call-cxx-cdtors $(LDFLAGS) \
 	-F/opt/iphone-sdk-3.0/sysroot/System/Library/PrivateFrameworks -framework WebUI
 
 ifdef DEBUG

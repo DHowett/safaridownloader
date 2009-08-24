@@ -17,6 +17,8 @@
 #define kDownloadSheet 993349
 #define kActionSheet 903403
 
+DHLateClass(Application);
+DHLateClass(BrowserController);
 static BOOL doRot = YES;
 
 @implementation DownloadManagerPanel
@@ -741,7 +743,7 @@ static int animationType = 0;
     keyWindow = [[BrowserController sharedBrowserController] window];
   }
   self.view.frame = [[UIScreen mainScreen] applicationFrame];
-  int orientation = [[CLASS(BrowserController) sharedBrowserController] orientation];
+  int orientation = [[DHClass(BrowserController) sharedBrowserController] orientation];
   NSString *transition = kCATransitionFromTop;
   if (orientation == 90)
     transition = kCATransitionFromLeft;
@@ -798,7 +800,7 @@ static int animationType = 0;
     [_panel allowRotations:YES];
     _visible = NO;
     if(_loadingURL != nil) {
-      [[CLASS(Application) sharedApplication] applicationOpenURL:_loadingURL];
+      [[DHClass(Application) sharedApplication] applicationOpenURL:_loadingURL];
       self.loadingURL = nil;
     }
   }
@@ -809,7 +811,7 @@ static int animationType = 0;
 - (void)hideDownloadManager
 {
   animationType = 2;
-  int orientation = [[CLASS(BrowserController) sharedBrowserController] orientation];
+  int orientation = [[DHClass(BrowserController) sharedBrowserController] orientation];
   NSString *transition = kCATransitionFromBottom;
   if (orientation == 90)
     transition = kCATransitionFromRight;

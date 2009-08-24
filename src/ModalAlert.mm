@@ -18,6 +18,8 @@
 #define NSLog(...)
 #endif
 
+DHLateClass(BrowserController);
+
 @interface ModalAlert (priv)
 UIAlertView* activeInstance;
 @end
@@ -277,8 +279,7 @@ static UIImage* savedIcon = nil;
 }
 
 + (void)showAuthViewWithChallenge:(NSURLAuthenticationChallenge*)challenge {
-  GET_CLASS(BrowserController);
-  BrowserController *brCont = [$BrowserController sharedBrowserController];
+  BrowserController *brCont = [DHClass(BrowserController) sharedBrowserController];
   TabController* tabCont = [brCont tabController];
   TabDocument* tabDoc = [tabCont activeTabDocument];
 
@@ -364,8 +365,7 @@ static UIImage* savedIcon = nil;
   iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
   [ohmygod addSubview:iconImageView];
   [iconImageView release];
-  GET_CLASS(BrowserController);
-  [ohmygod showInView:(UIView*)[[$BrowserController sharedBrowserController] browserLayer]];
+  [ohmygod showInView:(UIView*)[[DHClass(BrowserController) sharedBrowserController] browserLayer]];
   [ohmygod release];
   
   [ModalAlert block:ohmygod];	

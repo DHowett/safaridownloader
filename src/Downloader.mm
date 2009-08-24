@@ -23,6 +23,14 @@
 #define NEWWINDOW_ORIG webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:
 #define NEWWINDOW_HOOK webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$
 
+DHLateClass(Application); 
+DHLateClass(BrowserButtonBar);
+DHLateClass(BrowserController);
+DHLateClass(TabDocument);
+DHLateClass(UIWebDocumentView);
+
+DHLateClass(DOMHTMLAnchorElement);
+
 static void initCustomToolbar(void) {
   Class BrowserController = objc_getClass("BrowserController");
   Class BrowserButtonBar = objc_getClass("BrowserButtonBar");
@@ -179,7 +187,7 @@ HOOK(TabDocument,
   else { // if (_act == SDActionTypeDownload || action == SDActionTypeCancel) {
     NSLog(@"WDW: handled");
     NSLog(@"#####################################################");
-    [[CLASS(BrowserController) sharedBrowserController] setResourcesLoading:NO];
+    [[DHClass(BrowserController) sharedBrowserController] setResourcesLoading:NO];
   }
 }
 
@@ -226,7 +234,7 @@ HOOK(TabDocument,
   else { // if (_act == SDActionTypeDownload || action == SDActionTypeCancel) {
     NSLog(@"NAV: handled");
     NSLog(@"#####################################################");
-    [[CLASS(BrowserController) sharedBrowserController] setResourcesLoading:NO];
+    [[DHClass(BrowserController) sharedBrowserController] setResourcesLoading:NO];
   }
 }
 
@@ -269,7 +277,7 @@ HOOK(TabDocument,
   else {
     NSLog(@"MIME: handled");
     NSLog(@"#####################################################");
-    [[CLASS(BrowserController) sharedBrowserController] setResourcesLoading:NO];
+    [[DHClass(BrowserController) sharedBrowserController] setResourcesLoading:NO];
   }
 }
 #pragma mark -/*}}}*/
@@ -318,7 +326,7 @@ HOOK(UIWebDocumentView, actionSheet$clickedButtonAtIndex$, void, UIActionSheet *
 
 HOOK(UIWebDocumentView, showBrowserSheet$, void, id sheet) {
   struct interaction i = MSHookIvar<struct interaction>(self, "_interaction");
-  Class DOMHTMLAnchorElement = CLASS(DOMHTMLAnchorElement);
+  Class DOMHTMLAnchorElement = DHClass(DOMHTMLAnchorElement);
   int sheetType = i.interactionSheetType;
 //  if(sheetType == 3) {
     UIActionSheet *iSheet = i.interactionSheet;
@@ -352,23 +360,13 @@ HOOK(UIWebDocumentView, showBrowserSheet$, void, id sheet) {
 }
 #pragma mark -/*}}}*/
 
-void ReloadPrefsNotification (CFNotificationCenterRef center, 
-                              void *observer, 
-                              CFStringRef name, 
-                              const void *object, 
-                              CFDictionaryRef userInfo) {
+void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
   [[DownloadManager sharedManager] updateUserPreferences];
   [[DownloadManager sharedManager] updateFileTypes];
 }
 
-extern "C" void DownloaderInitialize() {	
-  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
-  
-  GET_CLASS(Application); 
-  GET_CLASS(BrowserButtonBar);
-  GET_CLASS(BrowserController);
-  GET_CLASS(TabDocument);
-  GET_CLASS(UIWebDocumentView);
+static _Constructor void DownloaderInitialize() {	
+  DHScopedAutoreleasePool();
 
   HOOK_MESSAGE_F(Application, applicationDidFinishLaunching:, applicationDidFinishLaunching$);
   HOOK_MESSAGE_F(Application, applicationResume:, applicationResume$);
@@ -378,7 +376,7 @@ extern "C" void DownloaderInitialize() {
   HOOK_MESSAGE_F(TabDocument, NAVACTION_ORIG, NAVACTION_HOOK);
   HOOK_MESSAGE_F(TabDocument, NEWWINDOW_ORIG, NEWWINDOW_HOOK); 
   HOOK_MESSAGE_F(TabDocument, MIMETYPE_ORIG,  MIMETYPE_HOOK);
-  
+
   HOOK_MESSAGE_F(UIWebDocumentView, actionSheet:clickedButtonAtIndex:, actionSheet$clickedButtonAtIndex$);
   HOOK_MESSAGE_F(UIWebDocumentView, showBrowserSheet:, showBrowserSheet$);
 
@@ -389,8 +387,6 @@ extern "C" void DownloaderInitialize() {
                                   CFSTR("net.howett.safaridownloader/ReloadPrefs"), 
                                   NULL, 
                                   0);
-
-  [pool release];
 }
 
 // vim:filetype=objc:ts=2:sw=2:expandtab
