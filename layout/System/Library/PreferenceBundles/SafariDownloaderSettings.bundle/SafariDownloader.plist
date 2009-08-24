@@ -67,10 +67,8 @@
 	    <true/>
 	</dict>
 	<dict>
-	    <key>alignment</key>
-	    <integer>2</integer>
 	    <key>cell</key>
-	    <string>PSStaticTextCell</string>
+	    <string>PSTitleValueCell</string>
 	    <key>label</key>
 	    <string>This option causes Safari Download Manager to consider file extensions when you tap a link, and prompt to download based on what it finds. This method causes a lot of false positives, and is generally a bad idea. SDM defaults to using MIME-types to determine whether or not to download a file.</string>
 	</dict>
@@ -81,20 +79,10 @@
 	    <true/>
 	</dict>
 	<dict>
-	    <key>alignment</key>
-	    <integer>2</integer>
 	    <key>cell</key>
-	    <string>PSStaticTextCell</string>
+	    <string>PSTitleValueCell</string>
 	    <key>label</key>
-	    <string>© 2009</string>
-	</dict>
-	<dict>
-	    <key>alignment</key>
-	    <integer>2</integer>
-	    <key>cell</key>
-	    <string>PSStaticTextCell</string>
-	    <key>label</key>
-	    <string>Youssef Francis and Dustin Howett</string>
+	    <string>© 2009 Youssef Francis and Dustin Howett</string>
 	</dict>
     </array>
     <key>title</key>
