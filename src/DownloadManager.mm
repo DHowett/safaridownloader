@@ -172,7 +172,7 @@ static id resourceBundle = nil;
   NSRange range = [filename rangeOfString: @"?"];
   if (range.location != NSNotFound)
     filename = [filename substringToIndex:range.location];
-  NSRange range = [filename rangeOfString: @"&"];
+  range = [filename rangeOfString: @"&"];
   if (range.location != NSNotFound)
     filename = [filename substringToIndex:range.location];
   if (filename.length == 0 || 
