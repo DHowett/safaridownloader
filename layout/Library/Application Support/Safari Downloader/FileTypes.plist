@@ -338,6 +338,7 @@
 				"application/binary",
 				"application/bin",
 				"application/octet-stream",
+				"application/octetstream",
 			);
 		};
 		"MS Download" = {
