@@ -359,8 +359,6 @@ static id fileClassController = nil;
 @end
 
 @implementation SDSettingsController
-static NSMutableArray *extraSpecs;
-
 - (id)initForContentSize:(CGSize)size {
 	if((self = [super initForContentSize:size])) {
 //		extraSpecs = [NSMutableArray array];

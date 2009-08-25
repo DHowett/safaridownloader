@@ -32,7 +32,7 @@
 @implementation BaseCell
 
 - (id)initWithFrame:(CGRect)frame reuseIdentifier:(NSString *)reuseIdentifier {
-  if(self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier]) 
+  if((self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier])) 
   {
 		contentView = [[BaseCellView alloc] initWithFrame:CGRectZero];
 		contentView.opaque = YES;

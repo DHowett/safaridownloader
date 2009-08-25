@@ -33,11 +33,11 @@ UIAlertView* activeInstance;
 @synthesize enteredText;
 - (id)initWithTitle:(NSString *)title message:(NSString *)message delegate:(id)delegate cancelButtonTitle:(NSString *)cancelButtonTitle okButtonTitle:(NSString *)okayButtonTitle
 {
-	if (self = [super initWithTitle:title 
+	if ((self = [super initWithTitle:title 
                           message:message
                          delegate:delegate 
                 cancelButtonTitle:cancelButtonTitle
-                otherButtonTitles:okayButtonTitle, nil]) {
+                otherButtonTitles:okayButtonTitle, nil])) {
 		UITextField *theTextField = [[UITextField alloc] initWithFrame:CGRectMake(14.0, 45.0, 255.0, 32.0)]; 
     theTextField.borderStyle = UITextBorderStyleBezel;
 		[theTextField setBackgroundColor:[UIColor whiteColor]]; 

@@ -26,7 +26,7 @@ endif
 STOREPACKAGE=1
 export STOREPACKAGE
 
-CFLAGS:=-include $(FRAMEWORKDIR)/Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include -I$(TOP_DIR)
+CFLAGS:=-include $(FRAMEWORKDIR)/Prefix.pch -Os -mthumb $(DEBUG_CFLAGS) -I$(FRAMEWORKDIR)/include -I$(TOP_DIR) -Wall -Werror
 export FRAMEWORKDIR
 export CFLAGS
 

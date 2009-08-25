@@ -35,7 +35,7 @@ failed      = _failed;
                  name:(NSString *)name 
              delegate:(id)del
          useSuggested:(BOOL)use {
-  if (self = [super init])
+  if ((self = [super init]))
   {
     self.delegate   = del;
     self.urlReq     = urlRequest;
@@ -49,7 +49,7 @@ failed      = _failed;
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
-  if (self = [super init]) {
+  if ((self = [super init])) {
     self.urlReq     = [coder decodeObject];
     self.startDate  = [coder decodeObject];
     self.filename   = [coder decodeObject];

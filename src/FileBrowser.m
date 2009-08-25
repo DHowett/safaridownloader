@@ -3,7 +3,7 @@
 #import "Resources.h" 
 #import <QuartzCore/QuartzCore.h>
 
-#define HOME_DIR @"/private/var/mobile/Library/Attachments"
+#define HOME_DIR @"/private/var/mobile/Library/Downloads"
 #define kNewFolderAlert 239530
 
 extern UIImage *_UIImageWithName(NSString *);

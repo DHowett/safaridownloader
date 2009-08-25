@@ -19,6 +19,11 @@
 
 DHLateClass(Application);
 DHLateClass(BrowserController);
+
+@interface UIApplication (Safari)
+- (void)applicationOpenURL:(id)url;
+@end
+
 static BOOL doRot = YES;
 
 @implementation DownloadManagerPanel

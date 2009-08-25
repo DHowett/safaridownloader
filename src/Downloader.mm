@@ -13,6 +13,7 @@
 #import "Safari/BrowserController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "Safari/TabDocument.h"
+#import <WebKit/DOMHTMLAnchorElement.h>
 
 #define NAVACTION_ORIG webView:decidePolicyForNavigationAction:request:frame:decisionListener:
 #define NAVACTION_HOOK webView$decidePolicyForNavigationAction$request$frame$decisionListener$
@@ -23,7 +24,11 @@
 #define NEWWINDOW_ORIG webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:
 #define NEWWINDOW_HOOK webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$
 
-DHLateClass(Application); 
+@interface UIActionSheet (Private)
+-(id)buttons;
+@end
+
+DHLateClass(Application);
 DHLateClass(BrowserButtonBar);
 DHLateClass(BrowserController);
 DHLateClass(TabDocument);
@@ -327,7 +332,7 @@ HOOK(UIWebDocumentView, actionSheet$clickedButtonAtIndex$, void, UIActionSheet *
 HOOK(UIWebDocumentView, showBrowserSheet$, void, id sheet) {
   struct interaction i = MSHookIvar<struct interaction>(self, "_interaction");
   Class DOMHTMLAnchorElement = DHClass(DOMHTMLAnchorElement);
-  int sheetType = i.interactionSheetType;
+//  int sheetType = i.interactionSheetType;
 //  if(sheetType == 3) {
     UIActionSheet *iSheet = i.interactionSheet;
     NSMutableArray *buttons = [sheet buttons];
