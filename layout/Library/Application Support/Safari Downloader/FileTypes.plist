@@ -259,6 +259,7 @@
 			);
 			Mimetypes = (
 				"audio/mpeg",
+				"audio/mp3",
 			);
 		};
 		"MPEG Video" = {
