@@ -1,19 +1,16 @@
-firstrule:
-	@(cd ..; make)
+BUNDLE_NAME := SDSettings
+SDSettings_OBJCC_FILES = SDSettings.mm
+SDSettings_OBJ_FILES = $(FRAMEWORKDIR)/lib/DHLocalizedListController.o
 
-LDFLAGS=-lobjc -framework Foundation -framework UIKit -framework CoreFoundation -multiply_defined suppress \
-	-Wall -Werror -lobjc -ObjC++ -fobjc-exceptions -bundle -fobjc-call-cxx-cdtors \
-	-F/opt/iphone-sdk/sys/System/Library/PrivateFrameworks -framework Preferences -framework CoreGraphics
+SDSettings_INSTALL_PATH = /System/Library/PreferenceBundles
 
-all: SDSettings
+SDSettings_FRAMEWORKS = UIKit CoreGraphics
+SDSettings_PRIVATE_FRAMEWORKS = Preferences
 
-SDSettings: SDSettings.o
-	$(CC) $(LDFLAGS) -o $@ $^ $(FRAMEWORKDIR)/lib/DHLocalizedListController.o
-	$(STRIP) -x $@
-	CODESIGN_ALLOCATE=$(CODESIGN_ALLOCATE) ldid -S $@
+SDSettings_CFLAGS = -mthumb
+SDSettings_LDFLAGS = -mthumb
 
-%.o: %.mm
-	$(CC) -c $(CFLAGS) $< -o $@
+SDSettings_BUNDLE_NAME = SafariDownloaderSettings
 
-clean:
-	rm -f *.o SDSettings
+include ../framework/makefiles/common.mk
+include ../framework/makefiles/bundle.mk

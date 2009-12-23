@@ -1,6 +1,6 @@
 #import "SDSettings.h"
 #import <objc/runtime.h>
-#import "src/DownloaderCommon.h"
+#import "../DownloaderCommon.h"
 
 static id resourceBundle = nil;
 static id fileTypesDict = nil;
