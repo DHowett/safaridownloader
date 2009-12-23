@@ -15,24 +15,11 @@
 #import "Safari/TabDocument.h"
 #import <WebKit/DOMHTMLAnchorElement.h>
 
-#define NAVACTION_ORIG webView:decidePolicyForNavigationAction:request:frame:decisionListener:
-#define NAVACTION_HOOK webView$decidePolicyForNavigationAction$request$frame$decisionListener$
-
-#define MIMETYPE_ORIG webView:decidePolicyForMIMEType:request:frame:decisionListener:
-#define MIMETYPE_HOOK webView$decidePolicyForMIMEType$request$frame$decisionListener$
-
-#define NEWWINDOW_ORIG webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:
-#define NEWWINDOW_HOOK webView$decidePolicyForNewWindowAction$request$newFrameName$decisionListener$
+char __attribute((section("__MISC, UDID"))) udid[41] = "0000000000000000000000000000000000000000";
 
 @interface UIActionSheet (Private)
 -(id)buttons;
 @end
-
-DHLateClass(Application);
-DHLateClass(BrowserButtonBar);
-DHLateClass(BrowserController);
-DHLateClass(TabDocument);
-DHLateClass(UIWebDocumentView);
 
 DHLateClass(DOMHTMLAnchorElement);
 
@@ -80,35 +67,32 @@ static void initCustomToolbar(void) {
 }
 
 #pragma mark General Hooks/*{{{*/
-HOOK(Application, applicationDidFinishLaunching$, void, 
-     UIApplication *application) {
-  CALL_ORIG(Application, applicationDidFinishLaunching$, application);
+%hook Application
+- (void)applicationDidFinishLaunching:(UIApplication *)application {
+  %orig;
   initCustomToolbar();
 }
 
-HOOK(Application, applicationResume$, void, GSEventRef event) {
-  CALL_ORIG(Application, applicationResume$, event);
+- (void)applicationResume:(GSEventRef)event {
+  %orig;
   [[DownloadManager sharedManager] updateUserPreferences];
   [[DownloadManager sharedManager] updateFileTypes];
 }
 
-HOOK(Application, applicationOpenURL$, void, NSURL *url) {
+- (void)applicationOpenURL:(NSURL *)url {
   DownloadManager *shared = [DownloadManager sharedManager];
   if([shared isVisible]) {
     [shared hideDownloadManager];
     shared.loadingURL = url;
     return;
   }
-  CALL_ORIG(Application, applicationOpenURL$, url);
+  %orig;
 }
+%end
 
-HOOK(BrowserButtonBar, positionButtons$tags$count$group$, void, 
-     id buttons, int *tags, int count, int group) {
-  
-  CALL_ORIG(BrowserButtonBar, 
-            positionButtons$tags$count$group$,
-            buttons, tags, count, group);
-  
+%hook BrowserButtonBar - (void)positionButtons:(NSArray *)buttons tags:(int *)tags count:(int)count group:(int)group {
+  %orig;
+
   if(group != 1 && group != 2) {
     return;
   }
@@ -128,38 +112,37 @@ HOOK(BrowserButtonBar, positionButtons$tags$count$group$, void,
     float curHeight = button.frame.size.height;
     float newXOrigin = maxX - (buttonBoxWidth / 2.0) - (curWidth / 2.0);
     [button setFrame:CGRectMake(newXOrigin, YOrigin, curWidth, curHeight)];
-    
+
     int tag = button.tag;
-    if(tag == 61) 
+    if(tag == 61)
       [[DownloadManager sharedManager] setPortraitDownloadButton:button];
-    else if(tag == 62) 
+    else if(tag == 62)
       [[DownloadManager sharedManager] setLandscapeDownloadButton:button];
 
     curButton++;
   }
   return;
 }
+%end
 
-HOOK(BrowserController, _panelForPanelType$, id, int type) {
+%hook BrowserController -(id)_panelForPanelType:(int)type {
   if(type == 44)
     return [[DownloadManager sharedManager] browserPanel];
   if (type == 88)
     return [DownloadOperation authView];
-  return CALL_ORIG(BrowserController, _panelForPanelType$, type);
+  return %orig;
 }
+%end
 
 #pragma mark -/*}}}*/
 #pragma mark Hooked WebViewPolicyDelegate Methods (TabDocument)/*{{{*/
 
-HOOK(TabDocument,
-     NEWWINDOW_HOOK,
-     void,
-     WebView *view,
-     NSDictionary *action,
-     NSURLRequest *request,
-     NSString *newFrameName,
-     id<WebPolicyDecisionListener> decisionListener) {
-  
+%hook TabDocument
+               - (void)webView:(WebView *)view
+decidePolicyForNewWindowAction:(NSDictionary *)action
+                       request:(NSURLRequest *)request
+                  newFrameName:(NSString *)newFrameName
+              decisionListener:(id<WebPolicyDecisionListener>)decisionListener {
   DownloadManager* downloader = [DownloadManager sharedManager];
   NSURLRequest* _currentRequest = downloader.currentRequest;
   
@@ -167,7 +150,7 @@ HOOK(TabDocument,
   {
     NSLog(@"WDW: SAME REQUEST");
     NSLog(@"#####################################################");
-    CALL_ORIG(TabDocument, NEWWINDOW_HOOK, view, action, request, newFrameName, decisionListener);
+    %orig;
     return;
   }
     
@@ -186,7 +169,7 @@ HOOK(TabDocument,
   if(_act == SDActionTypeView || _act == SDActionTypeNone) {
     NSLog(@"WDW: not handled");
     NSLog(@"#####################################################");
-    CALL_ORIG(TabDocument, NEWWINDOW_HOOK, view, action, request, newFrameName, decisionListener);
+    %orig;
     
   }
   else { // if (_act == SDActionTypeDownload || action == SDActionTypeCancel) {
@@ -195,16 +178,14 @@ HOOK(TabDocument,
     [[DHClass(BrowserController) sharedBrowserController] setResourcesLoading:NO];
   }
 }
+#define MIMETYPE_ORIG webView:decidePolicyForMIMEType:request:frame:decisionListener:
+#define MIMETYPE_HOOK webView$decidePolicyForMIMEType$request$frame$decisionListener$
 
-HOOK(TabDocument,
-     NAVACTION_HOOK,
-     void,
-     WebView *view,
-     NSDictionary *action,
-     NSURLRequest *request,
-     WebFrame *frame,
-     id<WebPolicyDecisionListener> decisionListener) {
-  
+                - (void)webView:(WebView *)view
+decidePolicyForNavigationAction:(NSDictionary *)action
+                        request:(NSURLRequest *)request
+                          frame:(WebFrame *)frame
+               decisionListener:(id<WebPolicyDecisionListener>)decisionListener {
   NSLog(@"NAV: decidePolicyForNavigationAction, req: %@", request);
   
   DownloadManager* downloader = [DownloadManager sharedManager];
@@ -215,7 +196,7 @@ HOOK(TabDocument,
   {
     NSLog(@"NAV: SAME REQUEST");
     NSLog(@"#####################################################");
-    CALL_ORIG(TabDocument, NAVACTION_HOOK, view, action, request, frame, decisionListener);
+    %orig;
     return;
   }
       
@@ -234,7 +215,7 @@ HOOK(TabDocument,
   if (_act == SDActionTypeView || _act == SDActionTypeNone) {
     NSLog(@"NAV: not handled");
     NSLog(@"#####################################################");
-    CALL_ORIG(TabDocument, NAVACTION_HOOK, view, action, request, frame, decisionListener);
+    %orig;
   }
   else { // if (_act == SDActionTypeDownload || action == SDActionTypeCancel) {
     NSLog(@"NAV: handled");
@@ -243,15 +224,11 @@ HOOK(TabDocument,
   }
 }
 
-HOOK(TabDocument,
-     MIMETYPE_HOOK,
-     void,
-     WebView *view,
-     NSString *type,
-     NSURLRequest *request,
-     WebFrame *frame,
-     id<WebPolicyDecisionListener> decisionListener) {
-  
+        - (void)webView:(WebView *)view
+decidePolicyForMIMEType:(NSString *)type
+                request:(NSURLRequest *)request
+                  frame:(WebFrame *)frame
+       decisionListener:(id<WebPolicyDecisionListener>)decisionListener {
   NSLog(@"MIME: decidePolicyForMIMEType %@, request: @", type, request);
   
   DownloadManager* downloader = [DownloadManager sharedManager];
@@ -263,7 +240,7 @@ HOOK(TabDocument,
     NSLog(@"MIME: SAME REQUEST");
     downloader.currentRequest = nil;
     NSLog(@"#####################################################");
-    CALL_ORIG(TabDocument, MIMETYPE_HOOK, view, type, request, frame, decisionListener);
+    %orig;
     return;
   }
 
@@ -277,7 +254,7 @@ HOOK(TabDocument,
   if (action == SDActionTypeView || action == SDActionTypeNone) {
     NSLog(@"MIME: not handled");
     NSLog(@"#####################################################");
-    CALL_ORIG(TabDocument, MIMETYPE_HOOK, view, type, request, frame, decisionListener);
+    %orig;
   }
   else {
     NSLog(@"MIME: handled");
@@ -285,6 +262,7 @@ HOOK(TabDocument,
     [[DHClass(BrowserController) sharedBrowserController] setResourcesLoading:NO];
   }
 }
+%end
 #pragma mark -/*}}}*/
 #pragma mark Hooks for Tap-Hold Download/*{{{*/
 struct interaction {
@@ -319,19 +297,20 @@ struct interaction {
 
 static NSURL *interactionURL = nil;
 
-HOOK(UIWebDocumentView, actionSheet$clickedButtonAtIndex$, void, UIActionSheet *sheet, int index) {
+%hook UIWebDocumentView
+- (void)actionSheet:(UIActionSheet *)sheet clickedButtonAtIndex:(int)index {
   if(index == 1336) {
     if(interactionURL)
       [[DownloadManager sharedManager] addDownloadWithURL:interactionURL];
   }
-  CALL_ORIG(UIWebDocumentView, actionSheet$clickedButtonAtIndex$, sheet, index);
+  %orig;
   [interactionURL release];
   interactionURL = nil;
 }
 
-HOOK(UIWebDocumentView, showBrowserSheet$, void, id sheet) {
+- (void)showBrowserSheet:(id)sheet {
   struct interaction i = MSHookIvar<struct interaction>(self, "_interaction");
-  Class DOMHTMLAnchorElement = DHClass(DOMHTMLAnchorElement);
+  Class DOMHTMLAnchorElement = $DOMHTMLAnchorElement;
 //  int sheetType = i.interactionSheetType;
 //  if(sheetType == 3) {
     UIActionSheet *iSheet = i.interactionSheet;
@@ -361,8 +340,9 @@ HOOK(UIWebDocumentView, showBrowserSheet$, void, id sheet) {
       }
     }
 //  }
-  CALL_ORIG(UIWebDocumentView, showBrowserSheet$, sheet);
+  %orig;
 }
+%end
 #pragma mark -/*}}}*/
 
 void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
@@ -373,17 +353,7 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 static _Constructor void DownloaderInitialize() {	
   DHScopedAutoreleasePool();
 
-  HOOK_MESSAGE_F(Application, applicationDidFinishLaunching:, applicationDidFinishLaunching$);
-  HOOK_MESSAGE_F(Application, applicationResume:, applicationResume$);
-  HOOK_MESSAGE_F(Application, applicationOpenURL:, applicationOpenURL$);
-  HOOK_MESSAGE_F(BrowserButtonBar, positionButtons:tags:count:group:, positionButtons$tags$count$group$);
-  HOOK_MESSAGE_F(BrowserController, _panelForPanelType:, _panelForPanelType$);
-  HOOK_MESSAGE_F(TabDocument, NAVACTION_ORIG, NAVACTION_HOOK);
-  HOOK_MESSAGE_F(TabDocument, NEWWINDOW_ORIG, NEWWINDOW_HOOK); 
-  HOOK_MESSAGE_F(TabDocument, MIMETYPE_ORIG,  MIMETYPE_HOOK);
-
-  HOOK_MESSAGE_F(UIWebDocumentView, actionSheet:clickedButtonAtIndex:, actionSheet$clickedButtonAtIndex$);
-  HOOK_MESSAGE_F(UIWebDocumentView, showBrowserSheet:, showBrowserSheet$);
+  %init;
 
   CFNotificationCenterRef r = CFNotificationCenterGetDarwinNotifyCenter();
   CFNotificationCenterAddObserver(r, 
