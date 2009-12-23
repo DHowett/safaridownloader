@@ -364,4 +364,4 @@ static _Constructor void DownloaderInitialize() {
                                   0);
 }
 
-// vim:filetype=objc:ts=2:sw=2:expandtab
+// vim:filetype=logos:ts=2:sw=2:expandtab
