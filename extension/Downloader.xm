@@ -67,6 +67,7 @@ static void initCustomToolbar(void) {
 }
 
 #pragma mark General Hooks/*{{{*/
+%class BrowserController
 %hook Application
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
   %orig;
