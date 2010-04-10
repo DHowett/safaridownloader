@@ -1,5 +1,6 @@
 SUBPROJECTS = extension preferences
 STOREPACKAGE=1
+export GO_EASY_ON_ME = 1
 export STOREPACKAGE
 
 include framework/makefiles/common.mk
