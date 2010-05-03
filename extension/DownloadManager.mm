@@ -33,19 +33,19 @@ static BOOL doRot = YES;
   doRot = allow;
 }
 
--(BOOL) allowsRotation {
+- (BOOL) allowsRotation {
   return _allowsRotations;
 }
 
--(BOOL) pausesPages {
+- (BOOL) pausesPages {
   return NO;
 }
 
--(int) panelType {
+- (int) panelType {
   return 44;
 }
 
--(int) panelState {
+- (int) panelState {
   return 0;
 }
 
@@ -71,20 +71,17 @@ static id sharedManager = nil;
 static id resourceBundle = nil;
 
 + (void)initialize  {
-  if (self == [DownloadManager class])
-  {
+  if (self == [DownloadManager class]) {
     sharedManager = [[self alloc] init];
   }
 }
 
-+ (id)sharedManager
-{
++ (id)sharedManager {
   return sharedManager;
 }
 
 - (id)init {
-  if([self initWithNibName:nil bundle:nil] != nil) 
-  {    
+  if ([self initWithNibName:nil bundle:nil] != nil) {    
     _panel = [[DownloadManagerPanel alloc] init];
     resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
     _currentDownloads = [NSMutableArray new];
@@ -98,8 +95,7 @@ static id resourceBundle = nil;
   return self;
 }
 
-- (void)loadView
-{
+- (void)loadView {
   CGRect frame = [[UIScreen mainScreen] applicationFrame];
   self.view = [[UIView alloc] initWithFrame:frame];
   
@@ -141,8 +137,7 @@ static id resourceBundle = nil;
   [self.view addSubview:_tableView];   
 }
 
-- (DownloadManagerPanel*)browserPanel
-{
+- (DownloadManagerPanel*)browserPanel {
   if (!_panel)
     _panel = [[DownloadManagerPanel alloc] init];
   return _panel;
@@ -197,8 +192,7 @@ static SDActionType _actionType = SDActionTypeNone;
               forRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType 
                  inFrame:(WebFrame *)frame
-            withListener:(id<WebPolicyDecisionListener>)listener
-{
+            withListener:(id<WebPolicyDecisionListener>)listener {
   NSLog(@"WE GOT CALLED!!!!");
   
   NSString *url = [[request URL] absoluteString];
@@ -235,8 +229,7 @@ static SDActionType _actionType = SDActionTypeNone;
                                              tag:kDownloadSheet
                                         delegate:self];
     
-    if (_actionType == SDActionTypeView) 
-    {
+    if (_actionType == SDActionTypeView) {
       return SDActionTypeView;
     }
     else if (_actionType == SDActionTypeDownload) 
@@ -417,32 +410,48 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark -/*}}}*/
 #pragma mark Download Management/*{{{*/
 
-- (SafariDownload *)downloadWithURL:(NSURL*)url
-{
-  for (SafariDownload *download in _currentDownloads) 
-  {
+- (SafariDownload *)downloadWithURL:(NSURL*)url {
+  for (SafariDownload *download in _currentDownloads) {
     if ([[download.urlReq URL] isEqual:url])
       return download;
   }
   return nil; 
 }
 
+- (void)fileBrowser:(FileBrowser*)browser 
+      didSelectPath:(NSString*)path 
+            forFile:(id)file 
+        withContext:(id)download {
+  NSLog(@"fileBrowserDidSelectPath");
+  //[ModalAlert dismissLoadingAlert];
+  ((SafariDownload*)download).savePath = path;
+  DownloadOperation *op = [[DownloadOperation alloc] initWithDelegate:(SafariDownload*)download];
+  [_downloadQueue addOperation:op];
+  [op release];
+  [_currentDownloads addObject:download];
+  if (_currentDownloads.count == 1) {
+    [_tableView insertSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+  } 
+  else {
+    [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
+                      withRowAnimation:UITableViewRowAnimationFade];
+  }
+}
+
+- (void)fileBrowserDidCancel:(FileBrowser*)browser {
+  NSLog(@"fileBrowserDidCancel");
+  //[ModalAlert dismissLoadingAlert];
+}
+
 // everything eventually goes through this method
 - (BOOL)addDownload:(SafariDownload *)download {
-  if (![_currentDownloads containsObject:download]) 
-  {
-    DownloadOperation *op = [[DownloadOperation alloc] initWithDelegate:download];
-    [_downloadQueue addOperation:op];
-    [op release];
-    [_currentDownloads addObject:download];
-    if(_currentDownloads.count == 1) {
-      [_tableView insertSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-    } 
-    else {
-      [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
-                        withRowAnimation:UITableViewRowAnimationFade];
-    }
-    [ModalAlert showLoadingAlertWithIconName:download.filename orMimeType:download.mimetype];
+  if (![_currentDownloads containsObject:download]) {
+    //[ModalAlert showLoadingAlertWithIconName:((SafariDownload*)download).filename orMimeType:((SafariDownload*)download).mimetype];
+    FileBrowser* f = [[FileBrowser alloc] initWithFile:download.filename 
+                                               context:download
+                                              delegate:self];
+    [f show];
+    [f release];
     return YES;
   }
   return NO;
@@ -555,8 +564,7 @@ static SDActionType _actionType = SDActionTypeNone;
   return NO; 
 }
 
-- (void)deleteDownload:(SafariDownload*)download
-{
+- (void)deleteDownload:(SafariDownload*)download {
   //  NSString *prefix = @"/var/mobile/Library/Downloads/YourTube";
   //  NSString *path = [prefix stringByAppendingPathComponent:download.filename];
   //  NSLog(@"removing file at path: %@", path);
@@ -568,19 +576,16 @@ static SDActionType _actionType = SDActionTypeNone;
   //                    withRowAnimation:UITableViewRowAnimationFade]; 
 }
 
-- (void)cancelAllDownloads
-{
+- (void)cancelAllDownloads {
   UIAlertView* alert = nil;
-  if (_currentDownloads.count > 0) 
-  {
+  if (_currentDownloads.count > 0) {
     alert = [[UIAlertView alloc] initWithTitle:@"Cancel All Downloads?"
                                        message:nil
                                       delegate:self
                              cancelButtonTitle:@"No"
                              otherButtonTitles:@"Yes", nil];
   }
-  else
-  {
+  else {
     alert = [[UIAlertView alloc] initWithTitle:@"Nothing to Cancel"
                                        message:nil
                                       delegate:self
@@ -603,8 +608,7 @@ static SDActionType _actionType = SDActionTypeNone;
   } 
 }
 
-- (DownloadCell*)cellForDownload:(SafariDownload*)download
-{
+- (DownloadCell*)cellForDownload:(SafariDownload*)download {
   //  NSLog(@"download: %@", download);
   //  NSLog(@"current Downloads: %@", _currentDownloads);
   //  NSLog(@"tableView: %@", _tableView);
@@ -618,8 +622,7 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark -/*}}}*/
 #pragma mark SafariDownloadDelegate Methods/*{{{*/
 
-- (void)downloadDidBegin:(SafariDownload*)download
-{
+- (void)downloadDidBegin:(SafariDownload*)download {
   DownloadCell *cell = [self cellForDownload:download];
   cell.nameLabel = download.filename;
   cell.progressLabel = @"Downloading...";
@@ -631,14 +634,12 @@ static SDActionType _actionType = SDActionTypeNone;
   cell.progressLabel = @"Awaiting Authentication...";
 }
 
-- (void)downloadDidProvideFilename:(SafariDownload*)download
-{
+- (void)downloadDidProvideFilename:(SafariDownload*)download {
   DownloadCell *cell = [self cellForDownload:download];
   cell.nameLabel = download.filename;
 }
 
-- (void)downloadDidFinish:(SafariDownload*)download
-{
+- (void)downloadDidFinish:(SafariDownload*)download {
   NSLog(@"downloadDidFinish");
   DownloadCell* cell = [self cellForDownload:download];
   
@@ -686,8 +687,7 @@ static SDActionType _actionType = SDActionTypeNone;
   }
 }
 
-- (void)downloadDidUpdate:(SafariDownload*)download
-{
+- (void)downloadDidUpdate:(SafariDownload*)download {
   DownloadCell* cell = [self cellForDownload:download];
   cell.progressView.progress = download.progress;
   cell.completionLabel = [NSString stringWithFormat:@"%d%%", (int)(download.progress*100.0f)];
@@ -695,15 +695,13 @@ static SDActionType _actionType = SDActionTypeNone;
   cell.sizeLabel = download.sizeString;
 }
 
-- (void)downloadDidCancel:(SafariDownload*)download
-{    
+- (void)downloadDidCancel:(SafariDownload*)download {    
   [self updateBadges];
   [self saveData];  
   download.downloadOperation = nil;
 }
 
-- (void)downloadDidFail:(SafariDownload*)download
-{
+- (void)downloadDidFail:(SafariDownload*)download {
   NSLog(@"downloadDidFail");
   DownloadCell* cell = [self cellForDownload:download];
   
@@ -742,8 +740,7 @@ static SDActionType _actionType = SDActionTypeNone;
 
 static int animationType = 0;
 
-- (void)showDownloadManager
-{    
+- (void)showDownloadManager {    
   NSLog(@"showDownloadManager!");
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
   if(!keyWindow) {
@@ -788,8 +785,7 @@ static int animationType = 0;
   }
 }
 
-- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
-{
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
   Class BrowserController = objc_getClass("BrowserController");
   NSLog(@"animationDidStop!");
   if (animationType == 1) 
@@ -816,8 +812,7 @@ static int animationType = 0;
   animationType = 0;
 }
 
-- (void)hideDownloadManager
-{
+- (void)hideDownloadManager {
   animationType = 2;
   int orientation = [[DHClass(BrowserController) sharedBrowserController] orientation];
   NSString *transition = kCATransitionFromBottom;
@@ -840,23 +835,19 @@ static int animationType = 0;
   [self.view setFrame:CGRectOffset(self.view.frame, 0, self.view.frame.size.height)];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
-{
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
   return doRot;
 }
 
-- (void)didReceiveMemoryWarning
-{
+- (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning]; 
 }
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
   [super viewDidLoad]; 
 }
 
-- (void)viewDidUnload
-{
+- (void)viewDidUnload {
   [super viewDidUnload]; 
 }
 
@@ -864,31 +855,27 @@ static int animationType = 0;
 #pragma mark UITableView methods/*{{{*/
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-  if(_currentDownloads.count > 0) {
+  if (_currentDownloads.count > 0)
     return 2;
-  } else {
+  else
     return 1;
-  }
 }
 
 - (NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-  if(tableView.numberOfSections == 2 && section == 0) {
+  if (tableView.numberOfSections == 2 && section == 0)
     return @"Active Downloads";
-  } else {
+  else
     return @"Finished Downloads";
-  }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  if(tableView.numberOfSections == 2 && section == 0) {
+  if(tableView.numberOfSections == 2 && section == 0)
     return [_currentDownloads count];
-  } else {
+  else
     return [_finishedDownloads count];
-  }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  
   static NSString *CellIdentifier = @"DownloadCell";
   BOOL finished = NO;
   SafariDownload *download = nil;
@@ -903,8 +890,7 @@ static int animationType = 0;
   }
   
   DownloadCell *cell = (DownloadCell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-  if (cell == nil) 
-  {
+  if (cell == nil) {
     cell = [[[DownloadCell alloc] initWithFrame:CGRectZero reuseIdentifier:CellIdentifier] autorelease];
   }
   
@@ -930,22 +916,21 @@ static int animationType = 0;
   return cell;
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
   if(tableView.numberOfSections == 2 && indexPath.section == 0) return 74;
   else return 58;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   [tableView deselectRowAtIndexPath:indexPath animated:YES];
-  if(tableView.numberOfSections == 1 || indexPath.section == 1) {
+  if (tableView.numberOfSections == 1 || indexPath.section == 1) {
     curDownload = [_finishedDownloads objectAtIndex:indexPath.row];
     UIActionSheet *launch = [[UIActionSheet alloc] initWithTitle:curDownload.filename
                                                         delegate:self
                                                cancelButtonTitle:nil
                                           destructiveButtonTitle:@"Delete"
                                                otherButtonTitles:nil];
-    if(curDownload.failed) [launch addButtonWithTitle:@"Retry"];
+    if (curDownload.failed) [launch addButtonWithTitle:@"Retry"];
     else {
       for(NSString *title in _launchActions) {
         [launch addButtonWithTitle:title];
@@ -962,8 +947,7 @@ static int animationType = 0;
   return YES;
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
-{
+- (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
   if (tableView.numberOfSections == 2 && indexPath.section == 0)
     return @"Cancel"; 
   else // local files

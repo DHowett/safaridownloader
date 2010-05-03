@@ -12,6 +12,7 @@
 #import "Safari/BrowserButtonBar.h"
 #import "WebPolicyDelegate.h"
 #import "UIKitExtra/UIToolbarButton.h"
+#import "FileBrowser.h"
 
 #define kProgressViewTag 238823
 #define progressViewForCell(cell) ((UIProgressView*)[cell viewWithTag:kProgressViewTag])

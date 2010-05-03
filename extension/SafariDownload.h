@@ -31,6 +31,7 @@
   NSString*      _mimetype;
   NSString*      _sizeString;
   NSString*      _timeString;
+  NSString*      _savePath;
   NSInteger      _size;
   NSInteger      _time_remaining;
   float          _progress;
@@ -49,6 +50,7 @@
 @property (nonatomic, retain) NSString        *mimetype;
 @property (nonatomic, retain) NSString        *sizeString;
 @property (nonatomic, retain) NSString        *timeString;
+@property (nonatomic, retain) NSString        *savePath;
 @property (assign) NSInteger  time;
 @property (assign) NSInteger  size;
 @property (assign) float      progress;

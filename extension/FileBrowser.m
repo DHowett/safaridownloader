@@ -3,14 +3,19 @@
 #import "Resources.h" 
 #import <QuartzCore/QuartzCore.h>
 
+#import "Safari/BrowserController.h"
+
 #define HOME_DIR @"/private/var/mobile/Library/Downloads"
 #define kNewFolderAlert 239530
 
 extern UIImage *_UIImageWithName(NSString *);
 
+FileBrowser* activeInstance;
+BOOL alertViewShown;
+
 @implementation FileBrowser
 
-@synthesize context, data, currentPath, attachment;
+@synthesize context, data, currentPath, file;
 @synthesize browserDelegate = _browserDelegate;
 
 + (FileBrowser*)activeInstance {
@@ -21,18 +26,16 @@ extern UIImage *_UIImageWithName(NSString *);
   return alertViewShown; 
 }
 
-- (id)initWithAttachment:(id)att 
-                 context:(id)ctx 
-                delegate:(id)del
-{  
+- (id)initWithFile:(id)fil 
+           context:(id)ctx 
+          delegate:(id)del {  
   NSString *messageString = [self resizeToFitCount:1];
-  if (self = [super initWithTitle:@"Attachments\n\n\n\n" 
+  if (self = [super initWithTitle:@"Downloads\n\n\n\n" 
                           message:messageString 
                          delegate:self 
                 cancelButtonTitle:@"Cancel" 
-                otherButtonTitles:@"Save", nil]) 
-  {
-    self.attachment = att;
+                otherButtonTitles:@"Save", nil]) {
+    self.file = fil;
     self.browserDelegate = del;
     self.context = ctx;
     self.currentPath = HOME_DIR;
@@ -63,13 +66,18 @@ extern UIImage *_UIImageWithName(NSString *);
 - (NSString*)resizeToFitCount:(NSUInteger)count {
   NSString *messageString = nil;
   messageString = @"\n\n\n";
-  tableHeight = 135;
+  tableHeight = 126;
   return messageString;
 }
 
 - (void)setData:(NSArray*)dat {
   [data release];
-  data = [dat copy];
+  
+  NSMutableArray* temp = [dat mutableCopy];
+  [temp removeObject:@".partial"];
+  data = [temp copy];
+  [temp release];
+  
   [self setMessage:[self resizeToFitCount:[dat count]]];
   [myTableView reloadData];
 }
@@ -77,10 +85,10 @@ extern UIImage *_UIImageWithName(NSString *);
 - (void)alertView:(UIAlertView *)alert 
 clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (alert.tag == kNewFolderAlert) {
-    if (buttonIndex != [alert cancelButtonIndex])
-    {
+    [[objc_getClass("BrowserController") sharedBrowserController] _hideKeyboardForSheet:YES];
+    if (buttonIndex != [alert cancelButtonIndex]) {
       NSString *entered = [(AlertPrompt *)alert enteredText];
-      BOOL success =[[NSFileManager defaultManager] createDirectoryAtPath:[currentPath stringByAppendingPathComponent:entered]
+      BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:[currentPath stringByAppendingPathComponent:entered]
                                                  attributes:nil];
       if (success) {
         self.currentPath = [currentPath stringByAppendingPathComponent:entered];
@@ -94,7 +102,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
     if (buttonIndex == 1) {
       [_browserDelegate fileBrowser:self 
                       didSelectPath:currentPath
-                      forAttachment:attachment
+                      forFile:file
                         withContext:context];
     }
     else {
@@ -118,7 +126,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   self.currentPath = [currentPath stringByDeletingLastPathComponent];
 }
 
--(void)show {
+- (void)show {
   alertViewShown = YES;
   [super show];
 }
@@ -132,10 +140,11 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
                    okButtonTitle:@"OK"];
   prompt.tag = kNewFolderAlert;
 	[prompt show];
-	[prompt release];  
+	[prompt release];
+  [[objc_getClass("BrowserController") sharedBrowserController] _showKeyboardForSheet:YES];
 }
 
--(void)prepare {
+- (void)prepare {
   
   UIView* container = [[UIView alloc] initWithFrame:CGRectMake(11, 47, 261, tableHeight)];
   container.backgroundColor = [UIColor whiteColor];
@@ -163,16 +172,16 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   [self addSubview:newButton];
   
   UIImageView *imgView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 261, 4)] autorelease];
-  imgView.image = [UIImage imageWithContentsOfFile:@"/Library/Application Support/AttachmentSaver/top.png"];
+  imgView.image = [UIImage imageWithContentsOfFile:@"/Library/Application Support/Safari Downloader/top.png"];
   [container addSubview:imgView];
   
   imgView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, tableHeight+66-23-47, 261, 4)] autorelease];
-  imgView.image = [UIImage imageWithContentsOfFile:@"/Library/Application Support/AttachmentSaver/bottom.png"];
+  imgView.image = [UIImage imageWithContentsOfFile:@"/Library/Application Support/Safari Downloader/bottom.png"];
   [container addSubview:imgView];
   
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView 
+- (UITableViewCell*)tableView:(UITableView *)tableView 
          cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ABC"];
   if (cell == nil) {
@@ -228,7 +237,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   return 38.0f; 
 }
 
--(void)dealloc {
+- (void)dealloc {
   activeInstance = nil;
   self.data = nil;
   self.browserDelegate = nil;

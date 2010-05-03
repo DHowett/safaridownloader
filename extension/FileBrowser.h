@@ -2,7 +2,7 @@
 
 @class FileBrowser;
 @protocol FileBrowserDelegate
-- (void)fileBrowser:(FileBrowser*)browser didSelectPath:(NSString*)path forAttachment:(id)att withContext:(id)context;
+- (void)fileBrowser:(FileBrowser*)browser didSelectPath:(NSString*)path forFile:(id)file withContext:(id)context;
 - (void)fileBrowserDidCancel:(FileBrowser*)browser;
 @end
 
@@ -12,7 +12,7 @@
   id context;
   NSArray *data;
   NSString* currentPath;
-  id attachment;
+  id file;
 	int tableHeight;
   UINavigationButton* navButton;
 }
@@ -21,15 +21,13 @@
 @property(nonatomic, retain) id context;
 @property(nonatomic, retain) NSArray *data;
 @property(nonatomic, copy) NSString *currentPath;
-@property(nonatomic, retain) id attachment;
+@property(nonatomic, retain) id file;
 
-BOOL alertViewShown;
-FileBrowser* activeInstance;
 
 + (FileBrowser*)activeInstance;
 + (BOOL)alertViewShown;
 
-- (id)initWithAttachment:(id)att context:(id)ctx delegate:(id)del;
+- (id)initWithFile:(id)att context:(id)ctx delegate:(id)del;
 - (NSString*)resizeToFitCount:(NSUInteger)count;
 @end
 

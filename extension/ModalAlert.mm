@@ -21,7 +21,7 @@
 DHLateClass(BrowserController);
 
 @interface ModalAlert (priv)
-UIAlertView* activeInstance;
+UIAlertView* activeAlert;
 @end
 
 @interface UIAlertView (priv)
@@ -140,8 +140,7 @@ static UIProgressView* progressView = nil;
 
 @implementation ModalAlert
 
-+ (void)block:(UIView *)view
-{
++ (void)block:(UIView *)view {
   view.hidden = FALSE;
   while (!view.hidden && view.superview != nil)
     [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
@@ -151,8 +150,7 @@ static UIProgressView* progressView = nil;
                        message:(NSString *)message 
                   cancelButton:(NSString*)cancel 
                       okButton:(NSString*)okButton 
-                      delegate:(id)delegate
-{
+                      delegate:(id)delegate {
   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
                                                   message:message
                                                  delegate:delegate 
@@ -165,20 +163,19 @@ static UIProgressView* progressView = nil;
   [ModalAlert block:alert];	
 }
 
-+ (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag
-{
++ (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
   [[DownloadManager sharedManager] updateBadges];
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
   UIView *v = [keyWindow viewWithTag:12345];
   [v removeFromSuperview];
-  [activeInstance dismissWithClickedButtonIndex:0 animated:YES];
-  activeInstance = nil;
+  [activeAlert dismissWithClickedButtonIndex:0 animated:YES];
+  activeAlert = nil;
 }
 
 static UIImage* savedIcon = nil;
 
 + (void)showLoadingAlertWithIconName:(NSString*)name orMimeType:(NSString *)mimeType {
-  activeInstance = [[UIAlertView alloc]
+  activeAlert = [[UIAlertView alloc]
                        initWithTitle:@"Loading..."
                        message:nil
                        delegate:self
@@ -192,27 +189,27 @@ static UIImage* savedIcon = nil;
 	frame.size.width = 22;
 	frame.size.height = 22;
 	listingIndicator.frame = frame;
-	[activeInstance addSubview:listingIndicator];
+	[activeAlert addSubview:listingIndicator];
   [listingIndicator release];
   
   savedIcon = [[[DownloadManager sharedManager] iconForExtension:[name pathExtension] orMimeType:mimeType] retain];
   
   UIImageView* icon = [[UIImageView alloc] initWithImage:savedIcon];
   icon.frame = CGRectMake(18, 14, 22, 22);
-  [activeInstance addSubview:icon];
+  [activeAlert addSubview:icon];
   [icon release];
   
-	[activeInstance setNumberOfRows:0];
-	[activeInstance setTransform:CGAffineTransformMakeScale(1, 1.1)];
-	[activeInstance show];
-  [activeInstance release];
+	[activeAlert setNumberOfRows:0];
+	[activeAlert setTransform:CGAffineTransformMakeScale(1, 1.1)];
+	[activeAlert show];
+  [activeAlert release];
 	[listingIndicator startAnimating];   
 }
 
 + (void)dismissLoadingAlert {
-  
+  NSLog(@"dismissLoadingAlert: %@", activeAlert);
   // Get the relevant frames.
-  if(!activeInstance) return;
+  if (!activeAlert) return;
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
   UIView *enclosingView = keyWindow;
 
@@ -226,7 +223,7 @@ static UIImage* savedIcon = nil;
   else cellFrame = [[[BrowserController sharedBrowserController] buttonBar] convertRect:tempCellFrame toView:keyWindow];
 
 //  CGRect cellFrame = GRectMake(260, 440, 34, 36);
-  CGRect buttonFrame = [activeInstance convertRect:CGRectMake(18, 14, 22, 22) toView:keyWindow];
+  CGRect buttonFrame = [activeAlert convertRect:CGRectMake(18, 14, 22, 22) toView:keyWindow];
   
   /*
    * Icon animation

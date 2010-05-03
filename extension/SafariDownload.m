@@ -12,6 +12,8 @@
 #define NSLog(...)
 #endif
 
+#define DEF_SAVE_PATH @"/var/mobile/Library/Downloads"
+
 @implementation SafariDownload
 @synthesize
 delegate    = _delegate,
@@ -27,7 +29,8 @@ time        = _time_remaining,
 speed       = _speed,
 useSuggest  = _useSuggested,
 complete    = _complete,
-failed      = _failed;
+failed      = _failed,
+savePath    = _savePath;
 
 @synthesize downloadOperation;
 
@@ -44,6 +47,7 @@ failed      = _failed;
     self.sizeString = @"N/A";
     self.timeString = @"Calculating remaining time...";
     self.useSuggest = use;
+    self.savePath   = DEF_SAVE_PATH;
   }
   return self;
 }
@@ -55,14 +59,15 @@ failed      = _failed;
     self.filename   = [coder decodeObject];
     self.sizeString = [coder decodeObject];
     self.timeString = [coder decodeObject];
-    self.time       = [coder decodeIntForKey:  @"time"    ];
-    self.progress   = [coder decodeFloatForKey:@"progress"];
-    self.speed      = [coder decodeFloatForKey:@"speed"   ];
-    self.size       = [coder decodeBoolForKey: @"size"    ];
-    self.complete   = [coder decodeBoolForKey: @"complete"];
-    self.useSuggest = [coder decodeBoolForKey: @"suggest" ];
-    self.failed     = [coder decodeBoolForKey: @"failed"  ];
+    self.time       = [coder decodeIntForKey:   @"time"    ];
+    self.progress   = [coder decodeFloatForKey: @"progress"];
+    self.speed      = [coder decodeFloatForKey: @"speed"   ];
+    self.size       = [coder decodeBoolForKey:  @"size"    ];
+    self.complete   = [coder decodeBoolForKey:  @"complete"];
+    self.useSuggest = [coder decodeBoolForKey:  @"suggest" ];
+    self.failed     = [coder decodeBoolForKey:  @"failed"  ];
     self.mimetype   = [coder decodeObject];
+    self.savePath   = [coder decodeObjectForKey:@"savePath"];
   }
   return self;
 }
@@ -81,10 +86,24 @@ failed      = _failed;
   [coder encodeBool:   _useSuggested   forKey:@"suggest" ];
   [coder encodeBool:   _failed         forKey:@"failed"  ];
   [coder encodeObject: _mimetype       ];
+  [coder encodeObject: _savePath       forKey:@"savePath"];
 }
 
 - (void)setDownloadSize:(NSInteger)length {
   [self setSize:length]; 
+}
+
+- (NSString*)savePath {
+  if (!_savePath) _savePath = [DEF_SAVE_PATH retain];
+  return _savePath;
+}
+
+- (void)setSavePath:(NSString*)pth {
+  [_savePath release];
+  if (!pth)
+    _savePath = [DEF_SAVE_PATH retain];
+  else
+    _savePath = [pth retain];
 }
 
 - (void)setSize:(NSInteger)length {
@@ -111,8 +130,7 @@ failed      = _failed;
   [_delegate performSelectorOnMainThread:@selector(downloadDidUpdate:) withObject:self waitUntilDone:YES];
 }
 
-- (void)setComplete:(BOOL)comp
-{
+- (void)setComplete:(BOOL)comp {
   _complete = comp;
   if (comp)
     [_delegate performSelectorOnMainThread:@selector(downloadDidFinish:) withObject:self waitUntilDone:NO];
@@ -149,6 +167,8 @@ failed      = _failed;
   [_filename release];
   [_sizeString release];
   [_timeString release];
+  [_mimetype release];
+  [_savePath release];
   [super dealloc];
 }
 
