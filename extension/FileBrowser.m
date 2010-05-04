@@ -2,6 +2,8 @@
 #import "ModalAlert.h"
 #import "Resources.h" 
 #import <QuartzCore/QuartzCore.h>
+#import "DownloadManager.h"
+#import "UIKitExtra/UIKeyboard.h"
 
 #import "Safari/BrowserController.h"
 
@@ -13,10 +15,40 @@ extern UIImage *_UIImageWithName(NSString *);
 FileBrowser* activeInstance;
 BOOL alertViewShown;
 
+@interface PathObject : NSObject {
+  NSString* name;
+  NSString* fullpath;
+  BOOL isDir;
+}
+@property (nonatomic, copy) NSString* name;
+@property (nonatomic, copy) NSString* fullpath;
+@property (assign) BOOL isDir;
+@end
+
+@implementation PathObject
+@synthesize name, fullpath, isDir;
+
++ (id)objectWithName:(NSString*)n path:(NSString*)p isDir:(BOOL)dir {
+  return [[[PathObject alloc] initWithName:n path:p isDir:dir] autorelease]; 
+}
+
+- (id)initWithName:(NSString*)n path:(NSString*)p isDir:(BOOL)dir {
+  if (self = [super init]) {
+    self.name = n;
+    self.fullpath = p;
+    self.isDir = dir;
+  }
+  return self;
+}
+
+@end
+
 @implementation FileBrowser
 
 @synthesize context, data, currentPath, file;
 @synthesize browserDelegate = _browserDelegate;
+
+UIKeyboard* keyboard;
 
 + (FileBrowser*)activeInstance {
   return activeInstance; 
@@ -45,13 +77,39 @@ BOOL alertViewShown;
   return self;
 }
 
+- (void)enumerateForDirsInPath:(NSString*)path 
+                     fillArray:(NSMutableArray*)array 
+                      maxCount:(NSInteger)count {
+  BOOL halt = (count > 0) ? YES : NO;
+  NSDirectoryEnumerator* denum = [[NSFileManager defaultManager] enumeratorAtPath:path];  
+  NSString* f = nil;
+  while ((!halt || count > 0) && (f = [denum nextObject]) != nil) {
+    NSAutoreleasePool* pool = [NSAutoreleasePool new];
+    NSDictionary* attribs = [denum fileAttributes];
+    if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory]) {
+      [denum skipDescendents];
+      if (![f isEqualToString:@".partial"])
+        [array addObject:[PathObject objectWithName:f path:[path stringByAppendingPathComponent:f] isDir:YES]];
+    }
+    else {
+      [array addObject:[PathObject objectWithName:f path:[path stringByAppendingPathComponent:f] isDir:NO]];
+    }
+    [pool drain];
+  }
+}
+
 - (void)setCurrentPath:(NSString*)path {
   [currentPath release];
   currentPath = [path copy];
   if (path == nil) {
     return;
   }
-  NSArray *contents = [[NSFileManager defaultManager] directoryContentsAtPath:path];
+  
+  NSMutableArray* temp = [NSMutableArray new];
+  [self enumerateForDirsInPath:path fillArray:temp maxCount:0];
+  NSArray *contents = [[temp copy] autorelease];
+  [temp release];
+  
   self.title = [[currentPath lastPathComponent] stringByAppendingString:@"\n\n\n\n"];
   [navButton setTitle:[[currentPath stringByDeletingLastPathComponent] lastPathComponent]];
   if ([currentPath isEqualToString:HOME_DIR]) {
@@ -85,11 +143,12 @@ BOOL alertViewShown;
 - (void)alertView:(UIAlertView *)alert 
 clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (alert.tag == kNewFolderAlert) {
-    [[objc_getClass("BrowserController") sharedBrowserController] _hideKeyboardForSheet:YES];
+    [keyboard removeFromSuperview];
+    keyboard = nil;
     if (buttonIndex != [alert cancelButtonIndex]) {
       NSString *entered = [(AlertPrompt *)alert enteredText];
       BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:[currentPath stringByAppendingPathComponent:entered]
-                                                 attributes:nil];
+                                                                attributes:nil];
       if (success) {
         self.currentPath = [currentPath stringByAppendingPathComponent:entered];
       }
@@ -102,7 +161,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
     if (buttonIndex == 1) {
       [_browserDelegate fileBrowser:self 
                       didSelectPath:currentPath
-                      forFile:file
+                            forFile:file
                         withContext:context];
     }
     else {
@@ -141,7 +200,16 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   prompt.tag = kNewFolderAlert;
 	[prompt show];
 	[prompt release];
-  [[objc_getClass("BrowserController") sharedBrowserController] _showKeyboardForSheet:YES];
+  
+  BOOL landscape = UIDeviceOrientationIsLandscape([[UIDevice currentDevice] orientation]);
+  UIView* sup = [prompt superview];
+  CGSize s = [UIKeyboard defaultSizeForInterfaceOrientation:[[UIDevice currentDevice] orientation]];
+  CGFloat height = landscape ? [sup frame].size.width : [sup frame].size.height;
+  CGRect f = CGRectMake(0, height - s.height, s.width, s.height);
+  
+  keyboard = [[[UIKeyboard alloc] initWithDefaultSize] autorelease];
+  [keyboard setFrame:f];
+  [sup addSubview:keyboard];
 }
 
 - (void)prepare {
@@ -182,7 +250,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView 
-         cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+        cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ABC"];
   if (cell == nil) {
     cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault 
@@ -190,13 +258,10 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
     cell.textLabel.font = [UIFont boldSystemFontOfSize:15];
   }  
   
-  NSString* item = [data objectAtIndex:indexPath.row];
-  NSString* full = [currentPath stringByAppendingPathComponent:item];
+  PathObject* item = [data objectAtIndex:indexPath.row];  
+  cell.textLabel.text = item.name;
   
-  cell.textLabel.text = item;
-  
-  BOOL isDir = NO;
-  if ([[NSFileManager defaultManager] fileExistsAtPath:full isDirectory:&isDir] && isDir) {
+  if (item.isDir) {
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     cell.selectionStyle = UITableViewCellSelectionStyleBlue;
     cell.textLabel.textColor = [UIColor blackColor];
@@ -206,7 +271,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
     cell.accessoryType = UITableViewCellAccessoryNone;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.textLabel.textColor = [UIColor grayColor];
-    cell.imageView.image = [Resources iconForExtension:[item pathExtension]];
+    cell.imageView.image = [Resources iconForExtension:[item.name pathExtension]];
   }
   
   return cell;
@@ -215,8 +280,9 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   [tableView deselectRowAtIndexPath:indexPath animated:YES];
   
-  NSString* item = [data objectAtIndex:indexPath.row];
-  
+  PathObject* item = [data objectAtIndex:indexPath.row];
+  if (!item.isDir)
+    return;
   CATransition *animation = [CATransition animation];
   [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
   [animation setDelegate:self];
@@ -226,7 +292,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   [animation setFillMode:kCAFillModeForwards];
   [animation setRemovedOnCompletion:YES];
   [[myTableView layer] addAnimation:animation forKey:@"push"];
-  self.currentPath = [currentPath stringByAppendingPathComponent:item];
+  self.currentPath = item.fullpath;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {

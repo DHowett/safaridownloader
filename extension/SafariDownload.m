@@ -104,6 +104,7 @@ savePath    = _savePath;
     _savePath = [DEF_SAVE_PATH retain];
   else
     _savePath = [pth retain];
+  [[NSFileManager defaultManager] createDirectoryAtPath:_savePath withIntermediateDirectories:NO attributes:nil error:nil];
 }
 
 - (void)setSize:(NSInteger)length {

@@ -31,35 +31,35 @@ UIAlertView* activeAlert;
 @implementation AlertPrompt
 @synthesize textField;
 @synthesize enteredText;
-- (id)initWithTitle:(NSString *)title message:(NSString *)message delegate:(id)delegate cancelButtonTitle:(NSString *)cancelButtonTitle okButtonTitle:(NSString *)okayButtonTitle
-{
+- (id)initWithTitle:(NSString *)title 
+            message:(NSString *)message 
+           delegate:(id)delegate 
+  cancelButtonTitle:(NSString *)cancelButtonTitle 
+      okButtonTitle:(NSString *)okayButtonTitle {
 	if ((self = [super initWithTitle:title 
-                          message:message
-                         delegate:delegate 
-                cancelButtonTitle:cancelButtonTitle
-                otherButtonTitles:okayButtonTitle, nil])) {
+                           message:message
+                          delegate:delegate 
+                 cancelButtonTitle:cancelButtonTitle
+                 otherButtonTitles:okayButtonTitle, nil])) {
 		UITextField *theTextField = [[UITextField alloc] initWithFrame:CGRectMake(14.0, 45.0, 255.0, 32.0)]; 
     theTextField.borderStyle = UITextBorderStyleBezel;
 		[theTextField setBackgroundColor:[UIColor whiteColor]]; 
 		[self addSubview:theTextField];
 		self.textField = theTextField;
 		[theTextField release];
-		CGAffineTransform translate = CGAffineTransformMakeTranslation(0.0, 130.0); 
+		CGAffineTransform translate = CGAffineTransformMakeTranslation(0.0, 75.0); 
 		[self setTransform:translate];
 	}
 	return self;
 }
-- (void)show
-{
+- (void)show {
 	[textField becomeFirstResponder];
 	[super show];
 }
-- (NSString *)enteredText
-{
+- (NSString *)enteredText {
 	return textField.text;
 }
-- (void)dealloc
-{
+- (void)dealloc {
 	[textField release];
 	[super dealloc];
 }
@@ -176,11 +176,11 @@ static UIImage* savedIcon = nil;
 
 + (void)showLoadingAlertWithIconName:(NSString*)name orMimeType:(NSString *)mimeType {
   activeAlert = [[UIAlertView alloc]
-                       initWithTitle:@"Loading..."
-                       message:nil
-                       delegate:self
-                       cancelButtonTitle:nil
-                       otherButtonTitles:nil];
+                 initWithTitle:@"Loading..."
+                 message:nil
+                 delegate:self
+                 cancelButtonTitle:nil
+                 otherButtonTitles:nil];
   
 	UIActivityIndicatorView *listingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
 	CGRect frame = listingIndicator.frame;
@@ -212,7 +212,7 @@ static UIImage* savedIcon = nil;
   if (!activeAlert) return;
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
   UIView *enclosingView = keyWindow;
-
+  
   Class BrowserController = objc_getClass("BrowserController");
   int orientation = [[BrowserController sharedBrowserController] orientation];
   NSLog(@"Orientation = %d.", orientation);
@@ -221,14 +221,14 @@ static UIImage* savedIcon = nil;
   CGRect cellFrame;
   if(!button) cellFrame = CGRectMake(260, 440, 34, 36);
   else cellFrame = [[[BrowserController sharedBrowserController] buttonBar] convertRect:tempCellFrame toView:keyWindow];
-
-//  CGRect cellFrame = GRectMake(260, 440, 34, 36);
+  
+  //  CGRect cellFrame = GRectMake(260, 440, 34, 36);
   CGRect buttonFrame = [activeAlert convertRect:CGRectMake(18, 14, 22, 22) toView:keyWindow];
   
   /*
    * Icon animation
    */
-    
+  
   // Determine the animation's path.
 	CGPoint startPoint = CGPointMake(buttonFrame.origin.x + buttonFrame.size.width / 2, buttonFrame.origin.y + buttonFrame.size.height / 2);
 	CGPoint curvePoint1 = CGPointMake(startPoint.x + 90, startPoint.y - 150);
@@ -279,15 +279,15 @@ static UIImage* savedIcon = nil;
   BrowserController *brCont = [DHClass(BrowserController) sharedBrowserController];
   TabController* tabCont = [brCont tabController];
   TabDocument* tabDoc = [tabCont activeTabDocument];
-
+  
   [brCont tabController:tabCont tabDocument:tabDoc didReceiveAuthenticationChallenge:challenge];
 }
 
 + (NSDictionary*)showAuthAlertViewWithTitle:(NSString*)title 
-                           message:(NSString *)message 
-                      cancelButton:(NSString*)cancel 
-                          okButton:(NSString*)okButton 
-                          delegate:(id)delegate
+                                    message:(NSString *)message 
+                               cancelButton:(NSString*)cancel 
+                                   okButton:(NSString*)okButton 
+                                   delegate:(id)delegate
 {
   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
                                                   message:[message stringByAppendingString:@"\n\n\n\n"]
@@ -313,10 +313,10 @@ static UIImage* savedIcon = nil;
   [alert show];
   [alert release];
   [userField becomeFirstResponder];
-
-//  UIWindow* window = [[UIApplication sharedApplication] keyWindow];
-//  [[objc_getClass("BrowserController") sharedBrowserController] showKeyboard:YES atPoint:CGPointMake(0, window.frame.size.height-216) inLayer:window belowLayer:nil forSheet:YES];
-
+  
+  //  UIWindow* window = [[UIApplication sharedApplication] keyWindow];
+  //  [[objc_getClass("BrowserController") sharedBrowserController] showKeyboard:YES atPoint:CGPointMake(0, window.frame.size.height-216) inLayer:window belowLayer:nil forSheet:YES];
+  
   [[objc_getClass("BrowserController") sharedBrowserController] _showKeyboardForSheet:YES];
   [ModalAlert block:alert];
   [[objc_getClass("BrowserController") sharedBrowserController] _hideKeyboardForSheet:YES];
@@ -358,7 +358,7 @@ static UIImage* savedIcon = nil;
   [nameLabel setText:message];
   
   UIImageView *iconImageView = [[UIImageView alloc]
-	  initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension] orMimeType:mimetype]];
+                                initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension] orMimeType:mimetype]];
   iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
   [ohmygod addSubview:iconImageView];
   [iconImageView release];

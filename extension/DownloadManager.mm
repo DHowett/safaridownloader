@@ -34,6 +34,7 @@ static BOOL doRot = YES;
 }
 
 - (BOOL) allowsRotation {
+  NSLog(@"allowsRotation????: %d", _allowsRotations);
   return _allowsRotations;
 }
 
@@ -379,9 +380,9 @@ static SDActionType _actionType = SDActionTypeNone;
             withMimeType:(NSString *)mimeType
 {
   NSString *urlString = [[request URL] absoluteString];
-  NSLog(urlString);
+  //NSLog(urlString);
   NSString *extension = [urlString pathExtension];
-  NSLog(extension);
+  //NSLog(extension);
   
   NSLog(@"mimetype count: %d", [_mimeTypes count]);
   NSLog(@"extensions count: %d", [_extensions count]);
@@ -407,6 +408,22 @@ static SDActionType _actionType = SDActionTypeNone;
   //[NSKeyedArchiver archiveRootObject:_currentDownloads toFile:DL_ARCHIVE_PATH]; 
 }
 
+#pragma mark -
+
+- (void)disableRotations {
+  Class BrowserController = objc_getClass("BrowserController");
+  [[BrowserController sharedBrowserController] _setBrowserPanel:_panel]; 
+  [_panel allowRotations:NO];
+}
+
+- (void)enableRotations {
+  Class BrowserController = objc_getClass("BrowserController");
+  [[BrowserController sharedBrowserController] _setBrowserPanel:nil]; 
+  [_panel allowRotations:YES];
+}
+
+#pragma mark -
+
 #pragma mark -/*}}}*/
 #pragma mark Download Management/*{{{*/
 
@@ -424,6 +441,7 @@ static SDActionType _actionType = SDActionTypeNone;
         withContext:(id)download {
   NSLog(@"fileBrowserDidSelectPath");
   //[ModalAlert dismissLoadingAlert];
+  [self enableRotations];
   ((SafariDownload*)download).savePath = path;
   DownloadOperation *op = [[DownloadOperation alloc] initWithDelegate:(SafariDownload*)download];
   [_downloadQueue addOperation:op];
@@ -441,17 +459,23 @@ static SDActionType _actionType = SDActionTypeNone;
 - (void)fileBrowserDidCancel:(FileBrowser*)browser {
   NSLog(@"fileBrowserDidCancel");
   //[ModalAlert dismissLoadingAlert];
+  [_panel allowRotations:YES];
+  Class BrowserController = objc_getClass("BrowserController");
+  [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
 }
 
 // everything eventually goes through this method
-- (BOOL)addDownload:(SafariDownload *)download {
+- (BOOL)addDownload:(SafariDownload*)download {
   if (![_currentDownloads containsObject:download]) {
     //[ModalAlert showLoadingAlertWithIconName:((SafariDownload*)download).filename orMimeType:((SafariDownload*)download).mimetype];
+    [self disableRotations];
+    
     FileBrowser* f = [[FileBrowser alloc] initWithFile:download.filename 
                                                context:download
                                               delegate:self];
     [f show];
     [f release];
+    
     return YES;
   }
   return NO;
@@ -623,6 +647,7 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark SafariDownloadDelegate Methods/*{{{*/
 
 - (void)downloadDidBegin:(SafariDownload*)download {
+  [self updateBadges];
   DownloadCell *cell = [self cellForDownload:download];
   cell.nameLabel = download.filename;
   cell.progressLabel = @"Downloading...";
@@ -1014,7 +1039,7 @@ static int animationType = 0;
   if(_currentDownloads.count > 0) val = [NSString stringWithFormat:@"%d", _currentDownloads.count];
   [_portraitDownloadButton _setBadgeValue:val];
   [_landscapeDownloadButton _setBadgeValue:val];
-  [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+  //[[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 }
 @end
 

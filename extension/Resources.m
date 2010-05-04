@@ -7,7 +7,7 @@
 //
 
 #import "Resources.h"
-#define SUPPORT_BUNDLE_PATH @"/Library/Application Support/AttachmentSaver"
+#define SUPPORT_BUNDLE_PATH @"/Library/Application Support/Safari Downloader"
 
 @implementation Resources
 
