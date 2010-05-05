@@ -228,15 +228,11 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   [newButton addTarget:self action:@selector(newFolder) forControlEvents:UIControlEventTouchUpInside];
   newButton.frame = CGRectMake(236, 10, 34, 30);
   [self addSubview:newButton];
-  
-  UIImageView *imgView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 261, 4)] autorelease];
-  imgView.image = [UIImage imageWithContentsOfFile:@"/Library/Application Support/Safari Downloader/top.png"];
-  [container addSubview:imgView];
-  
-  imgView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, tableHeight+66-23-47, 261, 4)] autorelease];
-  imgView.image = [UIImage imageWithContentsOfFile:@"/Library/Application Support/Safari Downloader/bottom.png"];
-  [container addSubview:imgView];
-  
+
+  UIImageView *shadows = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 261, tableHeight)];
+  shadows.image = [_UIImageWithName(@"UIPopupAlertListShadow.png") stretchableImageWithLeftCapWidth:5 topCapHeight:7];
+  [container addSubview:shadows];
+  [shadows release];
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView 
