@@ -71,6 +71,7 @@ typedef enum
   NSURL		    *_loadingURL;
   BOOL _isDismissible;
   FileBrowserPanel* _fbPanel;
+  id<BrowserPanel> _oldPanel;
 }
 
 @property (nonatomic, assign) UIToolbarButton*  portraitDownloadButton;

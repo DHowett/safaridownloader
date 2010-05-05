@@ -78,47 +78,25 @@ MyAuthenticationView* _authenticationView;
     NSLog(@"HOLY CRAP. HEARTBEAT FIRING. PROGRESS: %f", _bytes);
     [_delegate setProgress:percentComplete speed:avspd];
   }
-  else if (!_keepAlive)
-  {
+  else if (!_keepAlive) {
     [_timer invalidate];
     _timer = nil;
   }
 }
 
-static id savedPanel = nil;
-
 - (void)cancelFromAuthenticationView:(id)authenticationView {
-  [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];
-    
-  if (savedPanel == [[DownloadManager sharedManager] browserPanel]) {
-    [[objc_getClass("BrowserController") sharedBrowserController] _setBrowserPanel:savedPanel];
-    NSLog(@"download manager is down!!!");
-    [[DownloadManager sharedManager] view].alpha = 1;
-  }
-  
-  [savedPanel release];
-  savedPanel = nil;
-  
+  [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];  
   _requiresAuthentication = NO;
 }
 
 - (void)setCredential:(NSURLCredential*)cred {
+  [_authCredential release];
   _authCredential = [cred retain]; 
 }
 
 - (void)logInFromAuthenticationView:(id)authenticationView withCredential:(id)credential {
   [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];
   [self setCredential:credential];
-    
-  if (savedPanel == [[DownloadManager sharedManager] browserPanel]) {
-    [[objc_getClass("BrowserController") sharedBrowserController] _setBrowserPanel:savedPanel];
-    NSLog(@"download manager is down!!!");
-    [[DownloadManager sharedManager] view].alpha = 1;
-  }
-  
-  [savedPanel release];
-  savedPanel = nil;
-  
   _requiresAuthentication = NO;
 }
 
@@ -131,17 +109,7 @@ static id savedPanel = nil;
 }
 
 - (void)showAuthenticationChallenge:(NSURLAuthenticationChallenge*)challenge {
-  
-  savedPanel = [[[objc_getClass("BrowserController") sharedBrowserController] browserPanel] retain];
-  
-  if (savedPanel == [[DownloadManager sharedManager] browserPanel]) {
-    NSLog(@"download manager is up!!!");
-    [[DownloadManager sharedManager] view].alpha = 0;
-    [[objc_getClass("BrowserController") sharedBrowserController] _setBrowserPanel:nil];
-  }
-  
   [[objc_getClass("BrowserController") sharedBrowserController] showBrowserPanelType:88];
-  [[objc_getClass("BrowserController") sharedBrowserController] _setBrowserPanel:_authenticationView];
   NSLog(@"setting challenge: %@", challenge);
   [_authenticationView setSavedChallenge:challenge];
   [_authenticationView setChallenge:challenge];

@@ -462,8 +462,16 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   NSLog(@"-[BrowserController toggleDownloadManagerFromButtonBar]--");
 }
 //- (id)browserPanel {%log; return %orig;}
-- (BOOL)showBrowserPanelType:(int)arg1 {%log; BOOL x = %orig;
-NSLog(@"------- showBrowserPanelType: %d", arg1); return x;}
+- (BOOL)showBrowserPanelType:(int)arg1 {
+  %log;
+  if (arg1 == 88 && [[self browserPanel] panelType] == 44) {
+    [self hideBrowserPanelType:44];
+    NSLog(@"showing authview, hide download list plz");
+  }
+  BOOL x = %orig;
+  NSLog(@"------- showBrowserPanelType: %d", arg1); 
+  return x;
+}
 - (BOOL)hideBrowserPanelType:(int)arg1 {
   %log;
   if (arg1 == 44) {
