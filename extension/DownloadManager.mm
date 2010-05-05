@@ -742,6 +742,11 @@ static int animationType = 0;
   [super viewDidUnload]; 
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+  [_tableView reloadData];
+  [super viewWillAppear:animated];
+}
+
 #pragma mark -/*}}}*/
 #pragma mark UITableView methods/*{{{*/
 
