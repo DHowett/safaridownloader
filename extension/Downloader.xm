@@ -14,7 +14,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "Safari/TabDocument.h"
 //#import <WebKit/DOMHTMLAnchorElement.h>
-typedef void* GSEventRef;
+//typedef void* GSEventRef;
 
 char __attribute((section("__MISC, UDID"))) udid[41] = "0000000000000000000000000000000000000000";
 
@@ -278,7 +278,8 @@ decidePolicyForMIMEType:(NSString *)type
 %end
 #pragma mark -/*}}}*/
 #pragma mark Hooks for Tap-Hold Download/*{{{*/
-struct interaction {
+/* {{{ struct interaction on 3.2+ */
+struct interaction32 {
   NSTimer *timer;
   struct CGPoint location;
   char isBlocked;
@@ -294,7 +295,40 @@ struct interaction {
   UIActionSheet *interactionSheet;
   char allowsImageSheet;
   char allowsDataDetectorsSheet;
-} _interaction;
+} _interaction32;
+/* }}} */
+
+/* {{{ struct interaction on < 3.2 */
+struct interactionnot32 {
+  NSTimer* timer;
+  CGPoint location;
+  BOOL isBlocked;
+  BOOL isCancelled;
+  BOOL isOnWebThread;
+  BOOL isDisplayingHighlight;
+  BOOL attemptedClick;
+  BOOL isGestureScrolling;
+  CGPoint gestureScrollPoint;
+  CGPoint gestureCurrentPoint;
+  BOOL hasAttemptedGestureScrolling;
+  UIView* candidate;
+  BOOL forwardingGuard;
+  SEL mouseUpForwarder;
+  SEL mouseDraggedForwarder;
+  DOMNode* element;
+  BOOL defersCallbacksState;
+  UIInformalDelegate* delegate;
+  int interactionSheetType;
+  UIActionSheet* interactionSheet;
+  BOOL allowsImageSheet;
+  BOOL allowsDataDetectorsSheet;
+  struct {
+    BOOL active;
+    BOOL defaultPrevented;
+    NSMutableArray* regions;
+  } directEvents;
+};
+/* }}} */
 
 static NSURL *interactionURL = nil;
 
@@ -309,40 +343,54 @@ static NSURL *interactionURL = nil;
   interactionURL = nil;
 }
 
+static void showBrowserSheetHookInternals(UIWebDocumentView *self, UIActionSheet *sheet, DOMNode *&domElement) {
+  NSMutableArray *buttons = [sheet buttons];
+  id myButton;
+  if(![domElement isKindOfClass:[$DOMHTMLAnchorElement class]]) {
+    NSLog(@"not htmlanchorelement oh no %@", domElement);
+    domElement = [domElement parentNode];
+  }
+
+  if([domElement isKindOfClass:[$DOMHTMLAnchorElement class]]) {
+    NSLog(@"htmlanchorelement yay %@", domElement);
+    interactionURL = [[domElement absoluteLinkURL] copy];
+    NSString *scheme = [interactionURL scheme];
+    NSLog(@"url is %@", interactionURL);
+    if([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]
+    || [scheme isEqualToString:@"ftp"]) {
+      [sheet addButtonWithTitle:@"Download"];
+      myButton = [buttons lastObject];
+      [myButton retain];
+      [myButton setTag:1337];
+      [buttons removeObject:myButton];
+      [buttons insertObject:myButton atIndex:0];
+      [myButton release];
+      [sheet setDestructiveButtonIndex:0];
+      [sheet setCancelButtonIndex:([buttons count] - 1)];
+    } else {
+      [interactionURL release];
+      interactionURL = nil;
+    }
+  }
+}
+
+%group Firmware_ge_32
 - (void)showBrowserSheet:(id)sheet atPoint:(CGPoint)p {
-  struct interaction i = MSHookIvar<struct interaction>(self, "_interaction");
-  Class DOMHTMLAnchorElement = $DOMHTMLAnchorElement;
-//  int sheetType = i.interactionSheetType;
-//  if(sheetType == 3) {
-    UIActionSheet *iSheet = i.interactionSheet;
-    NSMutableArray *buttons = [sheet buttons];
-    id domElement = i.element;
-    id myButton;
-    if(![domElement isKindOfClass:DOMHTMLAnchorElement]) {
-      domElement = [domElement parentNode];
-    }
-    if([domElement isKindOfClass:DOMHTMLAnchorElement]) {
-      interactionURL = [[domElement absoluteLinkURL] copy];
-      NSString *scheme = [interactionURL scheme];
-      if([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]
-      || [scheme isEqualToString:@"ftp"]) {
-        [iSheet addButtonWithTitle:@"Download"];
-        myButton = [buttons lastObject];
-        [myButton retain];
-        [myButton setTag:1337];
-        [buttons removeObject:myButton];
-        [buttons insertObject:myButton atIndex:0];
-        [myButton release];
-        [iSheet setDestructiveButtonIndex:0];
-        [iSheet setCancelButtonIndex:([buttons count] - 1)];
-      } else {
-        [interactionURL release];
-        interactionURL = nil;
-      }
-    }
-//  }
+  %log;
+  struct interaction32 i = MSHookIvar<struct interaction32>(self, "_interaction");
+  showBrowserSheetHookInternals(self, sheet, i.element);
   %orig;
 }
+%end
+
+%group Firmware_lt_32
+- (void)showBrowserSheet:(id)sheet {
+  %log;
+  struct interactionnot32 i = MSHookIvar<struct interactionnot32>(self, "_interaction");
+  showBrowserSheetHookInternals(self, sheet, i.element);
+  %orig;
+}
+%end
 %end
 #pragma mark -/*}}}*/
 
@@ -469,6 +517,10 @@ static _Constructor void DownloaderInitialize() {
   DHScopedAutoreleasePool();
 
   %init;
+  if(class_getInstanceMethod(objc_getClass("UIWebDocumentView"), @selector(showBrowserSheet:atPoint:)) == NULL)
+    %init(Firmware_lt_32);
+  else
+    %init(Firmware_ge_32);
 
   CFNotificationCenterRef r = CFNotificationCenterGetDarwinNotifyCenter();
   CFNotificationCenterAddObserver(r, 
