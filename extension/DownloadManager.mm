@@ -24,42 +24,69 @@ DHLateClass(BrowserController);
 - (void)applicationOpenURL:(id)url;
 @end
 
-static BOOL doRot = YES;
+@implementation FileBrowserPanel
+- (BOOL)allowsRotation { return NO; }
+- (BOOL)pausesPages { return NO; }
+- (int)panelType { return 45; }
+- (int)panelState { return 1; }
+@end
 
-@implementation DownloadManagerPanel
-
-- (void)allowRotations:(BOOL)allow {
-  _allowsRotations = allow;
-  doRot = allow;
+@implementation DownloadManagerNavigationController
+static id sharedNc = nil;
++ (void)initialize  {
+  if (self == [DownloadManagerNavigationController class]) {
+    NSLog(@"INITIALIZE!!");
+    sharedNc = [[self alloc] initWithRootViewController:[DownloadManager sharedManager]];
+  }
 }
 
-- (BOOL) allowsRotation {
-  NSLog(@"allowsRotation????: %d", _allowsRotations);
-  return _allowsRotations;
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)inter {
+  return NO; 
 }
 
-- (BOOL) pausesPages {
-  return NO;
++ (id)sharedInstance { return sharedNc; }
+- (id)copyWithZone:(NSZone *)zone { return self; }
+- (id)retain { return self; }
+- (unsigned)retainCount { return UINT_MAX; }
+- (void)release { }
+- (id)autorelease { return self; }
+- (BOOL)allowsRotation { return NO; }
+- (BOOL)pausesPages { return NO; }
+- (int)panelType { return 44; }
+- (int)panelState { return 1; }
+- (BOOL)isDismissible { return _isDismissible; }
+
+#undef MARK
+#define MARK    NSLog(@"%s", __PRETTY_FUNCTION__);
+
+- (void)close {
+  [[$BrowserController sharedBrowserController] hideBrowserPanelType:44];
 }
 
-- (int) panelType {
-  return 44;
+static int markthing = 0;
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  [[$BrowserController sharedBrowserController] didShowBrowserPanel:[[$BrowserController sharedBrowserController] browserPanel]];
 }
-
-- (int) panelState {
-  return 0;
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  [[$BrowserController sharedBrowserController] willShowBrowserPanel:[[$BrowserController sharedBrowserController] browserPanel]];
 }
-
--(NSString*)description {
-  return @"[DownloadManagerPanel]: Fake object that conforms to the browserpanel protocol, this allows us to block rotations successfully"; 
+- (void)viewDidDisappear:(BOOL)animated {
+  [super viewDidDisappear:animated];
+  if ([[$BrowserController sharedBrowserController] browserPanel] == self)
+    [[$BrowserController sharedBrowserController] didHideBrowserPanel:[[$BrowserController sharedBrowserController] browserPanel]];
 }
-
+- (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
+  if([[$BrowserController sharedBrowserController] browserPanel] == self)
+    [[$BrowserController sharedBrowserController] closeBrowserPanel:[[$BrowserController sharedBrowserController] browserPanel]];
+}
 @end
 
 @implementation DownloadManager
 @synthesize 
-navItem = _navItem, 
-portraitDownloadButton = _portraitDownloadButton, 
+portraitDownloadButton = _portraitDownloadButton,
 landscapeDownloadButton = _landscapeDownloadButton,
 userPrefs = _userPrefs,
 visible = _visible,
@@ -70,6 +97,10 @@ currentRequest;
 #pragma mark Singleton Methods/*{{{*/
 static id sharedManager = nil;
 static id resourceBundle = nil;
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)inter {
+  return NO; 
+}
 
 + (void)initialize  {
   if (self == [DownloadManager class]) {
@@ -82,8 +113,8 @@ static id resourceBundle = nil;
 }
 
 - (id)init {
-  if ([self initWithNibName:nil bundle:nil] != nil) {    
-    _panel = [[DownloadManagerPanel alloc] init];
+  if (self = [super init]) {
+    _fbPanel = [[FileBrowserPanel alloc] init];
     resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
     _currentDownloads = [NSMutableArray new];
     _finishedDownloads = [NSMutableArray new];
@@ -96,71 +127,35 @@ static id resourceBundle = nil;
   return self;
 }
 
-- (void)loadView {
-  CGRect frame = [[UIScreen mainScreen] applicationFrame];
-  self.view = [[UIView alloc] initWithFrame:frame];
-  
-  self.view.autoresizingMask =   UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
-  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth       | 
-  UIViewAutoresizingFlexibleHeight;
-  
-  self.view.autoresizesSubviews = YES;
-  _navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
-  _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin   |
-  UIViewAutoresizingFlexibleLeftMargin   | UIViewAutoresizingFlexibleRightMargin |
-  UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth        | UIViewAutoresizingFlexibleHeight;
-  self.navItem = [[UINavigationItem alloc] initWithTitle:@"Downloads"];
-  
-  UIBarButtonItem *doneItemButton = [[UIBarButtonItem alloc]  initWithBarButtonSystemItem:UIBarButtonSystemItemDone 
-                                                                                   target:self 
-                                                                                   action:@selector(hideDownloadManager)];
-  self.navItem.leftBarButtonItem = doneItemButton;
+- (void)loadView { 
+  NSLog(@"LOADVIEW!!");
   UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
                                                                    style:UIBarButtonItemStyleBordered 
                                                                   target:self 
-                                                                  action:@selector(cancelAllDownloads)];    
-  self.navItem.rightBarButtonItem = cancelButton;
-  self.navItem.rightBarButtonItem.enabled = YES;
+                                                                  action:@selector(cancelAllDownloads)];
+  self.navigationItem.rightBarButtonItem = cancelButton;
+  self.navigationItem.rightBarButtonItem.enabled = YES;
   
-  [_navBar pushNavigationItem:self.navItem animated:NO];
-  [self.view addSubview:_navBar];
+  UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" 
+                                                                 style:UIBarButtonItemStyleDone 
+                                                                target:[DownloadManagerNavigationController sharedInstance] 
+                                                                action:@selector(close)];
+  self.navigationItem.leftBarButtonItem = doneButton;
+  self.navigationItem.leftBarButtonItem.enabled = YES;
   
-  frame.origin.y = _navBar.frame.size.height;
-  frame.size.height = self.view.frame.size.height - _navBar.frame.size.height;
-  
-  _tableView = [[UITableView alloc] initWithFrame:frame style:UITableViewStylePlain];
+  _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0.f, 0.f, 320.f, 480.f) style:UITableViewStylePlain];
   _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   _tableView.delegate = self;
   _tableView.dataSource = self;
   _tableView.rowHeight = 56;
-  [self.view addSubview:_tableView];   
+  self.view = _tableView;
 }
 
-- (DownloadManagerPanel*)browserPanel {
-  if (!_panel)
-    _panel = [[DownloadManagerPanel alloc] init];
-  return _panel;
-}
-
-- (id)copyWithZone:(NSZone *)zone {
-  return self;
-}
-
-- (id)retain {
-  return self;
-}
-
-- (unsigned)retainCount {
-  return UINT_MAX;
-}
-
-- (void)release {}
-
-- (id)autorelease {
-  return self;
-}
+- (id)copyWithZone:(NSZone *)zone { return self; }
+- (id)retain { return self; }
+- (unsigned)retainCount { return UINT_MAX; }
+- (void)release { }
+- (id)autorelease { return self; }
 
 - (NSString*)fileNameForURL:(NSURL*)url {
   NSString *filename = [[[url absoluteString] lastPathComponent] 
@@ -233,8 +228,7 @@ static SDActionType _actionType = SDActionTypeNone;
     if (_actionType == SDActionTypeView) {
       return SDActionTypeView;
     }
-    else if (_actionType == SDActionTypeDownload) 
-    {
+    else if (_actionType == SDActionTypeDownload) {
       [listener ignore];
       [frame stopLoading];
       BOOL downloadAdded = NO;
@@ -402,8 +396,7 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark -/*}}}*/
 #pragma mark Persistent Storage/*{{{*/
 
-- (void)saveData
-{
+- (void)saveData {
   NSLog(@"(fake) archiving to path: %@", DL_ARCHIVE_PATH);
   //[NSKeyedArchiver archiveRootObject:_currentDownloads toFile:DL_ARCHIVE_PATH]; 
 }
@@ -412,14 +405,12 @@ static SDActionType _actionType = SDActionTypeNone;
 
 - (void)disableRotations {
   Class BrowserController = objc_getClass("BrowserController");
-  [[BrowserController sharedBrowserController] _setBrowserPanel:_panel]; 
-  [_panel allowRotations:NO];
+  [[BrowserController sharedBrowserController] _setBrowserPanel:_fbPanel]; 
 }
 
 - (void)enableRotations {
   Class BrowserController = objc_getClass("BrowserController");
-  [[BrowserController sharedBrowserController] _setBrowserPanel:nil]; 
-  [_panel allowRotations:YES];
+  [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
 }
 
 #pragma mark -
@@ -459,7 +450,7 @@ static SDActionType _actionType = SDActionTypeNone;
 - (void)fileBrowserDidCancel:(FileBrowser*)browser {
   NSLog(@"fileBrowserDidCancel");
   //[ModalAlert dismissLoadingAlert];
-  [_panel allowRotations:YES];
+  //[_panel allowRotations:YES];
   Class BrowserController = objc_getClass("BrowserController");
   [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
 }
@@ -765,103 +756,98 @@ static SDActionType _actionType = SDActionTypeNone;
 
 static int animationType = 0;
 
-- (void)showDownloadManager {    
-  NSLog(@"showDownloadManager!");
-  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
-  if(!keyWindow) {
-    Class BrowserController = objc_getClass("BrowserController");
-    keyWindow = [[BrowserController sharedBrowserController] window];
-  }
-  self.view.frame = [[UIScreen mainScreen] applicationFrame];
-  int orientation = [[DHClass(BrowserController) sharedBrowserController] orientation];
-  NSString *transition = kCATransitionFromTop;
-  if (orientation == 90)
-    transition = kCATransitionFromLeft;
-  else if (orientation == -90)
-    transition = kCATransitionFromRight;
-  
-  NSLog(@"Checking Values:\nWindow: %@\nView: %@\nTable: %@", keyWindow, self.view, _tableView);
-  
-  CATransition *animation = [CATransition animation];
-  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
-  [animation setDelegate:self];
-  [animation setType:kCATransitionPush];
-  [animation setSubtype:transition];
-  [animation setDuration:0.3];
-  [animation setFillMode:kCAFillModeForwards];
-  [animation setRemovedOnCompletion:YES];
-  [[self.view layer] addAnimation:animation forKey:@"pushUp"];
-  animationType = 1;
-  [keyWindow addSubview:self.view];
-  if (orientation == 0) {
-    NSLog(@"%s portrait!", _cmd);
-    _tableView.frame = CGRectMake(0, 44, 320, 416);
-    _navBar.frame = CGRectMake(0, 0, 320, 44);
-  }
-  else
-  {
-    NSLog(@"%s landscape!", _cmd);
-    _tableView.frame = CGRectMake(0, 44, 480, 256);
-    _navBar.frame = CGRectMake(0, 0, 480, 44);
-  }
-  
-  for (DownloadCell* cell in [_tableView visibleCells]) {
-    [cell setNeedsDisplay];
-  }
+- (void)showDownloadManager {
+//  NSLog(@"showDownloadManager!");
+//  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+//  if(!keyWindow) {
+//    Class BrowserController = objc_getClass("BrowserController");
+//    keyWindow = [[BrowserController sharedBrowserController] window];
+//  }
+//  self.view.frame = [[UIScreen mainScreen] applicationFrame];
+//  int orientation = [[DHClass(BrowserController) sharedBrowserController] orientation];
+//  NSString *transition = kCATransitionFromTop;
+//  if (orientation == 90)
+//    transition = kCATransitionFromLeft;
+//  else if (orientation == -90)
+//    transition = kCATransitionFromRight;
+//  
+//  NSLog(@"Checking Values:\nWindow: %@\nView: %@\nTable: %@", keyWindow, self.view, _tableView);
+//  
+//  CATransition *animation = [CATransition animation];
+//  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+//  [animation setDelegate:self];
+//  [animation setType:kCATransitionPush];
+//  [animation setSubtype:transition];
+//  [animation setDuration:0.3];
+//  [animation setFillMode:kCAFillModeForwards];
+//  [animation setRemovedOnCompletion:YES];
+//  [[self.view layer] addAnimation:animation forKey:@"pushUp"];
+//  animationType = 1;
+//  [keyWindow addSubview:self.view];
+//  if (orientation == 0) {
+//    NSLog(@"%s portrait!", _cmd);
+//    _tableView.frame = CGRectMake(0, 44, 320, 416);
+//    _navBar.frame = CGRectMake(0, 0, 320, 44);
+//  }
+//  else {
+//    NSLog(@"%s landscape!", _cmd);
+//    _tableView.frame = CGRectMake(0, 44, 480, 256);
+//    _navBar.frame = CGRectMake(0, 0, 480, 44);
+//  }
+//  
+//  for (DownloadCell* cell in [_tableView visibleCells]) {
+//    [cell setNeedsDisplay];
+//  }
 }
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
-  Class BrowserController = objc_getClass("BrowserController");
-  NSLog(@"animationDidStop!");
-  if (animationType == 1) 
-  {
-    NSLog(@"animationType == 1");
-    [[BrowserController sharedBrowserController] showBrowserPanelType:44];
-    [[BrowserController sharedBrowserController] _setBrowserPanel:_panel];
-    [_panel allowRotations:NO];
-    _visible = YES;
-  }
-  else if (animationType == 2)
-  {
-    NSLog(@"animationType == 2");
-    [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
-    [self.view removeFromSuperview];
-    [_panel allowRotations:YES];
-    _visible = NO;
-    if(_loadingURL != nil) {
-      [[DHClass(Application) sharedApplication] applicationOpenURL:_loadingURL];
-      self.loadingURL = nil;
-    }
-  }
-  
-  animationType = 0;
+//  Class BrowserController = objc_getClass("BrowserController");
+//  NSLog(@"animationDidStop!");
+//  if (animationType == 1) 
+//  {
+//    NSLog(@"animationType == 1");
+////    [[BrowserController sharedBrowserController] showBrowserPanelType:44];
+////    [[BrowserController sharedBrowserController] _setBrowserPanel:_panel];
+////    [_panel allowRotations:NO];
+//    _visible = YES;
+//  }
+//  else if (animationType == 2)
+//  {
+//    NSLog(@"animationType == 2");
+////    [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
+////    [self.view removeFromSuperview];
+////    [_panel allowRotations:YES];
+//    _visible = NO;
+//    if(_loadingURL != nil) {
+//      [[DHClass(Application) sharedApplication] applicationOpenURL:_loadingURL];
+//      self.loadingURL = nil;
+//    }
+//  }
+//  
+//  animationType = 0;
 }
 
 - (void)hideDownloadManager {
-  animationType = 2;
-  int orientation = [[DHClass(BrowserController) sharedBrowserController] orientation];
-  NSString *transition = kCATransitionFromBottom;
-  if (orientation == 90)
-    transition = kCATransitionFromRight;
-  else if (orientation == -90)
-    transition = kCATransitionFromLeft;
-  
-  CATransition *animation = [CATransition animation];
-  [animation setDelegate:self];
-  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
-  [animation setType:kCATransitionPush];
-  [animation setSubtype:transition];
-  [animation setDuration:0.4];
-  [animation setFillMode:kCAFillModeForwards];
-  [animation setDelegate:self];
-  [animation setEndProgress:1.0];
-  [animation setRemovedOnCompletion:YES];
-  [[self.view layer] addAnimation:animation forKey:@"pushDown"];
-  [self.view setFrame:CGRectOffset(self.view.frame, 0, self.view.frame.size.height)];
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
-  return doRot;
+//  animationType = 2;
+//  int orientation = [[DHClass(BrowserController) sharedBrowserController] orientation];
+//  NSString *transition = kCATransitionFromBottom;
+//  if (orientation == 90)
+//    transition = kCATransitionFromRight;
+//  else if (orientation == -90)
+//    transition = kCATransitionFromLeft;
+//  
+//  CATransition *animation = [CATransition animation];
+//  [animation setDelegate:self];
+//  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+//  [animation setType:kCATransitionPush];
+//  [animation setSubtype:transition];
+//  [animation setDuration:0.4];
+//  [animation setFillMode:kCAFillModeForwards];
+//  [animation setDelegate:self];
+//  [animation setEndProgress:1.0];
+//  [animation setRemovedOnCompletion:YES];
+//  [[self.view layer] addAnimation:animation forKey:@"pushDown"];
+//  [self.view setFrame:CGRectOffset(self.view.frame, 0, self.view.frame.size.height)];
 }
 
 - (void)didReceiveMemoryWarning {

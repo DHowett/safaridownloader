@@ -34,11 +34,15 @@
 - (void)setMessage:(id)message;
 @end
 
-@interface DownloadManagerPanel : NSObject <BrowserPanel>
-{
-  BOOL _allowsRotations; 
+@interface FileBrowserPanel : NSObject <BrowserPanel>
+@end
+
+@interface DownloadManagerNavigationController : UINavigationController <BrowserPanel> {
+	BOOL _isDismissible;
 }
-- (void)allowRotations:(BOOL)allow;
++ (id)sharedInstance;
+- (BOOL)isDismissible;
+- (void)close;
 @end
 
 typedef enum
@@ -49,7 +53,7 @@ typedef enum
   SDActionTypeCancel = 3,
 } SDActionType;
 
-@interface DownloadManager : UITableViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate> {
+@interface DownloadManager : UIViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate> {
   UITableView*      _tableView;
   NSMutableSet*     _mimeTypes;
   NSMutableSet*     _extensions;
@@ -60,17 +64,15 @@ typedef enum
   NSOperationQueue* _downloadQueue;
   UIToolbarButton*  _portraitDownloadButton;
   UIToolbarButton*  _landscapeDownloadButton;
-  UINavigationItem* _navItem;
-  UINavigationBar*  _navBar;
-  DownloadManagerPanel *_panel;
   NSURLRequest* currentRequest;
   SafariDownload* curDownload;
   NSDictionary      *_userPrefs;
   BOOL		     _visible;
   NSURL		    *_loadingURL;
+  BOOL _isDismissible;
+  FileBrowserPanel* _fbPanel;
 }
 
-@property (nonatomic, retain) UINavigationItem* navItem;
 @property (nonatomic, assign) UIToolbarButton*  portraitDownloadButton;
 @property (nonatomic, assign) UIToolbarButton*  landscapeDownloadButton;
 @property (nonatomic, retain) NSURLRequest*     currentRequest;
@@ -105,7 +107,7 @@ typedef enum
 - (BOOL)cancelDownloadWithURL:(NSURL *)url;
 - (IBAction)cancelAllDownloads;
 
-- (DownloadManagerPanel*)browserPanel;
+//- (DownloadManagerPanel*)browserPanel;
 - (void)showDownloadManager;
 - (IBAction)hideDownloadManager;
 

@@ -287,8 +287,7 @@ static UIImage* savedIcon = nil;
                                     message:(NSString *)message 
                                cancelButton:(NSString*)cancel 
                                    okButton:(NSString*)okButton 
-                                   delegate:(id)delegate
-{
+                                   delegate:(id)delegate {
   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
                                                   message:[message stringByAppendingString:@"\n\n\n\n"]
                                                  delegate:delegate 
@@ -337,8 +336,7 @@ static UIImage* savedIcon = nil;
                              destructive:(NSString*)destructive
                                    other:(NSString*)other 
                                      tag:(NSInteger)tag
-                                delegate:(id)delegate
-{
+                                delegate:(id)delegate {
   
   UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:title
                                                        delegate:delegate

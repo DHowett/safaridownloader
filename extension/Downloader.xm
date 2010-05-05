@@ -13,7 +13,8 @@
 #import "Safari/BrowserController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "Safari/TabDocument.h"
-#import <WebKit/DOMHTMLAnchorElement.h>
+//#import <WebKit/DOMHTMLAnchorElement.h>
+typedef void* GSEventRef;
 
 char __attribute((section("__MISC, UDID"))) udid[41] = "0000000000000000000000000000000000000000";
 
@@ -21,7 +22,8 @@ char __attribute((section("__MISC, UDID"))) udid[41] = "000000000000000000000000
 -(id)buttons;
 @end
 
-DHLateClass(DOMHTMLAnchorElement);
+%class BrowserController
+%class DOMHTMLAnchorElement;
 
 static void initCustomToolbar(void) {
   Class BrowserController = objc_getClass("BrowserController");
@@ -34,12 +36,12 @@ static void initCustomToolbar(void) {
   
   id x = [BrowserButtonBar imageButtonItemWithName:@"Download.png"
                                                tag:61
-                                            action:@selector(showDownloadManager)
-                                            target:[NSValue valueWithNonretainedObject:[DownloadManager sharedManager]]];
+                                            action:@selector(toggleDownloadManagerFromButtonBar)
+                                            target:[NSValue valueWithNonretainedObject:[$BrowserController sharedBrowserController]]];
   id y = [BrowserButtonBar imageButtonItemWithName:@"DownloadSmall.png"
                                                tag:62
-                                            action:@selector(showDownloadManager)
-                                            target:[NSValue valueWithNonretainedObject:[DownloadManager sharedManager]]];
+                                            action:@selector(toggleDownloadManagerFromButtonBar)
+                                            target:[NSValue valueWithNonretainedObject:[$BrowserController sharedBrowserController]]];
   
   NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
   
@@ -67,7 +69,6 @@ static void initCustomToolbar(void) {
 }
 
 #pragma mark General Hooks/*{{{*/
-%class BrowserController
 %hook Application
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
   %orig;
@@ -81,12 +82,14 @@ static void initCustomToolbar(void) {
 }
 
 - (void)applicationOpenURL:(NSURL *)url {
+  /*
   DownloadManager *shared = [DownloadManager sharedManager];
   if([shared isVisible]) {
     [shared hideDownloadManager];
     shared.loadingURL = url;
     return;
   }
+  */
   %orig;
 }
 %end
@@ -127,10 +130,19 @@ static void initCustomToolbar(void) {
 %end
 
 %hook BrowserController -(id)_panelForPanelType:(int)type {
-  if(type == 44)
-    return [[DownloadManager sharedManager] browserPanel];
+  if (type == 44) {
+    %log;
+    return [DownloadManagerNavigationController sharedInstance];
+  }
   if (type == 88)
     return [DownloadOperation authView];
+  return %orig;
+}
+%end
+
+%hook BrowserPanelViewController -(id)initWithPanelType:(int)type {
+  %log;
+  NSLog(@"initWithPanelType: %d", type);
   return %orig;
 }
 %end
@@ -267,34 +279,22 @@ decidePolicyForMIMEType:(NSString *)type
 #pragma mark -/*}}}*/
 #pragma mark Hooks for Tap-Hold Download/*{{{*/
 struct interaction {
-  NSTimer* timer;
-  CGPoint location;
-  BOOL isBlocked;
-  BOOL isCancelled;
-  BOOL isOnWebThread;
-  BOOL isDisplayingHighlight;
-  BOOL attemptedClick;
-  BOOL isGestureScrolling;
-  CGPoint gestureScrollPoint;
-  CGPoint gestureCurrentPoint;
-  BOOL hasAttemptedGestureScrolling;
-  UIView* candidate;
-  BOOL forwardingGuard;
-  SEL mouseUpForwarder;
-  SEL mouseDraggedForwarder;
-  DOMNode* element;
-  BOOL defersCallbacksState;
-  UIInformalDelegate* delegate;
+  NSTimer *timer;
+  struct CGPoint location;
+  char isBlocked;
+  char isCancelled;
+  char isOnWebThread;
+  char isDisplayingHighlight;
+  char attemptedClick;
+  struct CGPoint lastPanTranslation;
+  DOMNode *element;
+  char defersCallbacksState;
+  UIInformalDelegate *delegate;
   int interactionSheetType;
-  UIActionSheet* interactionSheet;
-  BOOL allowsImageSheet;
-  BOOL allowsDataDetectorsSheet;
-  struct {
-    BOOL active;
-    BOOL defaultPrevented;
-    NSMutableArray* regions;
-  } directEvents;
-};
+  UIActionSheet *interactionSheet;
+  char allowsImageSheet;
+  char allowsDataDetectorsSheet;
+} _interaction;
 
 static NSURL *interactionURL = nil;
 
@@ -309,7 +309,7 @@ static NSURL *interactionURL = nil;
   interactionURL = nil;
 }
 
-- (void)showBrowserSheet:(id)sheet {
+- (void)showBrowserSheet:(id)sheet atPoint:(CGPoint)p {
   struct interaction i = MSHookIvar<struct interaction>(self, "_interaction");
   Class DOMHTMLAnchorElement = $DOMHTMLAnchorElement;
 //  int sheetType = i.interactionSheetType;
@@ -350,6 +350,121 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   [[DownloadManager sharedManager] updateUserPreferences];
   [[DownloadManager sharedManager] updateFileTypes];
 }
+
+#if 0
+%hook NSBundle
+- (id)localizedStringForKey:(id)key value:(id)value table:(id)table {
+    //if([key isEqualToString:@"Add"]) [NSObject fuck];
+  %log; return %orig;
+}
+%end
+#endif
+%hook BrowserController
+- (void)_setShowingCurrentPanel:(BOOL)showing animate:(BOOL)animate {
+  %log;
+  id<BrowserPanel> panel = MSHookIvar<id>(self, "_browserPanel");
+  /*
+  if(!showing) {
+    [self willHideBrowserPanel:panel];
+  } else {
+    [self willShowBrowserPanel:panel];
+  }
+  */
+  %orig;
+  if([panel panelType] == 44) {
+    [MSHookIvar<id>(self, "_browserView") resignFirstResponder];
+    [self _setShowingDownloads:showing animate:animate];
+  }
+  NSLog(@"DONE WITH -[BrowserController _setShowingCurrentPanel...]--");
+}
+
+%new(v@:ii)
+- (void)_setShowingDownloads:(BOOL)showing animate:(BOOL)animate {
+  if (showing) {
+    [self _resizeNavigationController:[DownloadManagerNavigationController sharedInstance] small:NO];
+    //[self _presentModalViewControllerFromDownloadsButton:[DownloadManagerNavigationController sharedInstance]]; // 3.2 ONLY
+    
+    // UITransitionView (non-wildcat only)
+      UITransitionView* tr = MSHookIvar<UITransitionView*>(self, "_browserLayer");
+      [tr transition:3 toView:[[DownloadManagerNavigationController sharedInstance] view]];
+      NSLog(@"SHOW: from: %@, to: %@", [tr fromView], [tr toView]);
+    
+  } else {
+    [self willHideBrowserPanel:[DownloadManagerNavigationController sharedInstance]];
+    //[self _forceDismissModalViewController:animate]; // 3.2 ONLY
+    
+    // UITransitionView (non-wildcat only)
+    UITransitionView* tr = MSHookIvar<UITransitionView*>(self, "_browserLayer");
+    [tr transition:7 toView:[self _panelSuperview]];
+  }
+}
+
+%new(v@:@)
+- (void)_presentModalViewControllerFromDownloadsButton:(id)x {
+  // [self _presentModalViewControllerFromBookmarksButton:x]; // 3.2 ONLY
+  
+}
+
+%new(v@:)
+- (void)toggleDownloadManagerFromButtonBar {
+  NSLog(@"-[BrowserController toggleDownloadManagerFromButtonBar]++");
+  if([[self browserPanel] panelType] == 44) {
+//    [[DownloadManagerNavigationController sharedInstance] close];
+//    [self hideBrowserPanelType:44];
+    [self hideBrowserPanelType:44];
+    [self _setShowingDownloads:NO animate:YES];
+  } else {
+      [self showBrowserPanelType:44];
+      [self _setShowingDownloads:YES animate:YES];
+  }
+  NSLog(@"-[BrowserController toggleDownloadManagerFromButtonBar]--");
+}
+//- (id)browserPanel {%log; return %orig;}
+- (BOOL)showBrowserPanelType:(int)arg1 {%log; BOOL x = %orig;
+NSLog(@"------- showBrowserPanelType: %d", arg1); return x;}
+- (BOOL)hideBrowserPanelType:(int)arg1 {
+  %log;
+  if (arg1 == 44) {
+    [self _setShowingDownloads:NO animate:YES];
+    return YES;
+  }
+  BOOL x = %orig;
+  NSLog(@"------- hideBrowserPanelType: %d", arg1); 
+  return x;
+}
+- (BOOL)hideBrowserPanel {
+  %log;
+  return %orig;
+}
+- (void)_resizeNavigationController:(id)arg1 small:(BOOL)arg2 {%log; %orig;}
+- (void)_presentModalViewControllerFromBookmarksButton:(id)arg1 {%log; %orig;
+NSLog(@"------- presentModalViewControllerFromBookmarksButton");}
+- (void)_presentModalViewControllerFromActionButton:(id)arg1 {%log; %orig;}
+- (void)closeBrowserPanel:(id)x { %log; %orig; }
+- (void)willShowBrowserPanel:(id)x { %log; %orig; }
+- (void)willHideBrowserPanel:(id)x { %log; %orig; }
+//- (void)_handleBookmarkSelector:(SEL)x { NSLog(@"%d -[BrowserController _handleBookmarkSelector:%s]++", neslev++, sel_getName(x)); %orig;
+//  NSLog(@"%d--", neslev--); }
+%end
+
+%hook BookmarksNavigationController
+- (BOOL)isDismissible {
+  %log;
+  BOOL x = %orig;
+  return x;
+}
+- (void)viewDidAppear:(BOOL)x { %log; %orig; }
+- (void)viewWillAppear:(BOOL)x { %log; %orig; }
+- (void)viewDidDisappear:(BOOL)x { %log; %orig; }
+- (void)viewWillDisappear:(BOOL)x { %log; %orig; }
+%end
+
+%hook DownloadManagerNavigationController
+- (void)viewDidAppear:(BOOL)x { %log; %orig; }
+- (void)viewWillAppear:(BOOL)x { %log; %orig; }
+- (void)viewDidDisappear:(BOOL)x { %log; %orig; }
+- (void)viewWillDisappear:(BOOL)x { %log; %orig; }
+%end
 
 static _Constructor void DownloaderInitialize() {	
   DHScopedAutoreleasePool();

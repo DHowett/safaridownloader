@@ -11,6 +11,8 @@
 #define kNewFolderAlert 239530
 
 extern UIImage *_UIImageWithName(NSString *);
+void UIKeyboardEnableAutomaticAppearance(void);
+void UIKeyboardDisableAutomaticAppearance(void);
 
 FileBrowser* activeInstance;
 BOOL alertViewShown;
@@ -47,8 +49,6 @@ BOOL alertViewShown;
 
 @synthesize context, data, currentPath, file;
 @synthesize browserDelegate = _browserDelegate;
-
-UIKeyboard* keyboard;
 
 + (FileBrowser*)activeInstance {
   return activeInstance; 
@@ -143,8 +143,7 @@ UIKeyboard* keyboard;
 - (void)alertView:(UIAlertView *)alert 
 clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (alert.tag == kNewFolderAlert) {
-    [keyboard removeFromSuperview];
-    keyboard = nil;
+    UIKeyboardDisableAutomaticAppearance();
     if (buttonIndex != [alert cancelButtonIndex]) {
       NSString *entered = [(AlertPrompt *)alert enteredText];
       BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:[currentPath stringByAppendingPathComponent:entered]
@@ -191,7 +190,8 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
 }
 
 - (void)newFolder {
-	AlertPrompt *prompt = [AlertPrompt alloc];
+  UIKeyboardEnableAutomaticAppearance(); // w00t!
+  AlertPrompt *prompt = [AlertPrompt alloc];
 	prompt = [prompt initWithTitle:@"New Folder" 
                          message:@"Enter a name for the new folder" 
                         delegate:self 
@@ -200,16 +200,6 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   prompt.tag = kNewFolderAlert;
 	[prompt show];
 	[prompt release];
-  
-  BOOL landscape = UIDeviceOrientationIsLandscape([[UIDevice currentDevice] orientation]);
-  UIView* sup = [prompt superview];
-  CGSize s = [UIKeyboard defaultSizeForInterfaceOrientation:[[UIDevice currentDevice] orientation]];
-  CGFloat height = landscape ? [sup frame].size.width : [sup frame].size.height;
-  CGRect f = CGRectMake(0, height - s.height, s.width, s.height);
-  
-  keyboard = [[[UIKeyboard alloc] initWithDefaultSize] autorelease];
-  [keyboard setFrame:f];
-  [sup addSubview:keyboard];
 }
 
 - (void)prepare {
@@ -258,7 +248,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
     cell.textLabel.font = [UIFont boldSystemFontOfSize:15];
   }  
   
-  PathObject* item = [data objectAtIndex:indexPath.row];  
+  PathObject* item = [data objectAtIndex:indexPath.row];
   cell.textLabel.text = item.name;
   
   if (item.isDir) {
