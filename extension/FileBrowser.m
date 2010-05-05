@@ -143,7 +143,6 @@ BOOL alertViewShown;
 - (void)alertView:(UIAlertView *)alert 
 clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (alert.tag == kNewFolderAlert) {
-    UIKeyboardDisableAutomaticAppearance();
     if (buttonIndex != [alert cancelButtonIndex]) {
       NSString *entered = [(AlertPrompt *)alert enteredText];
       BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:[currentPath stringByAppendingPathComponent:entered]
@@ -154,6 +153,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
     }
   }
   else {
+    UIKeyboardDisableAutomaticAppearance();
     alertViewShown = NO;
     activeInstance = nil;
     
