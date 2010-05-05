@@ -386,16 +386,15 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
     
     // UITransitionView (non-wildcat only)
       UITransitionView* tr = MSHookIvar<UITransitionView*>(self, "_browserLayer");
-      [tr transition:3 toView:[[DownloadManagerNavigationController sharedInstance] view]];
-      NSLog(@"SHOW: from: %@, to: %@", [tr fromView], [tr toView]);
-    
-  } else {
+      [tr transition:8 toView:[[DownloadManagerNavigationController sharedInstance] view]];
+  } 
+  else {
     [self willHideBrowserPanel:[DownloadManagerNavigationController sharedInstance]];
     //[self _forceDismissModalViewController:animate]; // 3.2 ONLY
     
     // UITransitionView (non-wildcat only)
     UITransitionView* tr = MSHookIvar<UITransitionView*>(self, "_browserLayer");
-    [tr transition:7 toView:[self _panelSuperview]];
+    [tr transition:9 toView:[self _panelSuperview]];
   }
 }
 

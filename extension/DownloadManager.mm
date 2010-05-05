@@ -378,11 +378,13 @@ static SDActionType _actionType = SDActionTypeNone;
     NSLog(@"mimeType: %@ supported!", mimeType);
     return YES;
   }
-  else
+  else {
+    NSString* extension = [[[request URL] absoluteString] pathExtension];
     if ([_extensions containsObject:extension]) {
       NSLog(@"extensions contain %@, supported!", extension);
       return YES;
     }
+  }
   return NO;
 }
 
@@ -441,7 +443,7 @@ static SDActionType _actionType = SDActionTypeNone;
 
 - (void)fileBrowserDidCancel:(FileBrowser*)browser {
   NSLog(@"fileBrowserDidCancel");
-  [self enableRotations]
+  [self enableRotations];
 }
 
 // everything eventually goes through this method
