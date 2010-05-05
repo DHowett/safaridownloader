@@ -8,4 +8,4 @@ include framework/makefiles/aggregate.mk
 
 internal-package::
 	-find _ -iname '*.plist' -print0 | xargs -0 plutil -convert binary1
-	$(FAKEROOT) chown -R 0.80 _
+	$(FAKEROOT) chown -R 0:80 _
