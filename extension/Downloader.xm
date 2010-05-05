@@ -81,15 +81,10 @@ static void initCustomToolbar(void) {
   [[DownloadManager sharedManager] updateFileTypes];
 }
 
-- (void)applicationOpenURL:(NSURL *)url {
-  /*
-  DownloadManager *shared = [DownloadManager sharedManager];
-  if([shared isVisible]) {
-    [shared hideDownloadManager];
-    shared.loadingURL = url;
-    return;
-  }
-  */
+- (void)applicationWillSuspend {
+  BrowserController *sbc = [$BrowserController sharedBrowserController];
+  if([[sbc browserPanel] panelType] == 44)
+    [sbc hideBrowserPanelType:44];
   %orig;
 }
 %end
