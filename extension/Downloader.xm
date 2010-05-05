@@ -479,38 +479,6 @@ NSLog(@"------- showBrowserPanelType: %d", arg1); return x;}
   NSLog(@"------- hideBrowserPanelType: %d", arg1); 
   return x;
 }
-- (BOOL)hideBrowserPanel {
-  %log;
-  return %orig;
-}
-- (void)_resizeNavigationController:(id)arg1 small:(BOOL)arg2 {%log; %orig;}
-- (void)_presentModalViewControllerFromBookmarksButton:(id)arg1 {%log; %orig;
-NSLog(@"------- presentModalViewControllerFromBookmarksButton");}
-- (void)_presentModalViewControllerFromActionButton:(id)arg1 {%log; %orig;}
-- (void)closeBrowserPanel:(id)x { %log; %orig; }
-- (void)willShowBrowserPanel:(id)x { %log; %orig; }
-- (void)willHideBrowserPanel:(id)x { %log; %orig; }
-//- (void)_handleBookmarkSelector:(SEL)x { NSLog(@"%d -[BrowserController _handleBookmarkSelector:%s]++", neslev++, sel_getName(x)); %orig;
-//  NSLog(@"%d--", neslev--); }
-%end
-
-%hook BookmarksNavigationController
-- (BOOL)isDismissible {
-  %log;
-  BOOL x = %orig;
-  return x;
-}
-- (void)viewDidAppear:(BOOL)x { %log; %orig; }
-- (void)viewWillAppear:(BOOL)x { %log; %orig; }
-- (void)viewDidDisappear:(BOOL)x { %log; %orig; }
-- (void)viewWillDisappear:(BOOL)x { %log; %orig; }
-%end
-
-%hook DownloadManagerNavigationController
-- (void)viewDidAppear:(BOOL)x { %log; %orig; }
-- (void)viewWillAppear:(BOOL)x { %log; %orig; }
-- (void)viewDidDisappear:(BOOL)x { %log; %orig; }
-- (void)viewWillDisappear:(BOOL)x { %log; %orig; }
 %end
 
 static _Constructor void DownloaderInitialize() {	
