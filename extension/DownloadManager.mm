@@ -244,8 +244,7 @@ static SDActionType _actionType = SDActionTypeNone;
         NSLog(@"add download failed");
       return SDActionTypeDownload;
     } 
-    else 
-    {
+    else {
       [listener ignore];
       [frame stopLoading];
       return SDActionTypeCancel;
@@ -268,25 +267,25 @@ static SDActionType _actionType = SDActionTypeNone;
                                                                              ofType:@"plist"]];
   NSArray *disabledItems = [_userPrefs objectForKey:@"DisabledItems"];
   NSDictionary *customTypes = [_userPrefs objectForKey:@"CustomItems"];
-  if(customTypes) 
+  if (customTypes) 
     [globalFileTypes setValue:customTypes forKey:@"CustomItems"];
   
-  if(_mimeTypes) [_mimeTypes release];
-  if(_extensions) [_extensions release];
-  if(_classMappings) [_classMappings release];
+  if (_mimeTypes) [_mimeTypes release];
+  if (_extensions) [_extensions release];
+  if (_classMappings) [_classMappings release];
   _mimeTypes = [[NSMutableSet alloc] init];
   _extensions = [[NSMutableSet alloc] init];
   _classMappings = [[NSMutableDictionary alloc] init];
   
   BOOL disabled = [[_userPrefs objectForKey:@"Disabled"] boolValue];
-  if(disabled) return;
+  if (disabled) return;
   
   BOOL useExtensions = [[_userPrefs objectForKey:@"UseExtensions"] boolValue];
   
-  for(NSString *fileClassName in globalFileTypes) {
+  for (NSString *fileClassName in globalFileTypes) {
     NSDictionary *fileClass = [globalFileTypes objectForKey:fileClassName];
-    for(NSString *fileTypeName in fileClass) {
-      if([disabledItems containsObject:fileTypeName]) {
+    for (NSString *fileTypeName in fileClass) {
+      if ([disabledItems containsObject:fileTypeName]) {
         NSLog(@"Skipping %@...", fileTypeName);
         continue;
       }
@@ -294,8 +293,8 @@ static SDActionType _actionType = SDActionTypeNone;
       NSDictionary *fileType = [fileClass objectForKey:fileTypeName];
       NSArray *mimes = [fileType objectForKey:@"Mimetypes"];
       [_mimeTypes addObjectsFromArray:mimes];
-      for(NSString *i in mimes) [_classMappings setObject:fileClassName forKey:i];
-      if(useExtensions || [[fileType objectForKey:@"ForceExtension"] boolValue] || [fileClassName isEqualToString:@"CustomItems"]) {
+      for (NSString *i in mimes) [_classMappings setObject:fileClassName forKey:i];
+      if (useExtensions || [[fileType objectForKey:@"ForceExtension"] boolValue] || [fileClassName isEqualToString:@"CustomItems"]) {
         NSArray *exts = [fileType objectForKey:@"Extensions"];
         [_extensions addObjectsFromArray:exts];
         for(NSString *i in exts) [_classMappings setObject:fileClassName forKey:i];
@@ -305,12 +304,12 @@ static SDActionType _actionType = SDActionTypeNone;
   NSLog(@"%@", _mimeTypes);
   
   NSFileManager *fm = [NSFileManager defaultManager];
-  if(_launchActions) [_launchActions release];
+  if (_launchActions) [_launchActions release];
   _launchActions = [[NSMutableDictionary alloc] init];
-  if([fm fileExistsAtPath:@"/Applications/iFile.app"]) {
+  if ([fm fileExistsAtPath:@"/Applications/iFile.app"]) {
     NSDictionary *iFile = [NSDictionary dictionaryWithContentsOfFile:@"/Applications/iFile.app/Info.plist"];
     NSString *iFileVersion = [iFile objectForKey:@"CFBundleVersion"];
-    if(![iFileVersion isEqualToString:@"1.0.0"])
+    if (![iFileVersion isEqualToString:@"1.0.0"])
       [_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
   }
   return;
@@ -318,10 +317,10 @@ static SDActionType _actionType = SDActionTypeNone;
 
 - (NSString *)iconPathForClassOfType:(NSString *)name {
   NSString *iconPath = nil;
-  if(!name || [name length] == 0) return nil;
+  if (!name || [name length] == 0) return nil;
   NSString *t = [_classMappings objectForKey:name];
   NSLog(@"Class is %@", t);
-  if(t != nil) iconPath = 
+  if (t != nil) iconPath = 
     [resourceBundle pathForResource:[@"Class-" stringByAppendingString:t] 
                              ofType:@"png" inDirectory:@"FileIcons"];
   return iconPath;
@@ -340,13 +339,13 @@ static SDActionType _actionType = SDActionTypeNone;
 
 - (NSString *)iconPathForMIME:(NSString *)mime {
   NSString *iconPath = nil;
-  if(mime && [mime length] > 0) {
+  if (mime && [mime length] > 0) {
     NSString *sanitaryMime = [mime stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
     NSString *mimeClass = [[mime componentsSeparatedByString:@"/"] objectAtIndex:0];
     iconPath = [resourceBundle pathForResource:sanitaryMime
                                         ofType:@"png" 
                                    inDirectory:@"FileIcons"];
-    if(!iconPath) {
+    if (!iconPath) {
       iconPath = [resourceBundle pathForResource:mimeClass
                                           ofType:@"png" 
                                      inDirectory:@"FileIcons"];
@@ -356,7 +355,7 @@ static SDActionType _actionType = SDActionTypeNone;
   return iconPath;
 }
 
-- (UIImage *)iconForExtension:(NSString *)extension 
+- (UIImage*)iconForExtension:(NSString *)extension 
                    orMimeType:(NSString *)mimeType {
   NSString *mimeIconPath = [self iconPathForMIME:mimeType];
   NSString *extIconPath = [self iconPathForName:extension];
@@ -371,13 +370,7 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (BOOL)supportedRequest:(NSURLRequest *)request
-            withMimeType:(NSString *)mimeType
-{
-  NSString *urlString = [[request URL] absoluteString];
-  //NSLog(urlString);
-  NSString *extension = [urlString pathExtension];
-  //NSLog(extension);
-  
+            withMimeType:(NSString *)mimeType {
   NSLog(@"mimetype count: %d", [_mimeTypes count]);
   NSLog(@"extensions count: %d", [_extensions count]);
   
@@ -385,7 +378,7 @@ static SDActionType _actionType = SDActionTypeNone;
     NSLog(@"mimeType: %@ supported!", mimeType);
     return YES;
   }
-  else  // eventually have this read from a prefs array on disk
+  else
     if ([_extensions containsObject:extension]) {
       NSLog(@"extensions contain %@, supported!", extension);
       return YES;
@@ -430,7 +423,6 @@ static SDActionType _actionType = SDActionTypeNone;
       didSelectPath:(NSString*)path 
             forFile:(id)file 
         withContext:(id)download {
-  NSLog(@"fileBrowserDidSelectPath");
   //[ModalAlert dismissLoadingAlert];
   [self enableRotations];
   ((SafariDownload*)download).savePath = path;
@@ -449,10 +441,7 @@ static SDActionType _actionType = SDActionTypeNone;
 
 - (void)fileBrowserDidCancel:(FileBrowser*)browser {
   NSLog(@"fileBrowserDidCancel");
-  //[ModalAlert dismissLoadingAlert];
-  //[_panel allowRotations:YES];
-  Class BrowserController = objc_getClass("BrowserController");
-  [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
+  [self enableRotations]
 }
 
 // everything eventually goes through this method
@@ -492,7 +481,6 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request {
-  //  NSLog(@"addDownloadWithRequest: %@", request);
   BOOL use = NO;
   NSString *filename = [self fileNameForURL:[request URL]];
   if (filename == nil) {
@@ -511,7 +499,6 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType {
-  //  NSLog(@"addDownloadWithRequest: %@", request);
   BOOL use = NO;
   NSString *filename = [self fileNameForURL:[request URL]];
   if (filename == nil) {
@@ -544,16 +531,13 @@ static SDActionType _actionType = SDActionTypeNone;
 
 // everything eventually goes through this method
 - (BOOL)cancelDownload:(SafariDownload *)download {
-  if (download != nil)
-  {
-    @try 
-    {
+  if (download != nil) {
+    @try {
       DownloadOperation *op = download.downloadOperation;
       [op cancel];
       download.downloadOperation = nil;
     }
-    @catch (id nothing) 
-    { 
+    @catch (id nothing) { 
       NSLog(@"exception caught attempting to cancel operation"); 
     }
     
@@ -562,7 +546,8 @@ static SDActionType _actionType = SDActionTypeNone;
     
     if (_currentDownloads.count == 0) {
       [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-    } else {
+    } 
+    else {
       [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
                         withRowAnimation:UITableViewRowAnimationFade];
     }
@@ -580,15 +565,7 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (void)deleteDownload:(SafariDownload*)download {
-  //  NSString *prefix = @"/var/mobile/Library/Downloads/YourTube";
-  //  NSString *path = [prefix stringByAppendingPathComponent:download.filename];
-  //  NSLog(@"removing file at path: %@", path);
-  //  [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
-  //  NSUInteger index = [_downloadedVideos indexOfObject:download];
-  //  [_finishedDownloads removeObjectAtIndex:index];
-  //  NSInteger section = [_tableView numberOfSections] - 1;
-  //  [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:index inSection:section]] 
-  //                    withRowAnimation:UITableViewRowAnimationFade]; 
+
 }
 
 - (void)cancelAllDownloads {
@@ -624,12 +601,7 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (DownloadCell*)cellForDownload:(SafariDownload*)download {
-  //  NSLog(@"download: %@", download);
-  //  NSLog(@"current Downloads: %@", _currentDownloads);
-  //  NSLog(@"tableView: %@", _tableView);
-  //  NSLog(@"tableview visible cells: %@", [_tableView visibleCells]);
   NSUInteger row = [_currentDownloads indexOfObject:download];
-  //  NSLog(@"row: %d", row);
   DownloadCell *cell = (DownloadCell*)[_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
   return cell;
 }
@@ -755,100 +727,6 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark UIViewController Methods/*{{{*/
 
 static int animationType = 0;
-
-- (void)showDownloadManager {
-//  NSLog(@"showDownloadManager!");
-//  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
-//  if(!keyWindow) {
-//    Class BrowserController = objc_getClass("BrowserController");
-//    keyWindow = [[BrowserController sharedBrowserController] window];
-//  }
-//  self.view.frame = [[UIScreen mainScreen] applicationFrame];
-//  int orientation = [[DHClass(BrowserController) sharedBrowserController] orientation];
-//  NSString *transition = kCATransitionFromTop;
-//  if (orientation == 90)
-//    transition = kCATransitionFromLeft;
-//  else if (orientation == -90)
-//    transition = kCATransitionFromRight;
-//  
-//  NSLog(@"Checking Values:\nWindow: %@\nView: %@\nTable: %@", keyWindow, self.view, _tableView);
-//  
-//  CATransition *animation = [CATransition animation];
-//  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
-//  [animation setDelegate:self];
-//  [animation setType:kCATransitionPush];
-//  [animation setSubtype:transition];
-//  [animation setDuration:0.3];
-//  [animation setFillMode:kCAFillModeForwards];
-//  [animation setRemovedOnCompletion:YES];
-//  [[self.view layer] addAnimation:animation forKey:@"pushUp"];
-//  animationType = 1;
-//  [keyWindow addSubview:self.view];
-//  if (orientation == 0) {
-//    NSLog(@"%s portrait!", _cmd);
-//    _tableView.frame = CGRectMake(0, 44, 320, 416);
-//    _navBar.frame = CGRectMake(0, 0, 320, 44);
-//  }
-//  else {
-//    NSLog(@"%s landscape!", _cmd);
-//    _tableView.frame = CGRectMake(0, 44, 480, 256);
-//    _navBar.frame = CGRectMake(0, 0, 480, 44);
-//  }
-//  
-//  for (DownloadCell* cell in [_tableView visibleCells]) {
-//    [cell setNeedsDisplay];
-//  }
-}
-
-- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
-//  Class BrowserController = objc_getClass("BrowserController");
-//  NSLog(@"animationDidStop!");
-//  if (animationType == 1) 
-//  {
-//    NSLog(@"animationType == 1");
-////    [[BrowserController sharedBrowserController] showBrowserPanelType:44];
-////    [[BrowserController sharedBrowserController] _setBrowserPanel:_panel];
-////    [_panel allowRotations:NO];
-//    _visible = YES;
-//  }
-//  else if (animationType == 2)
-//  {
-//    NSLog(@"animationType == 2");
-////    [[BrowserController sharedBrowserController] _setBrowserPanel:nil];
-////    [self.view removeFromSuperview];
-////    [_panel allowRotations:YES];
-//    _visible = NO;
-//    if(_loadingURL != nil) {
-//      [[DHClass(Application) sharedApplication] applicationOpenURL:_loadingURL];
-//      self.loadingURL = nil;
-//    }
-//  }
-//  
-//  animationType = 0;
-}
-
-- (void)hideDownloadManager {
-//  animationType = 2;
-//  int orientation = [[DHClass(BrowserController) sharedBrowserController] orientation];
-//  NSString *transition = kCATransitionFromBottom;
-//  if (orientation == 90)
-//    transition = kCATransitionFromRight;
-//  else if (orientation == -90)
-//    transition = kCATransitionFromLeft;
-//  
-//  CATransition *animation = [CATransition animation];
-//  [animation setDelegate:self];
-//  [animation setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
-//  [animation setType:kCATransitionPush];
-//  [animation setSubtype:transition];
-//  [animation setDuration:0.4];
-//  [animation setFillMode:kCAFillModeForwards];
-//  [animation setDelegate:self];
-//  [animation setEndProgress:1.0];
-//  [animation setRemovedOnCompletion:YES];
-//  [[self.view layer] addAnimation:animation forKey:@"pushDown"];
-//  [self.view setFrame:CGRectOffset(self.view.frame, 0, self.view.frame.size.height)];
-}
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning]; 
