@@ -165,8 +165,8 @@ static UIProgressView* progressView = nil;
 
 + (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
   [[DownloadManager sharedManager] updateBadges];
-  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
-  UIView *v = [keyWindow viewWithTag:12345];
+  UITransitionView* parent = MSHookIvar<UITransitionView*>([objc_getClass("BrowserController") sharedBrowserController], "_browserLayer");
+  UIView* v = [parent viewWithTag:12345];
   [v removeFromSuperview];
   [activeAlert dismissWithClickedButtonIndex:0 animated:YES];
   activeAlert = nil;
@@ -182,14 +182,14 @@ static UIImage* savedIcon = nil;
                  cancelButtonTitle:nil
                  otherButtonTitles:nil];
   
-	UIActivityIndicatorView *listingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
-	CGRect frame = listingIndicator.frame;
-	frame.origin.x = 220;
-	frame.origin.y = 15;
-	frame.size.width = 22;
-	frame.size.height = 22;
-	listingIndicator.frame = frame;
-	[activeAlert addSubview:listingIndicator];
+  UIActivityIndicatorView *listingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+  CGRect frame = listingIndicator.frame;
+  frame.origin.x = 220;
+  frame.origin.y = 15;
+  frame.size.width = 22;
+  frame.size.height = 22;
+  listingIndicator.frame = frame;
+  [activeAlert addSubview:listingIndicator];
   [listingIndicator release];
   
   savedIcon = [[[DownloadManager sharedManager] iconForExtension:[name pathExtension] orMimeType:mimeType] retain];
@@ -199,9 +199,9 @@ static UIImage* savedIcon = nil;
   [activeAlert addSubview:icon];
   [icon release];
   
-	[activeAlert setNumberOfRows:0];
-	[activeAlert setTransform:CGAffineTransformMakeScale(1, 1.1)];
-	[activeAlert show];
+  [activeAlert setNumberOfRows:0];
+  [activeAlert setTransform:CGAffineTransformMakeScale(1, 1.1)];
+  [activeAlert show];
   [activeAlert release];
 	[listingIndicator startAnimating];   
 }
@@ -210,20 +210,23 @@ static UIImage* savedIcon = nil;
   NSLog(@"dismissLoadingAlert: %@", activeAlert);
   // Get the relevant frames.
   if (!activeAlert) return;
-  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
-  UIView *enclosingView = keyWindow;
   
   Class BrowserController = objc_getClass("BrowserController");
+  BrowserController* sbc = [BrowserController sharedBrowserController];
+  
+  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+  UIView *enclosingView = MSHookIvar<UIView*>(sbc, "_browserLayer"); // transitionview
+  
   int orientation = [[BrowserController sharedBrowserController] orientation];
-  NSLog(@"Orientation = %d.", orientation);
-  UIView *button = (orientation == 0 ? ([[DownloadManager sharedManager] portraitDownloadButton]) : ([[DownloadManager sharedManager] landscapeDownloadButton]));
+  UIView *button = (orientation == 0 ? ([[DownloadManager sharedManager] portraitDownloadButton]) : 
+                    ([[DownloadManager sharedManager] landscapeDownloadButton]));
   CGRect tempCellFrame = [button frame];
   CGRect cellFrame;
-  if(!button) cellFrame = CGRectMake(260, 440, 34, 36);
-  else cellFrame = [[[BrowserController sharedBrowserController] buttonBar] convertRect:tempCellFrame toView:keyWindow];
+  if (!button) cellFrame = CGRectMake(260, 440, 34, 36);
+  else cellFrame = [[[BrowserController sharedBrowserController] buttonBar] convertRect:tempCellFrame toView:enclosingView];
   
   //  CGRect cellFrame = GRectMake(260, 440, 34, 36);
-  CGRect buttonFrame = [activeAlert convertRect:CGRectMake(18, 14, 22, 22) toView:keyWindow];
+  CGRect buttonFrame = [activeAlert convertRect:CGRectMake(18, 14, 22, 22) toView:enclosingView];
   
   /*
    * Icon animation
@@ -249,8 +252,7 @@ static UIImage* savedIcon = nil;
   path = CGPathCreateCopy(mutablepath);
   CGPathRelease(mutablepath);
   
-  // Create animated icon view.
-  
+  // Create animated icon view
   UIImageView* animatedLabel = [[UIImageView alloc] initWithImage:savedIcon];
   animatedLabel.tag = 12345;
   [enclosingView addSubview:animatedLabel];
@@ -265,10 +267,8 @@ static UIImage* savedIcon = nil;
   animatedIconAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
   [iconViewLayer addAnimation:animatedIconAnimation forKey:@"animateIcon"];
   
-  // Start the icon animation.
+  // Start the icon animation
   [iconViewLayer setPosition:CGPointMake(endPoint.x, endPoint.y)];
-  
-  [UIView beginAnimations:nil context:NULL];
   [UIView setAnimationCurve:UIViewAnimationCurveEaseIn];
   [UIView setAnimationDuration:0.3];
   [animatedLabel setTransform:CGAffineTransformMakeScale(0.3, 0.3)];
