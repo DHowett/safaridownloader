@@ -135,13 +135,6 @@ static void initCustomToolbar(void) {
 }
 %end
 
-%hook BrowserPanelViewController -(id)initWithPanelType:(int)type {
-  %log;
-  NSLog(@"initWithPanelType: %d", type);
-  return %orig;
-}
-%end
-
 #pragma mark -/*}}}*/
 #pragma mark Hooked WebViewPolicyDelegate Methods (TabDocument)/*{{{*/
 
