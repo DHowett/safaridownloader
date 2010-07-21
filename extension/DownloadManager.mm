@@ -144,7 +144,7 @@ static id resourceBundle = nil;
   self.navigationItem.leftBarButtonItem = doneButton;
   self.navigationItem.leftBarButtonItem.enabled = YES;
   
-  _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0.f, 0.f, 320.f, 480.f) style:UITableViewStylePlain];
+  _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
   _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   _tableView.delegate = self;
   _tableView.dataSource = self;
