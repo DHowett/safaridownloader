@@ -165,7 +165,7 @@ static UIProgressView* progressView = nil;
 
 + (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
   [[DownloadManager sharedManager] updateBadges];
-  UITransitionView* parent = MSHookIvar<UITransitionView*>([objc_getClass("BrowserController") sharedBrowserController], "_browserLayer");
+  UITransitionView* parent = [[objc_getClass("BrowserController") sharedBrowserController] browserLayer];
   UIView* v = [parent viewWithTag:12345];
   [v removeFromSuperview];
   [activeAlert dismissWithClickedButtonIndex:0 animated:YES];
@@ -215,7 +215,7 @@ static UIImage* savedIcon = nil;
   BrowserController* sbc = [BrowserController sharedBrowserController];
   
   UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
-  UIView *enclosingView = MSHookIvar<UIView*>(sbc, "_browserLayer"); // transitionview
+  UIView *enclosingView = [sbc browserLayer]; // transitionview
   
   int orientation = [[BrowserController sharedBrowserController] orientation];
   UIView *button = (orientation == 0 ? ([[DownloadManager sharedManager] portraitDownloadButton]) : 

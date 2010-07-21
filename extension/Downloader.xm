@@ -470,10 +470,17 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 }
 %end
 
+@interface BrowserController (iOS4)
+- (id)transitionView;
+@end
 %hook BrowserController
 %new(v@:@)
 - (void)_setBrowserPanel:(id)panel {
   [self setBrowserPanel:panel];
+}
+%new(@@:)
+- (id)browserLayer {
+  return [self transitionView];
 }
 %end
 
