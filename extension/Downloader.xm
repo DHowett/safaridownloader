@@ -418,24 +418,17 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 - (void)_setShowingDownloads:(BOOL)showing animate:(BOOL)animate {
   if (showing) {
     [self _resizeNavigationController:[DownloadManagerNavigationController sharedInstance] small:NO];
-    //[self _presentModalViewControllerFromDownloadsButton:[DownloadManagerNavigationController sharedInstance]]; // 3.2 ONLY
-    
-    // UITransitionView (non-wildcat only)
-      UITransitionView* tr = MSHookIvar<UITransitionView*>(self, "_browserLayer");
-      [tr transition:8 toView:[[DownloadManagerNavigationController sharedInstance] view]];
+    [self _presentModalViewControllerFromDownloadsButton:[DownloadManagerNavigationController sharedInstance]];
   } 
   else {
     [self willHideBrowserPanel:[DownloadManagerNavigationController sharedInstance]];
-    //[self _forceDismissModalViewController:animate]; // 3.2 ONLY
-    
-    // UITransitionView (non-wildcat only)
-    UITransitionView* tr = MSHookIvar<UITransitionView*>(self, "_browserLayer");
-    [tr transition:9 toView:[self _panelSuperview]];
+    [self _forceDismissModalViewController/*:animate*/]; // 3.2+
   }
 }
 
 %new(v@:@)
 - (void)_presentModalViewControllerFromDownloadsButton:(id)x {
+    [[self _modalViewController] presentModalViewController:x animated:YES];
   // [self _presentModalViewControllerFromBookmarksButton:x]; // 3.2 ONLY
   
 }
@@ -474,6 +467,13 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   BOOL x = %orig;
   NSLog(@"------- hideBrowserPanelType: %d", arg1); 
   return x;
+}
+%end
+
+%hook BrowserController
+%new(v@:@)
+- (void)_setBrowserPanel:(id)panel {
+  [self setBrowserPanel:panel];
 }
 %end
 
