@@ -1,5 +1,5 @@
 BUNDLE_NAME := SDSettings
-SDSettings_OBJCC_FILES = SDSettings.mm
+SDSettings_FILES = SDSettings.mm
 SDSettings_OBJ_FILES = $(FRAMEWORKDIR)/lib/DHLocalizedListController.o
 
 SDSettings_INSTALL_PATH = /System/Library/PreferenceBundles

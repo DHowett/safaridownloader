@@ -53,7 +53,7 @@ static id fileClassController = nil;
 @implementation SDFileTypeSetupController
 + (BOOL)isOverlay { return NO; }
 - (void)navigationBar:(id)bar buttonClicked:(int)clicked {
-	SDSettingsCustomFileTypeController *controller = [_controllers lastObject];
+	SDSettingsCustomFileTypeController *controller = [self.controllers lastObject];
 	if(clicked == 1) [controller updatePreferencesFile];
 	[self dismiss];
 	[fileClassController reloadSpecifiers];
