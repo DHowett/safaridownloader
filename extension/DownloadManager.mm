@@ -83,6 +83,10 @@ static int markthing = 0;
   if([[$BrowserController sharedBrowserController] browserPanel] == self)
     [[$BrowserController sharedBrowserController] closeBrowserPanel:[[$BrowserController sharedBrowserController] browserPanel]];
 }
+
+- (void)didHideBrowserPanel {
+  [[[[$BrowserController sharedBrowserController] _modalViewController] view] performSelector:@selector(removeFromSuperview) withObject:nil afterDelay:0];
+}
 @end
 
 @implementation DownloadManager
