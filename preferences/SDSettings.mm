@@ -75,6 +75,8 @@ static id fileClassController = nil;
 	[super dealloc];
 }
 
+- (BOOL)canBeShownFromSuspendedState { return NO; }
+
 - (void)suspend {
 	[self updatePreferencesFile];
 }
@@ -245,16 +247,11 @@ static id fileClassController = nil;
 	return self;
 }
 
+- (BOOL)canBeShownFromSuspendedState { return NO; }
+
 - (void)dealloc {
 	[_disabledItems release];
 	[super dealloc];
-}
-
-- (void)suspend {
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] ?: [NSMutableDictionary dictionary];
-	[dict setObject:[_disabledItems allObjects] forKey:@"DisabledItems"];
-	[dict writeToFile:PREFERENCES_FILE atomically:NO];
-	[super suspend];
 }
 
 - (id)specifiers {
@@ -271,7 +268,7 @@ static id fileClassController = nil;
 									     cell:c
 									     edit:nil];
 			[spec setProperty:fileType forKey:@"id"];
-			[self addSpecifier:spec];
+			[(NSMutableArray*)_specifiers addObject:spec];
 		}
 	}
 	return _specifiers;
@@ -291,6 +288,9 @@ static id fileClassController = nil;
 	} else {
 		[_disabledItems addObject:spec.identifier];
 	}
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] ?: [NSMutableDictionary dictionary];
+	[dict setObject:[_disabledItems allObjects] forKey:@"DisabledItems"];
+	[dict writeToFile:PREFERENCES_FILE atomically:NO];
 }
 @end
 
@@ -316,6 +316,8 @@ static id fileClassController = nil;
 	}
 	return self;
 }
+
+- (BOOL)canBeShownFromSuspendedState { return NO; }
 
 - (id)specifiers {
 	_specifiers = [[self loadSpecifiersFromPlistName:@"FileClass" target:self] retain];
