@@ -13,6 +13,8 @@
 #import "Safari/BrowserController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "Safari/TabDocument.h"
+
+#import "Safari/RotatablePopoverController.h"
 //#import <WebKit/DOMHTMLAnchorElement.h>
 //typedef void* GSEventRef;
 
@@ -26,6 +28,23 @@ static bool _wildCat = NO;
 
 %class BrowserController
 %class DOMHTMLAnchorElement;
+
+@interface BrowserController (SDMAdditions)
+- (void)_setShowingDownloads:(BOOL)showing animate:(BOOL)animate;
+- (void)_presentModalViewControllerFromDownloadsButton:(id)x;
+- (void)toggleDownloadManagerFromButtonBar;
+- (void)_setBrowserPanel:(id)panel;
+- (void)setBrowserPanel:(id)panel;
+- (id)browserLayer;
+@end
+
+@interface BrowserController (SafariFour)
+- (void)setCurrentPopoverController:(UIPopoverController *)p;
+@end
+
+@interface UIDevice (Wildcat)
+- (BOOL)isWildcat;
+@end
 
 static void initCustomToolbar(void) {
   Class BrowserController = objc_getClass("BrowserController");
@@ -312,7 +331,7 @@ struct interactionnot32 {
   BOOL forwardingGuard;
   SEL mouseUpForwarder;
   SEL mouseDraggedForwarder;
-  DOMNode* element;
+  DOMNode *element;
   BOOL defersCallbacksState;
   UIInformalDelegate* delegate;
   int interactionSheetType;
