@@ -320,7 +320,6 @@ static id fileClassController = nil;
 - (id)initForContentSize:(CGSize)size {
 	if((self = [super initForContentSize:size])) {
 		fileClassController = self;
-		self.title = @"Filetypes";
 		_customTypeSpecifiers = [[NSMutableArray alloc] init];
 	}
 	return self;
@@ -365,6 +364,7 @@ static id fileClassController = nil;
 			[_customTypeSpecifiers addObject:spec];
 			[(NSMutableArray *)_specifiers addObject:spec];
 		}
+		self.title = @"Filetypes";
 	}
 	return _specifiers;
 }
