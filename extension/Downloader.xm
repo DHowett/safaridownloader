@@ -18,6 +18,8 @@
 
 char __attribute((section("__MISC, UDID"))) udid[41] = "0000000000000000000000000000000000000000";
 
+static bool _wildCat = NO;
+
 @interface UIActionSheet (Private)
 -(id)buttons;
 @end
@@ -34,34 +36,41 @@ static void initCustomToolbar(void) {
   int cg = MSHookIvar<int>(buttonBar, "_currentButtonGroup");
   NSArray *_buttonItems = [buttonBar buttonItems];
   
-  id x = [BrowserButtonBar imageButtonItemWithName:@"Download.png"
+  NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
+
+  id x = [BrowserButtonBar imageButtonItemWithName:(_wildCat ? @"DownloadT.png" : @"Download.png")
                                                tag:61
                                             action:@selector(toggleDownloadManagerFromButtonBar)
                                             target:[NSValue valueWithNonretainedObject:[$BrowserController sharedBrowserController]]];
-  id y = [BrowserButtonBar imageButtonItemWithName:@"DownloadSmall.png"
-                                               tag:62
-                                            action:@selector(toggleDownloadManagerFromButtonBar)
-                                            target:[NSValue valueWithNonretainedObject:[$BrowserController sharedBrowserController]]];
-  
-  NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
-  
+
   [mutButtonItems addObject:x];
-  [mutButtonItems addObject:y];
+  CFDictionaryRemoveValue(_groups, (void*)1);
+
+  if(!_wildCat) {
+    // Landscape (non-iPad)
+    id y = [BrowserButtonBar imageButtonItemWithName:@"DownloadSmall.png"
+                                                 tag:62
+                                              action:@selector(toggleDownloadManagerFromButtonBar)
+                                              target:[NSValue valueWithNonretainedObject:[$BrowserController sharedBrowserController]]];
+    [mutButtonItems addObject:y];
+    CFDictionaryRemoveValue(_groups, (void*)2);
+  }
+
+  
   [buttonBar setButtonItems:mutButtonItems];
   [mutButtonItems release];
   
   int portraitGroup[]  = {5, 7, 15, 1, 61, 3};
   int landscapeGroup[] = {6, 8, 16, 2, 62, 4};
   
-  CFDictionaryRemoveValue(_groups, (void*)1);
-  CFDictionaryRemoveValue(_groups, (void*)2);
-  
   [buttonBar registerButtonGroup:1 
                      withButtons:portraitGroup 
                        withCount:6];
-  [buttonBar registerButtonGroup:2 
-                     withButtons:landscapeGroup 
-                       withCount:6];
+  if(!_wildCat) {
+    [buttonBar registerButtonGroup:2 
+                       withButtons:landscapeGroup 
+                         withCount:6];
+  }
   
   if (cg == 1 || cg == 2)
     [buttonBar showButtonGroup:cg
@@ -103,7 +112,7 @@ static void initCustomToolbar(void) {
   float curX = 0;
   float maxX = buttonBoxWidth;
   int curButton = 0;
-  float YOrigin = 2; //(group == 1) ? 2 : 0;
+  float YOrigin = _wildCat ? 10 : 2;
   for(UIToolbarButton *button in buttons) {
     curX = curButton * buttonBoxWidth;
     maxX = curX + buttonBoxWidth;
@@ -429,7 +438,7 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 
 %new(v@:@)
 - (void)_presentModalViewControllerFromDownloadsButton:(id)x {
-  if([[UIDevice currentDevice] isWildcat]) {
+  if(_wildCat) {
     id rpc = [[%c(RotatablePopoverController) alloc] initWithContentViewController:x];
     [rpc setPresentationRect:[[[DownloadManager sharedManager] portraitDownloadButton] frame]];
     [rpc setPresentationView:[self buttonBar]];
@@ -512,6 +521,11 @@ static _Constructor void DownloaderInitialize() {
                                   CFSTR("net.howett.safaridownloader/ReloadPrefs"), 
                                   NULL, 
                                   0);
+  if([UIDevice instancesRespondToSelector:@selector(isWildcat)] && [[UIDevice currentDevice] isWildcat]) {
+    _wildCat = YES;
+  } else {
+    _wildCat = NO;
+  }
 }
 
 // vim:filetype=logos:ts=2:sw=2:expandtab
