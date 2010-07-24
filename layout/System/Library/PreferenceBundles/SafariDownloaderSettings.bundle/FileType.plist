@@ -85,7 +85,6 @@
 	    <string>Delete</string>
 		<key>action</key>
 		<string>deleteButtonPressed:</string>
-	<key>cellClass</key><string>PSDeleteTableCell</string>
 	</dict>
     </array>
 </dict>

@@ -7,21 +7,6 @@ static id fileTypesDict = nil;
 static id fileClassController = nil;
 
 
-#import <UIKit/UIPreferencesDeleteTableCell.h>
-@interface PSDeleteTableCell : UIPreferencesDeleteTableCell @end
-@implementation PSDeleteTableCell
--(void)setValueChangedTarget:(id)target action:(SEL)action userInfo:(NSDictionary*)info {
-	[self setTarget:target];
-	[self setAction:action];
-}
-
--(UILabel*)titleTextLabel {
-	UILabel* res = [super titleTextLabel];
-	res.textColor = [UIColor whiteColor];
-	return res;
-}
-@end
-
 @interface SDFileTypeSetupController : PSSetupController {
 }
 + (BOOL)isOverlay;
@@ -52,8 +37,9 @@ static id fileClassController = nil;
 
 @implementation SDFileTypeSetupController
 + (BOOL)isOverlay { return NO; }
+// Used on < 3.2
 - (void)navigationBar:(id)bar buttonClicked:(int)clicked {
-	SDSettingsCustomFileTypeController *controller = [self.controllers lastObject];
+	SDSettingsCustomFileTypeController *controller = [self lastController];
 	if(clicked == 1) [controller updatePreferencesFile];
 	[self dismiss];
 	[fileClassController reloadSpecifiers];
@@ -66,6 +52,28 @@ static id fileClassController = nil;
 		//[[_deleteCell button] addTarget:self action:@selector(deleteButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
 	}
 	return self;
+}
+
+- (void)viewDidLoad {
+	[super viewDidLoad];
+	// Used on >= 3.2 to add navbar buttons. why do I need to do this myself? Why does it work for apple and not me?
+	if (![[PSViewController class] instancesRespondToSelector:@selector(showLeftButton:withStyle:rightButton:withStyle:)]) {
+		UIBarButtonItem *cancelButton([[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(navBarButtonClicked:)]);
+		UIBarButtonItem *saveButton([[UIBarButtonItem alloc] initWithTitle:@"Save" style:UIBarButtonItemStyleDone target:self action:@selector(navBarButtonClicked:)]);
+		cancelButton.tag = 0;
+		saveButton.tag = 1;
+		[[self navigationItem] setLeftBarButtonItem:cancelButton];
+		[[self navigationItem] setRightBarButtonItem:saveButton];
+		[cancelButton release];
+		[saveButton release];
+	}
+}
+
+// Used on >= 3.2
+- (void)navBarButtonClicked:(UIBarButtonItem *)button {
+	if(button.tag == 1) [self updatePreferencesFile];
+	[fileClassController reloadSpecifiers];
+	[self.parentController dismiss];
 }
 
 - (void)dealloc {
@@ -312,6 +320,7 @@ static id fileClassController = nil;
 - (id)initForContentSize:(CGSize)size {
 	if((self = [super initForContentSize:size])) {
 		fileClassController = self;
+		self.title = @"Filetypes";
 		_customTypeSpecifiers = [[NSMutableArray alloc] init];
 	}
 	return self;
@@ -320,42 +329,43 @@ static id fileClassController = nil;
 - (BOOL)canBeShownFromSuspendedState { return NO; }
 
 - (id)specifiers {
-	_specifiers = [[self loadSpecifiersFromPlistName:@"FileClass" target:self] retain];
-	NSArray *customTypes = [[[NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] objectForKey:@"CustomItems"] allKeys] ?: [NSArray array];
+	if(!_specifiers) {
+		_specifiers = [[self loadSpecifiersFromPlistName:@"FileClass" target:self] retain];
+		NSArray *customTypes = [[[NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] objectForKey:@"CustomItems"] allKeys] ?: [NSArray array];
 
-	int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
-	int index = 3;
-	for(NSString *fileClass in fileTypesDict) {
-		PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileClass
-								   target:self
-								      set:nil
-								      get:nil
-								   detail:[SDSettingsFileTypeListController class]
-								     cell:c
-								     edit:nil];
-		[spec setProperty:fileClass forKey:@"class"];
-		[spec setProperty:[UIImage imageWithContentsOfFile:[resourceBundle pathForResource:[@"Class-" stringByAppendingString:fileClass] ofType:@"png" inDirectory:@"FileIcons"]] forKey:@"iconImage"];
-		[self insertSpecifier:spec atIndex:index++];
-	}
+		int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
+		int index = 3;
+		for(NSString *fileClass in fileTypesDict) {
+			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileClass
+									   target:self
+									      set:nil
+									      get:nil
+									   detail:[SDSettingsFileTypeListController class]
+									     cell:c
+									     edit:nil];
+			[spec setProperty:fileClass forKey:@"class"];
+			[spec setProperty:[UIImage imageWithContentsOfFile:[resourceBundle pathForResource:[@"Class-" stringByAppendingString:fileClass] ofType:@"png" inDirectory:@"FileIcons"]] forKey:@"iconImage"];
+			[(NSMutableArray *)_specifiers insertObject:spec atIndex:index++];
+		}
 
-//	[s setProperty:objc_getClass("SDSettingsCustomFileTypeController") forKey:@"customControllerClass"];
-	for(NSString *customType in customTypes) {
-		PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:customType
-								   target:self
-								      set:nil
-								      get:nil
-								   detail:[SDFileTypeSetupController class]
-								     cell:c
-								     edit:nil];
-		[spec setProperty:customType forKey:@"typename"];
-		[spec setProperty:@"SDSettingsCustomFileTypeController" forKey:@"customControllerClass"];
-		[spec setProperty:@"Save" forKey:@"okTitle"];
-		[spec setProperty:@"Cancel" forKey:@"cancelTitle"];
-		[spec setProperty:@"Edit this File Type information." forKey:@"prompt"];
-		[_customTypeSpecifiers addObject:spec];
-		[self addSpecifier:spec];
+	//	[s setProperty:objc_getClass("SDSettingsCustomFileTypeController") forKey:@"customControllerClass"];
+		for(NSString *customType in customTypes) {
+			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:customType
+									   target:self
+									      set:nil
+									      get:nil
+									   detail:[SDFileTypeSetupController class]
+									     cell:c
+									     edit:nil];
+			[spec setProperty:customType forKey:@"typename"];
+			[spec setProperty:@"SDSettingsCustomFileTypeController" forKey:@"customControllerClass"];
+			[spec setProperty:@"Save" forKey:@"okTitle"];
+			[spec setProperty:@"Cancel" forKey:@"cancelTitle"];
+			[spec setProperty:@"Edit this File Type information." forKey:@"prompt"];
+			[_customTypeSpecifiers addObject:spec];
+			[(NSMutableArray *)_specifiers addObject:spec];
+		}
 	}
-	self.title = @"Filetypes";
 	return _specifiers;
 }
 @end
