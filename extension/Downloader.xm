@@ -416,19 +416,31 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 
 %new(v@:ii)
 - (void)_setShowingDownloads:(BOOL)showing animate:(BOOL)animate {
+  id controller = [self browserPanel];
   if (showing) {
-    [self _resizeNavigationController:[DownloadManagerNavigationController sharedInstance] small:NO];
-    [self _presentModalViewControllerFromDownloadsButton:[DownloadManagerNavigationController sharedInstance]];
+    [self _resizeNavigationController:controller small:NO];
+    [self _presentModalViewControllerFromDownloadsButton:controller];
   } 
   else {
-    [self willHideBrowserPanel:[DownloadManagerNavigationController sharedInstance]];
+    [self willHideBrowserPanel:controller];
     [self _forceDismissModalViewController/*:animate*/]; // 3.2+
   }
 }
 
 %new(v@:@)
 - (void)_presentModalViewControllerFromDownloadsButton:(id)x {
+  if([[UIDevice currentDevice] isWildcat]) {
+    id rpc = [[%c(RotatablePopoverController) alloc] initWithContentViewController:x];
+    [rpc setPresentationRect:[[[DownloadManager sharedManager] portraitDownloadButton] frame]];
+    [rpc setPresentationView:[self buttonBar]];
+    [rpc setPermittedArrowDirections:1];
+    [rpc setPassthroughViews:[NSArray arrayWithObject:[self buttonBar]]];
+    [rpc presentPopoverAnimated:NO];
+    [self setCurrentPopoverController:rpc];
+    [rpc release];
+  } else {
     [[self _modalViewController] presentModalViewController:x animated:YES];
+  }
   // [self _presentModalViewControllerFromBookmarksButton:x]; // 3.2 ONLY
   
 }
