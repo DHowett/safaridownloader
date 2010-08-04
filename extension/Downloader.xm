@@ -153,12 +153,12 @@ static void initCustomToolbar(void) {
 %end
 
 %hook BrowserController -(id)_panelForPanelType:(int)type {
+  %log;
   if (type == 44) {
-    %log;
     return [DownloadManagerNavigationController sharedInstance];
-  }
-  if (type == 88)
+  } else if (type == 88) {
     return [DownloadOperation authView];
+  }
   return %orig;
 }
 %end
@@ -436,7 +436,7 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   */
   %orig;
   if([panel panelType] == 44) {
-    //[MSHookIvar<id>(self, "_browserView") resignFirstResponder];
+    [MSHookIvar<id>(self, "_browserView") resignFirstResponder];
     [self _setShowingDownloads:showing animate:animate];
   }
   NSLog(@"DONE WITH -[BrowserController _setShowingCurrentPanel...]--");
@@ -479,11 +479,12 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   if([[self browserPanel] panelType] == 44) {
 //    [[DownloadManagerNavigationController sharedInstance] close];
 //    [self hideBrowserPanelType:44];
-    [self hideBrowserPanelType:44];
-    [self _setShowingDownloads:NO animate:YES];
+    [[self browserPanel] performSelector:@selector(close)];
+    //[self hideBrowserPanelType:44];
+    //[self _setShowingDownloads:NO animate:YES];
   } else {
       [self showBrowserPanelType:44];
-      [self _setShowingDownloads:YES animate:YES];
+      //[self _setShowingDownloads:YES animate:YES];
   }
   NSLog(@"-[BrowserController toggleDownloadManagerFromButtonBar]--");
 }
