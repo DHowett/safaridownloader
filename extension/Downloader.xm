@@ -436,7 +436,7 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   */
   %orig;
   if([panel panelType] == 44) {
-    [MSHookIvar<id>(self, "_browserView") resignFirstResponder];
+    //[MSHookIvar<id>(self, "_browserView") resignFirstResponder];
     [self _setShowingDownloads:showing animate:animate];
   }
   NSLog(@"DONE WITH -[BrowserController _setShowingCurrentPanel...]--");
@@ -451,7 +451,7 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   } 
   else {
     [self willHideBrowserPanel:controller];
-    [self _forceDismissModalViewController/*:animate*/]; // 3.2+
+    [self _forceDismissModalViewController:animate]; // 3.2+
   }
 }
 
@@ -521,6 +521,10 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 %new(@@:)
 - (id)browserLayer {
   return [self transitionView];
+}
+%new(v@:i) // Missing on < 4.0
+- (void)_forceDismissModalViewController:(BOOL)animated {
+  [self _forceDismissModalViewController];
 }
 %end
 
