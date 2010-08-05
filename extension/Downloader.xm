@@ -473,21 +473,31 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   
 }
 
+%group Firmware_ge_32
 %new(v@:)
 - (void)toggleDownloadManagerFromButtonBar {
-  NSLog(@"-[BrowserController toggleDownloadManagerFromButtonBar]++");
   if([[self browserPanel] panelType] == 44) {
-//    [[DownloadManagerNavigationController sharedInstance] close];
-//    [self hideBrowserPanelType:44];
     [[self browserPanel] performSelector:@selector(close)];
-    //[self hideBrowserPanelType:44];
-    //[self _setShowingDownloads:NO animate:YES];
   } else {
       [self showBrowserPanelType:44];
-      //[self _setShowingDownloads:YES animate:YES];
   }
-  NSLog(@"-[BrowserController toggleDownloadManagerFromButtonBar]--");
 }
+%end
+
+%group Firmware_lt_32
+%new(v@:)
+- (void)toggleDownloadManagerFromButtonBar {
+  if([[self browserPanel] panelType] == 44) {
+    [self hideBrowserPanelType:44];
+    [self _setShowingDownloads:NO animate:YES];
+  } else {
+    [self showBrowserPanelType:44];
+    [self _setShowingDownloads:YES animate:YES];
+  }
+}
+%end
+
+
 //- (id)browserPanel {%log; return %orig;}
 - (BOOL)showBrowserPanelType:(int)arg1 {
   %log;
