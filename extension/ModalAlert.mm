@@ -26,6 +26,7 @@ UIAlertView* activeAlert;
 
 @interface UIAlertView (priv)
 - (void)setNumberOfRows:(int)num;
+- (id)addTextFieldWithValue:(id)value label:(id)label;
 @end
 
 @implementation AlertPrompt
@@ -41,20 +42,9 @@ UIAlertView* activeAlert;
                           delegate:delegate 
                  cancelButtonTitle:cancelButtonTitle
                  otherButtonTitles:okayButtonTitle, nil])) {
-		UITextField *theTextField = [[UITextField alloc] initWithFrame:CGRectMake(14.0, 45.0, 255.0, 32.0)]; 
-    theTextField.borderStyle = UITextBorderStyleBezel;
-		[theTextField setBackgroundColor:[UIColor whiteColor]]; 
-		[self addSubview:theTextField];
-		self.textField = theTextField;
-		[theTextField release];
-		CGAffineTransform translate = CGAffineTransformMakeTranslation(0.0, 75.0); 
-		[self setTransform:translate];
+		self.textField = [[self addTextFieldWithValue:@"" label:@""] retain];
 	}
 	return self;
-}
-- (void)show {
-	[textField becomeFirstResponder];
-	[super show];
 }
 - (NSString *)enteredText {
 	return textField.text;
