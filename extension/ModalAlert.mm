@@ -85,47 +85,6 @@ static UIProgressView* progressView = nil;
   [self createAlertWithTitle:@"Success" message:msg];
 }
 
-+ (void)showLoadingAlert {
-  alertView = [[UIAlertView alloc]
-               initWithTitle:@"Saving..."
-               message:nil
-               delegate:self
-               cancelButtonTitle:nil
-               otherButtonTitles:nil];
-  
-	UIActivityIndicatorView *listingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
-	CGRect frame = listingIndicator.frame;
-	frame.origin.x = 240;
-	frame.origin.y = 15;
-	frame.size.width = 22;
-	frame.size.height = 22;
-	listingIndicator.frame = frame;
-	[alertView addSubview:listingIndicator];
-  [listingIndicator release];
-  
-  progressView = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
-  progressView.frame = CGRectMake(15.0f, 48.0f, 248.0f, 15.0f);
-  [alertView addSubview:progressView];
-  [progressView release];
-  
-  [alertView setNumberOfRows:1];
-	[alertView setTransform:CGAffineTransformMakeScale(1, 1.5)];
-	[alertView show];
-  [alertView release];
-	[listingIndicator startAnimating];   
-}
-
-+ (void)updateProgress:(CGFloat)prog {
-  progressView.progress = prog;
-}
-
-+ (void)dismissLoadingAlert {
-  [progressView removeFromSuperview];
-  progressView = nil;
-  [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-  alertView = nil;
-}
-
 + (void)createAlertWithTitle:(NSString*)title message:(NSString*)message {
   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
                                                   message:message

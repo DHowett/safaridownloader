@@ -93,7 +93,6 @@ id _authenticationView = nil;
     [_authenticationView setChallenge:challenge];
     [_authenticationView layoutSubviews];
     [_authenticationView setNeedsDisplay];
-    [ModalAlert dismissLoadingAlert];
   } else { // We have to use the new WebUIAuthenticationManager
     WebUIAuthenticationManager *authManager = [[objc_getClass("WebUIAuthenticationManager") alloc] init];
     [authManager setDelegate:self];
@@ -178,7 +177,6 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 }
 
 - (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)resp {
-  [ModalAlert dismissLoadingAlert];
   _keepAlive = YES;
   NSLog(@"Received response: %@", resp);
 	long long expectedContentLength = [resp expectedContentLength];
@@ -202,7 +200,6 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 }
 
 - (void)download:(NSURLDownload *)download willResumeWithResponse:(NSURLResponse *)resp fromByte:(long long)startingByte {
-  [ModalAlert dismissLoadingAlert];
   NSLog(@"willResumeWithResponse: %@ fromByte: %ll", resp, startingByte);
   _keepAlive = YES;
 	long long expectedContentLength = [resp expectedContentLength];
@@ -258,7 +255,6 @@ fail:
   _timer = nil;
   _keepAlive = NO;
   [_delegate downloadFailedWithError:error];
-  [ModalAlert dismissLoadingAlert];
 }
 
 - (void)downloadDidFinish:(NSURLDownload *)download {

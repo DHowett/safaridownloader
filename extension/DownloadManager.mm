@@ -436,7 +436,6 @@ static SDActionType _actionType = SDActionTypeNone;
       didSelectPath:(NSString*)path 
             forFile:(id)file 
         withContext:(id)download {
-  [ModalAlert showLoadingAlertWithIconName:((SafariDownload*)download).filename orMimeType:((SafariDownload*)download).mimetype];
   [self enableRotations];
   ((SafariDownload*)download).savePath = path;
   DownloadOperation *op = [[DownloadOperation alloc] initWithDelegate:(SafariDownload*)download];
@@ -620,7 +619,6 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark SafariDownloadDelegate Methods/*{{{*/
 
 - (void)downloadDidBegin:(SafariDownload*)download {
-  [ModalAlert dismissLoadingAlert];
   [self updateBadges];
   DownloadCell *cell = [self cellForDownload:download];
   cell.nameLabel = download.filename;
@@ -629,13 +627,11 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (void)downloadDidReceiveAuthenticationChallenge:(SafariDownload *)download {
-  [ModalAlert dismissLoadingAlert];
   DownloadCell *cell = [self cellForDownload:download];
   cell.progressLabel = @"Awaiting Authentication...";
 }
 
 - (void)downloadDidProvideFilename:(SafariDownload*)download {
-  [ModalAlert dismissLoadingAlert];
   DownloadCell *cell = [self cellForDownload:download];
   cell.nameLabel = download.filename;
 }
@@ -697,14 +693,12 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (void)downloadDidCancel:(SafariDownload*)download {   
-  [ModalAlert dismissLoadingAlert];
   [self updateBadges];
   [self saveData];  
   download.downloadOperation = nil;
 }
 
 - (void)downloadDidFail:(SafariDownload*)download {
-  [ModalAlert dismissLoadingAlert];
   NSLog(@"downloadDidFail");
   DownloadCell* cell = [self cellForDownload:download];
   
