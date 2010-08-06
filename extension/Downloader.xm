@@ -469,8 +469,6 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   } else {
     [[self _modalViewController] presentModalViewController:x animated:YES];
   }
-  // [self _presentModalViewControllerFromBookmarksButton:x]; // 3.2 ONLY
-  
 }
 
 %group Firmware_ge_32
@@ -525,6 +523,10 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 - (id)transitionView;
 @end
 %hook BrowserController
+%group Firmware_ge_32
+- (void)setBrowserPanel:(id)panel {
+  %log;%orig;
+}
 %new(v@:@)
 - (void)_setBrowserPanel:(id)panel {
   [self setBrowserPanel:panel];
@@ -533,10 +535,14 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 - (id)browserLayer {
   return [self transitionView];
 }
+%end
+
+%group Firmware_lt_32
 %new(v@:i) // Missing on < 4.0
 - (void)_forceDismissModalViewController:(BOOL)animated {
   [self _forceDismissModalViewController];
 }
+%end
 %end
 
 static _Constructor void DownloaderInitialize() {	
