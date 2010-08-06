@@ -21,6 +21,7 @@
 char __attribute((section("__MISC, UDID"))) udid[41] = "0000000000000000000000000000000000000000";
 
 static bool _wildCat = NO;
+static bool _fourPointOh = NO;
 
 @interface UIActionSheet (Private)
 -(id)buttons;
@@ -46,6 +47,20 @@ static bool _wildCat = NO;
 - (BOOL)isWildcat;
 @end
 
+@interface UIScreen (iOS4)
+- (CGFloat)scale;
+@end
+
+static NSString *portraitIconFilename(void) {
+  NSString *name = (_wildCat ? @"DownloadT" : @"Download");
+  return _fourPointOh ? name : [name stringByAppendingString:@".png"];
+}
+
+static NSString *landscapeIconFilename(void) {
+  NSString *name = @"DownloadSmall";
+  return _fourPointOh ? name : [name stringByAppendingString:@".png"];
+}
+
 static void initCustomToolbar(void) {
   Class BrowserController = objc_getClass("BrowserController");
   Class BrowserButtonBar = objc_getClass("BrowserButtonBar");
@@ -57,7 +72,7 @@ static void initCustomToolbar(void) {
   
   NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
 
-  id x = [BrowserButtonBar imageButtonItemWithName:(_wildCat ? @"DownloadT.png" : @"Download.png")
+  id x = [BrowserButtonBar imageButtonItemWithName:portraitIconFilename()
                                                tag:61
                                             action:@selector(toggleDownloadManagerFromButtonBar)
                                             target:[NSValue valueWithNonretainedObject:[$BrowserController sharedBrowserController]]];
@@ -67,7 +82,7 @@ static void initCustomToolbar(void) {
 
   if(!_wildCat) {
     // Landscape (non-iPad)
-    id y = [BrowserButtonBar imageButtonItemWithName:@"DownloadSmall.png"
+    id y = [BrowserButtonBar imageButtonItemWithName:landscapeIconFilename()
                                                  tag:62
                                               action:@selector(toggleDownloadManagerFromButtonBar)
                                               target:[NSValue valueWithNonretainedObject:[$BrowserController sharedBrowserController]]];
@@ -574,6 +589,11 @@ static _Constructor void DownloaderInitialize() {
     _wildCat = YES;
   } else {
     _wildCat = NO;
+  }
+
+  _fourPointOh = NO;
+  if([UIScreen instancesRespondToSelector:@selector(scale)]) {
+    _fourPointOh = YES;
   }
 }
 

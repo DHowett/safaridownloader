@@ -754,6 +754,10 @@ static int animationType = 0;
   [super viewWillAppear:animated];
 }
 
+- (id)title {
+  return @"Downloads";
+}
+
 #pragma mark -/*}}}*/
 #pragma mark UITableView methods/*{{{*/
 
