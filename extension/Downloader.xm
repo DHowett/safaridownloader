@@ -81,6 +81,15 @@ static void initCustomToolbar(void) {
   
   int portraitGroup[]  = {5, 7, 15, 1, 61, 3};
   int landscapeGroup[] = {6, 8, 16, 2, 62, 4};
+
+  if(_wildCat) { // The iPad has a different button order than the iPhone.
+    portraitGroup[0] = 5;
+    portraitGroup[1] = 7;
+    portraitGroup[2] = 3;
+    portraitGroup[3] = 1;
+    portraitGroup[4] = 15;
+    portraitGroup[5] = 61;
+  }
   
   [buttonBar registerButtonGroup:1 
                      withButtons:portraitGroup 
