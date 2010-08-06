@@ -40,7 +40,7 @@
 	    <key>noAutoCorrect</key>
 	    <true/>
 	    <key>placeholder</key>
-	    <string>Extension (no dot)</string>
+	    <string>Extension</string>
 		<key>set</key>
 		<string>setNewItem:forSpecifier:</string>
 		<key>itemType</key>

@@ -192,7 +192,7 @@ static id fileClassController = nil;
 									       cell:c
 									       edit:nil];
 	if(contents) [spec setProperty:contents forKey:@"valueCopy"];
-	[spec setPlaceholder:(extension ? @"Extension (no dot)" : @"Mimetype")];
+	[spec setPlaceholder:(extension ? @"Extension" : @"Mimetype")];
 	[spec setKeyboardType:0 autoCaps:0 autoCorrection:0];
 	[spec setProperty:[NSNumber numberWithBool:(contents == nil)] forKey:@"new"];
 	[spec setProperty:(extension ? @"extension" : @"mimetype") forKey:@"itemType"];
@@ -220,6 +220,9 @@ static id fileClassController = nil;
 
 	if(oldValue) {
 		[workArray removeObject:oldValue];
+	}
+	if(isExtension && [s hasPrefix:@"."]) {
+		s = [s stringByReplacingCharactersInRange:NSMakeRange(0,1) withString:@""];
 	}
 	[workArray addObject:s];
 	[spec setProperty:[NSNumber numberWithBool:NO] forKey:@"new"];
