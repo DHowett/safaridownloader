@@ -13,10 +13,13 @@
 #import "DownloaderCommon.h"
 #import "ModalAlert.h"
 
+#import "UIKitExtra/UIDocumentInteractionController.h"
+
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
 #define kDownloadSheet 993349
 #define kActionSheet 903403
 
+@class LSApplicationProxy;
 DHLateClass(Application);
 DHLateClass(BrowserController);
 
@@ -838,8 +841,16 @@ static int animationType = 0;
                                                otherButtonTitles:nil];
     if (curDownload.failed) [launch addButtonWithTitle:@"Retry"];
     else {
-      for(NSString *title in _launchActions) {
-        [launch addButtonWithTitle:title];
+      UIDocumentInteractionController *x = [objc_getClass("UIDocumentInteractionController") interactionControllerWithURL:[NSURL fileURLWithPath:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", curDownload.filename]]];
+      if(x) {
+        NSArray *applications = [x _applications:YES];
+        for(LSApplicationProxy *app in applications) {
+          [launch addButtonWithTitle:[NSString stringWithFormat:@"IPC open %@", [app localizedName]]];
+        }
+      } else {
+        for(NSString *title in _launchActions) {
+          [launch addButtonWithTitle:title];
+        }
       }
     }
     launch.cancelButtonIndex = [launch addButtonWithTitle:@"Cancel"];

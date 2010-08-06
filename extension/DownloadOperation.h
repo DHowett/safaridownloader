@@ -46,10 +46,5 @@
 @end
 
 @interface MyAuthenticationView : AuthenticationView
-{
-  NSURLAuthenticationChallenge* savedChallenge;
-}
-
-@property (retain) NSURLAuthenticationChallenge* savedChallenge;
-
+- (void)setSavedChallenge:(id)savedChallenge;
 @end

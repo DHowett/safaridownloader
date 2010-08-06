@@ -5,39 +5,14 @@
 #import "ModalAlert.h"
 #import "WebUI/WebUI.h"
 #import "Safari/BrowserController.h"
+#import "WebUI4/WebUIAuthenticationManager.h"
 
 #ifndef DEBUG
 #define NSLog(...)
 #endif
 
 @interface DownloadOperation (extra)
-MyAuthenticationView* _authenticationView;
-@end
-
-@implementation MyAuthenticationView
-@synthesize savedChallenge;
-
-- (void)_logIn {  
-  if (!_challenge) {
-    _challenge = savedChallenge;
-  }
-  [super _logIn];
-}
-
-- (void)didShowBrowserPanel {  
-  UINavigationBar* navBar = nil;
-  object_getInstanceVariable(self, "_navigationBar", (void**)&navBar);
-  
-  UINavigationItem* navItem = [[UINavigationItem alloc] initWithTitle:@"Secure Website"];
-  [navItem setPrompt:@"This download requires authentication"];
-  UIBarButtonItem* loginItem = [[UIBarButtonItem alloc] initWithTitle:@"Log In" style:UIBarButtonItemStyleDone target:self action:@selector(_logIn)];
-  UIBarButtonItem* cancelItem = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(_cancel)];
-  navItem.rightBarButtonItem = loginItem;
-  navItem.leftBarButtonItem = cancelItem;
-  [navBar popNavigationItemAnimated:NO];
-  [navBar pushNavigationItem:navItem animated:NO];
-}
-
+id _authenticationView = nil;
 @end
 
 @implementation DownloadOperation
@@ -100,7 +75,7 @@ MyAuthenticationView* _authenticationView;
   _requiresAuthentication = NO;
 }
 
-+ (MyAuthenticationView*)authView {
++ (id)authView {
   return _authenticationView; 
 }
 
@@ -109,13 +84,33 @@ MyAuthenticationView* _authenticationView;
 }
 
 - (void)showAuthenticationChallenge:(NSURLAuthenticationChallenge*)challenge {
-  [[objc_getClass("BrowserController") sharedBrowserController] showBrowserPanelType:88];
-  NSLog(@"setting challenge: %@", challenge);
-  [_authenticationView setSavedChallenge:challenge];
-  [_authenticationView setChallenge:challenge];
-  [_authenticationView layoutSubviews];
-  [_authenticationView setNeedsDisplay];
-  [ModalAlert dismissLoadingAlert];
+  Class authView = objc_getClass("MyAuthenticationView");
+  if(authView != nil) { // We are somewhere where we can use the old authentication view.
+    _authenticationView = [[objc_getClass("MyAuthenticationView") alloc] initWithDelegate:self];
+    [[objc_getClass("BrowserController") sharedBrowserController] showBrowserPanelType:88];
+    NSLog(@"setting challenge: %@", challenge);
+    [_authenticationView setSavedChallenge:challenge];
+    [_authenticationView setChallenge:challenge];
+    [_authenticationView layoutSubviews];
+    [_authenticationView setNeedsDisplay];
+    [ModalAlert dismissLoadingAlert];
+  } else { // We have to use the new WebUIAuthenticationManager
+    WebUIAuthenticationManager *authManager = [[objc_getClass("WebUIAuthenticationManager") alloc] init];
+    [authManager setDelegate:self];
+    [authManager addAuthenticationChallenge:challenge displayPanel:YES];
+  }
+}
+
+- (void)cancelFromAuthenticationManager:(id)authenticationManager forChallenge:(id)challenge {
+  [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];  
+  _requiresAuthentication = NO;
+  [authenticationManager autorelease];
+}
+
+- (void)logInFromAuthenticationManager:(id)authenticationManager withCredential:(id)credential forChallenge:(id)challenge {
+  [self setCredential:credential];
+  _requiresAuthentication = NO;
+  [authenticationManager autorelease];
 }
 
 #pragma mark -
@@ -134,8 +129,6 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 
   [_delegate downloadDidReceiveAuthenticationChallenge];
   _requiresAuthentication = YES;
-  _authenticationView = [[MyAuthenticationView alloc] initWithDelegate:self];
-  NSLog(@"checking authview challenge: %@", [_authenticationView challenge]);
   [self performSelectorOnMainThread:@selector(showAuthenticationChallenge:) 
                          withObject:challenge
                       waitUntilDone:YES];
