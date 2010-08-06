@@ -153,7 +153,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
     }
   }
   else {
-    UIKeyboardDisableAutomaticAppearance();
+    //UIKeyboardDisableAutomaticAppearance();
     alertViewShown = NO;
     activeInstance = nil;
     
@@ -190,7 +190,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
 }
 
 - (void)newFolder {
-  UIKeyboardEnableAutomaticAppearance(); // w00t!
+  //UIKeyboardEnableAutomaticAppearance(); // w00t!
   AlertPrompt *prompt = [AlertPrompt alloc];
 	prompt = [prompt initWithTitle:@"New Folder" 
                          message:@"Enter a name for the new folder" 
