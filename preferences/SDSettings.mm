@@ -6,6 +6,8 @@ static id resourceBundle = nil;
 static id fileTypesDict = nil;
 static id fileClassController = nil;
 
+static BOOL _legacy = NO;
+
 
 @interface SDFileTypeSetupController : PSSetupController {
 }
@@ -333,10 +335,17 @@ static id fileClassController = nil;
 - (id)specifiers {
 	if(!_specifiers) {
 		_specifiers = [[self loadSpecifiersFromPlistName:@"FileClass" target:self] retain];
+
+		NSMutableArray *removals = [NSMutableArray array];
+		for(PSSpecifier *s in _specifiers) {
+			if([[s propertyForKey:@"legacy"] boolValue] && !_legacy) [removals addObject:s];
+		}
+		[(NSMutableArray*)_specifiers removeObjectsInArray:removals];
+
 		NSArray *customTypes = [[[NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] objectForKey:@"CustomItems"] allKeys] ?: [NSArray array];
 
 		int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
-		int index = 3;
+		int index = _legacy ? 3 : 2;
 		for(NSString *fileClass in fileTypesDict) {
 			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileClass
 									   target:self
@@ -374,6 +383,10 @@ static id fileClassController = nil;
 @end
 
 @implementation SDSettingsController
++ (void)load {
+	_legacy = ![UIDevice instancesRespondToSelector:@selector(isWildcat)];
+}
+
 - (id)initForContentSize:(CGSize)size {
 	if((self = [super initForContentSize:size])) {
 //		extraSpecs = [NSMutableArray array];
@@ -390,8 +403,15 @@ static id fileClassController = nil;
 	if(_specifiers == nil) {
 		_specifiers = [[self localizedSpecifiersWithSpecifiers:[self loadSpecifiersFromPlistName:plist target:self]] retain];
 //	[specifiers addObjectsFromArray:extraSpecs];
+		NSMutableArray *removals = [NSMutableArray array];
+		for(PSSpecifier *s in _specifiers) {
+			if([[s propertyForKey:@"legacy"] boolValue] && !_legacy) [removals addObject:s];
+		}
+		[(NSMutableArray*)_specifiers removeObjectsInArray:removals];
 	}
 	return _specifiers;
 }
 
 @end
+
+// vim:ft=objc
