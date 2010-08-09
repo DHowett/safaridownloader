@@ -52,7 +52,8 @@ static bool _fourPointOh = NO;
 @end
 
 static NSString *portraitIconFilename(void) {
-  NSString *name = (_wildCat ? @"DownloadT" : @"Download");
+  NSString *name = @"Download";
+  if(_wildCat) return @"DownloadT.png";
   return _fourPointOh ? name : [name stringByAppendingString:@".png"];
 }
 
