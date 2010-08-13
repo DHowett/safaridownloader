@@ -377,7 +377,7 @@ static NSURL *interactionURL = nil;
 - (void)actionSheet:(UIActionSheet *)sheet clickedButtonAtIndex:(int)index {
   if(index == 1336) {
     if(interactionURL)
-      [[DownloadManager sharedManager] addDownloadWithURL:interactionURL];
+      [[DownloadManager sharedManager] addDownloadWithURL:interactionURL browser:YES];
   }
   %orig;
   [interactionURL release];
@@ -399,7 +399,7 @@ static void showBrowserSheetHookInternals(UIWebDocumentView *self, UIActionSheet
     NSLog(@"url is %@", interactionURL);
     if([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]
     || [scheme isEqualToString:@"ftp"]) {
-      [sheet addButtonWithTitle:@"Download"];
+      [sheet addButtonWithTitle:@"Download..."];
       myButton = [buttons lastObject];
       [myButton retain];
       [myButton setTag:1337];
