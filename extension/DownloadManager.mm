@@ -236,21 +236,25 @@ static SDActionType _actionType = SDActionTypeNone;
     if (_actionType == SDActionTypeView) {
       return SDActionTypeView;
     }
-    else if (_actionType == SDActionTypeDownload) {
+    else if (_actionType == SDActionTypeDownload || 
+             _actionType == SDActionTypeDownloadAs) {
       [listener ignore];
       [frame stopLoading];
       BOOL downloadAdded = NO;
+      BOOL saveAs = (_actionType == SDActionTypeDownloadAs);
       if(mimeType != nil)
         downloadAdded = [self addDownloadWithRequest:request 
-                                         andMimeType:mimeType];
+                                         andMimeType:mimeType
+                                             browser:saveAs];
       else
-        downloadAdded = [self addDownloadWithRequest:request];
+        downloadAdded = [self addDownloadWithRequest:request
+                                             browser:saveAs];
       
       if (downloadAdded)
         NSLog(@"successfully added download");
       else
         NSLog(@"add download failed");
-      return SDActionTypeDownload;
+      return _actionType;
     } 
     else {
       [listener ignore];
@@ -457,20 +461,30 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 // everything eventually goes through this method
-- (BOOL)addDownload:(SafariDownload*)download {
+- (BOOL)addDownload:(SafariDownload*)download browser:(BOOL)browser {
   if (![_currentDownloads containsObject:download]) {
     [self disableRotations];
-    FileBrowser* f = [[FileBrowser alloc] initWithFile:download.filename 
-                                               context:download
-                                              delegate:self];
-    [f show];
-    [f release];
+      
+      if (browser) {
+          FileBrowser* f = [[FileBrowser alloc] initWithFile:download.filename 
+                                                     context:download
+                                                    delegate:self];
+          [f show];
+          [f release];
+      }
+      else {
+          [self fileBrowser:nil 
+              didSelectPath:@"/var/mobile/Media/Downloads" 
+                    forFile:download.filename 
+                withContext:download];
+      }
+      
     return YES;
   }
   return NO;
 }
 
-- (BOOL)addDownloadWithURL:(NSURL*)url {
+- (BOOL)addDownloadWithURL:(NSURL*)url browser:(BOOL)browser {
   if ([self downloadWithURL:url])
     return NO;
   
@@ -486,10 +500,10 @@ static SDActionType _actionType = SDActionTypeNone;
                                                             delegate:self
                                                         useSuggested:use];
   
-  return [self addDownload:download];
+    return [self addDownload:download browser:browser];
 }
 
-- (BOOL)addDownloadWithRequest:(NSURLRequest*)request {
+- (BOOL)addDownloadWithRequest:(NSURLRequest*)request browser:(BOOL)browser {
   BOOL use = NO;
   NSString *filename = [self fileNameForURL:[request URL]];
   if (filename == nil) {
@@ -504,10 +518,10 @@ static SDActionType _actionType = SDActionTypeNone;
                                                                 name:filename
                                                             delegate:self
                                                         useSuggested:use];
-  return [self addDownload:download];
+    return [self addDownload:download browser:browser];
 }
 
-- (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType {
+- (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType browser:(BOOL)browser {
   BOOL use = NO;
   NSString *filename = [self fileNameForURL:[request URL]];
   if (filename == nil) {
@@ -523,10 +537,10 @@ static SDActionType _actionType = SDActionTypeNone;
                                                             delegate:self
                                                         useSuggested:use];
   download.mimetype = mimeType;
-  return [self addDownload:download];
+    return [self addDownload:download browser:browser];
 }
 
-- (BOOL)addDownloadWithInfo:(NSDictionary*)info {
+- (BOOL)addDownloadWithInfo:(NSDictionary*)info browser:(BOOL)b {
   NSURLRequest*   request  = [info objectForKey:@"request"];
   if ([self downloadWithURL:[request URL]])
     return NO;
@@ -535,7 +549,7 @@ static SDActionType _actionType = SDActionTypeNone;
                                                                 name:[info objectForKey:@"name"]
                                                             delegate:self
                                                         useSuggested:NO];
-  return [self addDownload:download];
+    return [self addDownload:download browser:b];
 }
 
 // everything eventually goes through this method
@@ -598,8 +612,19 @@ static SDActionType _actionType = SDActionTypeNone;
   [alert release];
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-  if (buttonIndex == 1) {
+- (void)alertView:(UIAlertView *)alert clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (alert.tag == kDownloadSheet) {
+        NSString* title = [alert buttonTitleAtIndex:buttonIndex];
+        if([title isEqualToString:@"Cancel"])
+            _actionType = SDActionTypeCancel;
+        else if([title isEqualToString:@"View"]) 
+            _actionType = SDActionTypeView;
+        else if ([title isEqualToString:@"Download"])
+            _actionType = SDActionTypeDownload;
+        else if ([title isEqualToString:@"Save As..."])
+            _actionType = SDActionTypeDownloadAs;
+    }
+  else if (buttonIndex == 1) {
     if (_currentDownloads.count > 0) {
       [self saveData];
       [_downloadQueue cancelAllOperations];
@@ -883,19 +908,7 @@ static int animationType = 0;
 /*}}}*/
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-  
-  if (actionSheet.tag == kDownloadSheet) {
-    if([[actionSheet buttonTitleAtIndex:buttonIndex] 
-        isEqualToString:@"Cancel"])
-      _actionType = SDActionTypeCancel;
-    else if([[actionSheet buttonTitleAtIndex:buttonIndex]
-             isEqualToString:@"View"]) 
-      _actionType = SDActionTypeView;
-    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] 
-              isEqualToString:@"Download"])
-      _actionType = SDActionTypeDownload;
-  }
-  else if (actionSheet.tag == kActionSheet) {
+  if (actionSheet.tag == kActionSheet) {
     NSString *button = [actionSheet buttonTitleAtIndex:buttonIndex];
     NSString *action = [_launchActions objectForKey:button];
     if([button isEqualToString:@"Delete"]) {

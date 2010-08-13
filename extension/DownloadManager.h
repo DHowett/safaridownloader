@@ -51,6 +51,7 @@ typedef enum
   SDActionTypeView = 1,
   SDActionTypeDownload = 2,
   SDActionTypeCancel = 3,
+  SDActionTypeDownloadAs = 4,
 } SDActionType;
 
 @interface DownloadManager : UIViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate> {
@@ -99,11 +100,11 @@ typedef enum
                  inFrame:(WebFrame *)frame
             withListener:(id<WebPolicyDecisionListener>)listener;
 
-- (BOOL)addDownloadWithInfo:(NSDictionary*)info;
-- (BOOL)addDownloadWithURL:(NSURL*)url;
-- (BOOL)addDownloadWithRequest:(NSURLRequest*)url;
-- (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType;
-- (BOOL)addDownload:(SafariDownload *)download;
+- (BOOL)addDownloadWithInfo:(NSDictionary*)info browser:(BOOL)b;
+- (BOOL)addDownloadWithURL:(NSURL*)url browser:(BOOL)b;
+- (BOOL)addDownloadWithRequest:(NSURLRequest*)url browser:(BOOL)b;
+- (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType browser:(BOOL)b;
+- (BOOL)addDownload:(SafariDownload *)download browser:(BOOL)b;
 - (BOOL)cancelDownload:(SafariDownload *)download;
 - (BOOL)cancelDownloadWithURL:(NSURL *)url;
 - (IBAction)cancelAllDownloads;

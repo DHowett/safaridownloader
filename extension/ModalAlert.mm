@@ -287,32 +287,41 @@ static UIImage* savedIcon = nil;
                                      tag:(NSInteger)tag
                                 delegate:(id)delegate {
   
-  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:title
-                                                       delegate:delegate
-                                              cancelButtonTitle:cancel
-                                         destructiveButtonTitle:destructive
-                                              otherButtonTitles:other, nil];
-  [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
-  ohmygod.tag = tag;
+    UIAlertView *ohmygod = [[UIAlertView alloc] initWithTitle:title
+                                                    message:message
+                                                   delegate:delegate 
+                                          cancelButtonTitle:cancel 
+                                          otherButtonTitles:destructive, @"Save As...", nil];
+    ohmygod.tag = tag;
+    [ohmygod show];
+    
+//  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:title
+//                                                       delegate:delegate
+//                                              cancelButtonTitle:cancel
+//                                         destructiveButtonTitle:destructive
+//                                              otherButtonTitles:other, nil];
+//  [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
+//  ohmygod.tag = tag;
   
-  UILabel *nameLabel = MSHookIvar<UILabel *>(ohmygod, "_bodyTextLabel");;
-  UIFont *filenameFont = [nameLabel font];
-  CGSize filenameSize = [message sizeWithFont:filenameFont];
-  CGRect screenRect = [[UIScreen mainScreen] bounds];
-  CGRect nameLabelRect = CGRectMake((screenRect.size.width / 2) - (filenameSize.width / 2), filenameSize.height,
-                                    filenameSize.width, filenameSize.height);
-  [nameLabel setFrame:nameLabelRect];
-  [nameLabel setText:message];
+//  UILabel *nameLabel = MSHookIvar<UILabel *>(ohmygod, "_bodyTextLabel");;
+//  UIFont *filenameFont = [nameLabel font];
+//  CGSize filenameSize = [message sizeWithFont:filenameFont];
+//  CGRect screenRect = [[UIScreen mainScreen] bounds];
+//  CGRect nameLabelRect = CGRectMake((screenRect.size.width / 2) - (filenameSize.width / 2), filenameSize.height,
+//                                    filenameSize.width, filenameSize.height);
+//  [nameLabel setFrame:nameLabelRect];
+//  [nameLabel setText:message];
   
-  UIImageView *iconImageView = [[UIImageView alloc]
-                                initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension] orMimeType:mimetype]];
-  iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
-  [ohmygod addSubview:iconImageView];
-  [iconImageView release];
-  [ohmygod showInView:(UIView*)[[DHClass(BrowserController) sharedBrowserController] browserLayer]];
-  [ohmygod release];
+//  UIImageView *iconImageView = [[UIImageView alloc]
+//                                initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension] orMimeType:mimetype]];
+//  iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
+//  [ohmygod addSubview:iconImageView];
+//  [iconImageView release];
+    
+//  [ohmygod showInView:(UIView*)[[DHClass(BrowserController) sharedBrowserController] browserLayer]];
   
   [ModalAlert block:ohmygod];	
+    [ohmygod release];
 }
 
 @end
