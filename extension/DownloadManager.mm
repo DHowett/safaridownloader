@@ -15,7 +15,7 @@
 
 #import "UIKitExtra/UIDocumentInteractionController.h"
 
-#define DL_ARCHIVE_PATH @"/var/mobile/Library/Downloads/safaridownloads.plist"
+#define DL_ARCHIVE_PATH @"/tmp/safaridownloads.plist"
 #define kDownloadSheet 993349
 #define kActionSheet 903403
 
@@ -311,13 +311,13 @@ static SDActionType _actionType = SDActionTypeNone;
   }
   NSLog(@"%@", _mimeTypes);
   
-  NSFileManager *fm = [NSFileManager defaultManager];
+    Class SandCastle = objc_getClass("SandCastle");
   if (_launchActions) [_launchActions release];
   _launchActions = [[NSMutableDictionary alloc] init];
-  if ([fm fileExistsAtPath:@"/Applications/iFile.app"]) {
-    NSDictionary *iFile = [NSDictionary dictionaryWithContentsOfFile:@"/Applications/iFile.app/Info.plist"];
-    NSString *iFileVersion = [iFile objectForKey:@"CFBundleVersion"];
-    if (![iFileVersion isEqualToString:@"1.0.0"])
+  if ([[SandCastle sharedInstance] fileExistsAtPath:@"/Applications/iFile.app"]) {
+//    NSDictionary *iFile = [NSDictionary dictionaryWithContentsOfFile:@"/Applications/iFile.app/Info.plist"];
+//    NSString *iFileVersion = [iFile objectForKey:@"CFBundleVersion"];
+//    if (![iFileVersion isEqualToString:@"1.0.0"])
       [_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
   }
   return;
@@ -400,8 +400,8 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark Persistent Storage/*{{{*/
 
 - (void)saveData {
-  NSLog(@"(fake) archiving to path: %@", DL_ARCHIVE_PATH);
-  //[NSKeyedArchiver archiveRootObject:_currentDownloads toFile:DL_ARCHIVE_PATH]; 
+    //NSLog(@"archiving to path: %@", DL_ARCHIVE_PATH);
+    //[NSKeyedArchiver archiveRootObject:_currentDownloads toFile:DL_ARCHIVE_PATH]; 
 }
 
 #pragma mark -
@@ -839,7 +839,7 @@ static int animationType = 0;
                                                otherButtonTitles:nil];
     if (curDownload.failed) [launch addButtonWithTitle:@"Retry"];
     else {
-      UIDocumentInteractionController *x = [objc_getClass("UIDocumentInteractionController") interactionControllerWithURL:[NSURL fileURLWithPath:[NSString stringWithFormat:@"/var/mobile/Library/Downloads/%@", curDownload.filename]]];
+      UIDocumentInteractionController *x = [objc_getClass("UIDocumentInteractionController") interactionControllerWithURL:[NSURL fileURLWithPath:[NSString stringWithFormat:@"/var/mobile/Media/Downloads/%@", curDownload.filename]]];
       if(x) {
         NSArray *applications = [x _applications:YES];
         for(LSApplicationProxy *app in applications) {
@@ -899,13 +899,16 @@ static int animationType = 0;
     NSString *button = [actionSheet buttonTitleAtIndex:buttonIndex];
     NSString *action = [_launchActions objectForKey:button];
     if([button isEqualToString:@"Delete"]) {
-      NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
+      NSString *path = [NSString stringWithFormat:@"%@/%@", curDownload.savePath, curDownload.filename];
       int row = [_finishedDownloads indexOfObject:curDownload];
       int section = (_currentDownloads.count > 0) ? 1 : 0;
       
       [_finishedDownloads removeObjectAtIndex:row];
       [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
-      [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+        
+        [[objc_getClass("SandCastle") sharedInstance] removeItemAtResolvedPath:path];
+        
+        //[[NSFileManager defaultManager] removeItemAtPath:path error:nil];
     } else if([button isEqualToString:@"Retry"]) {
       int row = [_finishedDownloads indexOfObject:curDownload];
       int section = (_currentDownloads.count > 0) ? 1 : 0;
@@ -916,7 +919,7 @@ static int animationType = 0;
       [self addDownload:curDownload];
     } else if(action) {
       Class Application = objc_getClass("Application");
-      NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Library/Downloads/%@", curDownload.filename];
+      NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Media/Downloads/%@", curDownload.filename];
       path = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
       [[Application sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", action, path]]];
     }

@@ -31,11 +31,13 @@
   long long      _resumedFrom;
   float          _downloadedBytes;
   BOOL           _requiresAuthentication;
+    NSString*   _temporaryPath;
 }
 
 + (id)authView;
 
 @property (assign) id<DownloadOperationDelegate> delegate;
+@property (nonatomic, copy) NSString* temporaryPath;
 
 - (id)initWithDelegate:(id)del;
 - (void)deleteDownload;

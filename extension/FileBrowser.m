@@ -7,7 +7,7 @@
 
 #import "Safari/BrowserController.h"
 
-#define HOME_DIR @"/private/var/mobile/Library/Downloads"
+#define HOME_DIR @"/private/var/mobile/Media/Downloads/"
 #define kNewFolderAlert 239530
 
 extern UIImage *_UIImageWithName(NSString *);
@@ -80,22 +80,17 @@ BOOL alertViewShown;
 - (void)enumerateForDirsInPath:(NSString*)path 
                      fillArray:(NSMutableArray*)array 
                       maxCount:(NSInteger)count {
-  BOOL halt = (count > 0) ? YES : NO;
-  NSDirectoryEnumerator* denum = [[NSFileManager defaultManager] enumeratorAtPath:path];  
-  NSString* f = nil;
-  while ((!halt || count > 0) && (f = [denum nextObject]) != nil) {
-    NSAutoreleasePool* pool = [NSAutoreleasePool new];
-    NSDictionary* attribs = [denum fileAttributes];
-    if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory]) {
-      [denum skipDescendents];
-      if (![f isEqualToString:@".partial"])
-        [array addObject:[PathObject objectWithName:f path:[path stringByAppendingPathComponent:f] isDir:YES]];
+    BOOL halt = (count > 0) ? YES : NO;
+    NSArray* list = [[objc_getClass("SandCastle") sharedInstance] directoryContentsAtPath:path];  
+    int i;
+    for (i=0; i<list.count; i++) {
+        NSAutoreleasePool* pool = [NSAutoreleasePool new];
+        NSString* curFile = [list objectAtIndex:i];
+        NSString* curPath = [path stringByAppendingPathComponent:curFile];
+        BOOL isDir = [[objc_getClass("SandCastle") sharedInstance] pathIsDir:curPath];
+        [array addObject:[PathObject objectWithName:curFile path:curPath isDir:isDir]];
+        [pool drain];
     }
-    else {
-      [array addObject:[PathObject objectWithName:f path:[path stringByAppendingPathComponent:f] isDir:NO]];
-    }
-    [pool drain];
-  }
 }
 
 - (void)setCurrentPath:(NSString*)path {
@@ -112,13 +107,13 @@ BOOL alertViewShown;
   
   self.title = [[currentPath lastPathComponent] stringByAppendingString:@"\n\n\n\n"];
   [navButton setTitle:[[currentPath stringByDeletingLastPathComponent] lastPathComponent]];
-  if ([currentPath isEqualToString:HOME_DIR]) {
+  if ([currentPath isEqualToString:@"/"]) {
     navButton.alpha = 0;
   }
   else {
     navButton.alpha = 1;
   }
-  self.data = contents;
+    self.data = contents;
 }
 
 - (NSString*)resizeToFitCount:(NSUInteger)count {
@@ -145,11 +140,9 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (alert.tag == kNewFolderAlert) {
     if (buttonIndex != [alert cancelButtonIndex]) {
       NSString *entered = [(AlertPrompt *)alert enteredText];
-      BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:[currentPath stringByAppendingPathComponent:entered]
-                                                                attributes:nil];
-      if (success) {
+        Class SandCastle = objc_getClass("SandCastle");
+        [[SandCastle sharedInstance] createDirectoryAtResolvedPath:[currentPath stringByAppendingPathComponent:entered]];
         self.currentPath = [currentPath stringByAppendingPathComponent:entered];
-      }
     }
   }
   else {
@@ -216,9 +209,9 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   myTableView.dataSource = self;
   [container addSubview:myTableView];
   
-  NSString* buttonTitle = nil;
+  NSString* buttonTitle = [[HOME_DIR stringByDeletingLastPathComponent] lastPathComponent];
   navButton = [[UINavigationButton alloc] initWithTitle:buttonTitle style:1];
-  navButton.alpha = 0;
+  navButton.alpha = 1;
   [navButton addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
   navButton.frame = CGRectMake(15, 10, 70, 30);
   [self addSubview:navButton];

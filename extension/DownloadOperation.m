@@ -8,7 +8,7 @@
 #import "WebUI4/WebUIAuthenticationManager.h"
 
 #ifndef DEBUG
-#define NSLog(...)
+//#define NSLog(...)
 #endif
 
 @interface DownloadOperation (extra)
@@ -17,6 +17,7 @@ id _authenticationView = nil;
 
 @implementation DownloadOperation
 @synthesize delegate = _delegate;
+@synthesize temporaryPath = _temporaryPath;
 
 - (id)initWithDelegate:(id)del {
   if (![super init]) return nil;
@@ -29,6 +30,7 @@ id _authenticationView = nil;
   _delegate = nil;
   [_downloader release];
   [_response release];
+    [_temporaryPath release];
   [super dealloc];
 }
 
@@ -171,9 +173,10 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
   NSLog(@"FILENAME SUGGESTED: %@", filename);
   if (_wasResumed) return;
   if ([_delegate useSuggest] || [_delegate filename] == nil) {
-    [download setDestination:[NSString stringWithFormat:@"%@/%@", [_delegate savePath], filename] allowOverwrite:YES];
+      self.temporaryPath = [NSString stringWithFormat:@"/tmp/.partial/%@", filename];
+      [download setDestination:_temporaryPath allowOverwrite:YES];
+      [_delegate setFilename:filename];
   }
-  [_delegate setFilename:filename];
 }
 
 - (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)resp {
@@ -258,7 +261,13 @@ fail:
 }
 
 - (void)downloadDidFinish:(NSURLDownload *)download {
-  NSLog(@"DL FINISHED!");
+    
+    NSString* finalDestination4 = [NSString stringWithFormat:@"%@/%@", [_delegate savePath], [_delegate filename]];
+    
+  NSLog(@"DL FINISHED! (->%@)", finalDestination4);
+    [[objc_getClass("SandCastle") sharedInstance] createDirectoryAtResolvedPath:[_delegate savePath]];
+    [[objc_getClass("SandCastle") sharedInstance] moveTemporaryFile:_temporaryPath
+                                                     toResolvedPath:finalDestination4];     
   _keepAlive = NO;
   _start = [NSDate timeIntervalSinceReferenceDate];
   [self deleteDownload];
@@ -269,13 +278,13 @@ fail:
   return NO;
 }
 
-- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path {
-  NSString *curFn = [_delegate filename];
-  NSString *newFn = [path lastPathComponent];
-  NSLog(@"didCreateDestination:%@", path);
-  if(![newFn isEqualToString:curFn]) [_delegate setFilename:newFn];
-  return;
-}
+//- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path {
+//  NSString *curFn = [_delegate filename];
+//  NSString *newFn = [path lastPathComponent];
+//  NSLog(@"didCreateDestination:%@", path);
+//  if(![newFn isEqualToString:curFn]) [_delegate setFilename:newFn];
+//  return;
+//}
 
 - (BOOL)beginDownload {
   BOOL resumeResult = [self resumeDownload];
@@ -284,7 +293,7 @@ fail:
   
   [self deleteDownload];
   
-  [[NSFileManager defaultManager] createDirectoryAtPath:@"/var/mobile/Library/Downloads/.partial" 
+  [[NSFileManager defaultManager] createDirectoryAtPath:@"/tmp/.partial" 
                             withIntermediateDirectories:YES
                                              attributes:nil error:nil];
   
@@ -297,7 +306,8 @@ fail:
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
     if (![_delegate useSuggest] && [_delegate filename] != nil) {
-      [_downloader setDestination:[NSString stringWithFormat:@"%@/%@", [_delegate savePath], [_delegate filename]] allowOverwrite:YES];
+        self.temporaryPath = [NSString stringWithFormat:@"/tmp/.partial/%@", [_delegate filename]];
+        [_downloader setDestination:_temporaryPath allowOverwrite:YES];
     }
     _start = [NSDate timeIntervalSinceReferenceDate];
     _bytes = 0.0;
@@ -308,20 +318,23 @@ fail:
 }
 
 - (BOOL)resumeDownload {
-  NSString *resumeDataPath = [NSString stringWithFormat:@"/var/mobile/Library/Downloads/.partial/%@", [_delegate filename]];
-  NSString *outputPath = [NSString stringWithFormat:@"%@/%@", [_delegate savePath], [_delegate filename]];
+  NSString *resumeDataPath = [NSString stringWithFormat:@"/tmp/.partial/%@.plist", [_delegate filename]];
+  NSString *outputPath = [NSString stringWithFormat:@"/tmp/.partial/%@", [_delegate filename]];
   
   NSLog(resumeDataPath);
   NSLog(outputPath);
   
   if ([[NSFileManager defaultManager] fileExistsAtPath:resumeDataPath] == NO) {
-    NSLog(@"file not found");
+    NSLog(@"resume file not found");
+    [[NSFileManager defaultManager] removeItemAtPath:outputPath error:nil];
     return NO;
   }
   
   NSData *resumeData = [NSData dataWithContentsOfFile:resumeDataPath];
   if (resumeData == nil || [resumeData length] == 0) {
     NSLog(@"data is nil");
+      [[NSFileManager defaultManager] removeItemAtPath:resumeDataPath error:nil];
+      [[NSFileManager defaultManager] removeItemAtPath:outputPath error:nil];
     return NO;
   }
   
@@ -341,7 +354,7 @@ fail:
 }
 
 - (void)deleteDownload {
-  NSString *path = [NSString stringWithFormat:@"/var/mobile/Library/Downloads/.partial/%@", [_delegate filename]];
+  NSString *path = [NSString stringWithFormat:@"/tmp/.partial/%@", [_delegate filename]];
   [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
 }
 
@@ -357,7 +370,7 @@ fail:
   NSLog(@"storing resume data with length: %u", [data length]);
   if (data != nil) {
     NSLog(@"storing resume data OK!");
-    NSString *path = [NSString stringWithFormat:@"/var/mobile/Library/Downloads/.partial/%@", [_delegate filename]];
+    NSString *path = [NSString stringWithFormat:@"/tmp/.partial/%@.plist", [_delegate filename]];
     [data writeToFile:path atomically:YES];
   }
 }

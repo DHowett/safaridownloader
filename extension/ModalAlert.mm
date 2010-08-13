@@ -15,7 +15,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #ifndef DEBUG
-#define NSLog(...)
+//#define NSLog(...)
 #endif
 
 DHLateClass(BrowserController);

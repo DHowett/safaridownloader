@@ -9,10 +9,10 @@
 #import "SafariDownload.h"
 
 #ifndef DEBUG
-#define NSLog(...)
+//#define NSLog(...)
 #endif
 
-#define DEF_SAVE_PATH @"/var/mobile/Library/Downloads"
+#define DEF_SAVE_PATH @"/var/mobile/Media/Downloads"
 
 @implementation SafariDownload
 @synthesize
