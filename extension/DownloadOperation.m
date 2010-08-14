@@ -216,7 +216,9 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error {
   NSLog(@"didFailWithError: %@", error);
-  [self storeResumeData];
+  if (_downloadedBytes > 0) {
+	[self storeResumeData];
+  }
   NSInteger code = [error code];
   if (_retryCount < 3
       && code != NSURLErrorCancelled
@@ -336,6 +338,7 @@ fail:
     return NO;
   }
   
+  self.temporaryPath = [NSString stringWithFormat:@"/tmp/.partial/%@", [_delegate filename]];
   _downloader = [[NSURLDownload alloc] initWithResumeData:resumeData delegate:self path:outputPath];
   if (_downloader == nil) {
     NSLog(@"downloader is nil");
@@ -359,7 +362,7 @@ fail:
 - (void)cancelDownload {
   _noUpdate = YES;
   [_downloader cancel];
-  [self storeResumeData];
+  //[self storeResumeData];
   _keepAlive = NO;
 }
 

@@ -442,6 +442,7 @@ static SDActionType _actionType = SDActionTypeNone;
   [self enableRotations];
   ((SDSafariDownload*)download).savePath = path;
   SDDownloadOperation *op = [[SDDownloadOperation alloc] initWithDelegate:(SDSafariDownload*)download];
+  ((SDSafariDownload*)download).downloadOperation = op;
   [_downloadQueue addOperation:op];
   [op release];
   [_currentDownloads addObject:download];
@@ -888,8 +889,11 @@ titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
 commitEditingStyle:(UITableViewCellEditingStyle)editingStyle 
  forRowAtIndexPath:(NSIndexPath *)indexPath {
   if (editingStyle == UITableViewCellEditingStyleDelete) {
-    if (tableView.numberOfSections == 2 && indexPath.section == 0)
-      [self cancelDownload:[_currentDownloads objectAtIndex:indexPath.row]];
+    if (tableView.numberOfSections == 2 && indexPath.section == 0) {
+	  id download = [_currentDownloads objectAtIndex:indexPath.row];
+	  NSLog(@"cancel download: %@", download);
+      [self cancelDownload:download];
+	}
     else {
       [_finishedDownloads removeObjectAtIndex:indexPath.row];
       [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
