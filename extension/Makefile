@@ -1,3 +1,8 @@
+ifeq ($(MAKELEVEL),0)
+all package install clean::
+	@cd ..; make $@
+else
+
 TWEAK_NAME=Downloader
 Downloader_OBJC_FILES = BaseCell.m DownloadCell.m DownloadOperation.m FileBrowser.m Resources.m SafariDownload.m
 Downloader_OBJCC_FILES = Downloader.mm DownloadManager.mm ModalAlert.mm
@@ -9,3 +14,4 @@ Downloader_LDFLAGS = -mthumb
 
 include ../framework/makefiles/common.mk
 include ../framework/makefiles/tweak.mk
+endif
