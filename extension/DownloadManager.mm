@@ -612,18 +612,7 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (void)alertView:(UIAlertView *)alert clickedButtonAtIndex:(NSInteger)buttonIndex {
-  if (alert.tag == kDownloadSheet) {
-	NSString* title = [alert buttonTitleAtIndex:buttonIndex];
-	if([title isEqualToString:@"Cancel"])
-	  _actionType = SDActionTypeCancel;
-	else if([title isEqualToString:@"View"]) 
-	  _actionType = SDActionTypeView;
-	else if ([title isEqualToString:@"Download"])
-	  _actionType = SDActionTypeDownload;
-	else if ([title isEqualToString:@"Download To..."])
-	  _actionType = SDActionTypeDownloadAs;
-  }
-  else if (buttonIndex == 1) {
+  if (buttonIndex == 1) {
     if (_currentDownloads.count > 0) {
       [self saveData];
       [_downloadQueue cancelAllOperations];
@@ -941,6 +930,18 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
       [[Application sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", action, path]]];
     }
     curDownload = nil;
+  }
+  else if (actionSheet.tag == kDownloadSheet) {
+	NSString* title = [actionSheet buttonTitleAtIndex:buttonIndex];
+	if([title isEqualToString:@"Cancel"])
+	  _actionType = SDActionTypeCancel;
+	else if([title isEqualToString:@"View"]) 
+	  _actionType = SDActionTypeView;
+	else if ([title isEqualToString:@"Download"])
+	  _actionType = SDActionTypeDownload;
+	else if ([title isEqualToString:@"Download To..."])
+	  _actionType = SDActionTypeDownloadAs;
+	actionSheet.hidden = YES;
   }
 }
 

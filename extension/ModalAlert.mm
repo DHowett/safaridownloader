@@ -14,10 +14,6 @@
 #import "Safari/TabController.h"
 #import <QuartzCore/QuartzCore.h>
 
-#ifndef DEBUG
-//#define NSLog(...)
-#endif
-
 DHLateClass(BrowserController);
 
 @interface SDModalAlert (priv)
@@ -90,9 +86,15 @@ UIAlertView* activeAlert;
 @implementation SDModalAlert
 
 + (void)block:(UIView *)view {
+  BOOL lolz = NO;
   view.hidden = FALSE;
-  while (!view.hidden && view.superview != nil)
+  while (!view.hidden && view.superview != nil) {
+	if (!lolz){
+	  [[UIApplication sharedApplication] endIgnoringInteractionEvents];
+	  lolz = YES;
+	}
     [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+  }
 }
 
 + (void)showAlertViewWithTitle:(NSString*)title 
@@ -287,44 +289,41 @@ static UIImage* savedIcon = nil;
                                      tag:(NSInteger)tag
                                 delegate:(id)delegate {
   
-  UIAlertView *ohmygod = [[UIAlertView alloc] initWithTitle:title
-                                                    message:message
-                                                   delegate:delegate 
-                                          cancelButtonTitle:cancel 
-                                          otherButtonTitles:destructive, @"Download To...", nil];
-  if (other) {
-	[ohmygod addButtonWithTitle:other];
-  }
+//  UIAlertView *ohmygod = [[UIAlertView alloc] initWithTitle:title
+//                                                    message:message
+//                                                   delegate:delegate 
+//                                          cancelButtonTitle:cancel
+//                                          otherButtonTitles:destructive, @"Download To...", other, nil];
+//
+//  ohmygod.tag = tag;
+//  [ohmygod show];
+  
+  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:title
+                                                       delegate:delegate
+                                              cancelButtonTitle:cancel
+                                         destructiveButtonTitle:destructive
+                                              otherButtonTitles:other, nil];
+  [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
   ohmygod.tag = tag;
-  [ohmygod show];
   
-  //  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:title
-  //                                                       delegate:delegate
-  //                                              cancelButtonTitle:cancel
-  //                                         destructiveButtonTitle:destructive
-  //                                              otherButtonTitles:other, nil];
-  //  [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
-  //  ohmygod.tag = tag;
+  UILabel *nameLabel = MSHookIvar<UILabel *>(ohmygod, "_bodyTextLabel");;
+  UIFont *filenameFont = [nameLabel font];
+  CGSize filenameSize = [message sizeWithFont:filenameFont];
+  CGRect screenRect = [[UIScreen mainScreen] bounds];
+  CGRect nameLabelRect = CGRectMake((screenRect.size.width / 2) - (filenameSize.width / 2), filenameSize.height,
+                                    filenameSize.width, filenameSize.height);
+  [nameLabel setFrame:nameLabelRect];
+  [nameLabel setText:message];
   
-  //  UILabel *nameLabel = MSHookIvar<UILabel *>(ohmygod, "_bodyTextLabel");;
-  //  UIFont *filenameFont = [nameLabel font];
-  //  CGSize filenameSize = [message sizeWithFont:filenameFont];
-  //  CGRect screenRect = [[UIScreen mainScreen] bounds];
-  //  CGRect nameLabelRect = CGRectMake((screenRect.size.width / 2) - (filenameSize.width / 2), filenameSize.height,
-  //                                    filenameSize.width, filenameSize.height);
-  //  [nameLabel setFrame:nameLabelRect];
-  //  [nameLabel setText:message];
+  UIImageView *iconImageView = [[UIImageView alloc]
+                                initWithImage:[[SDDownloadManager sharedManager] iconForExtension:[message pathExtension] orMimeType:mimetype]];
+  iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
+  [ohmygod addSubview:iconImageView];
+  [iconImageView release];
   
-  //  UIImageView *iconImageView = [[UIImageView alloc]
-  //                                initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension] orMimeType:mimetype]];
-  //  iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
-  //  [ohmygod addSubview:iconImageView];
-  //  [iconImageView release];
-  
-  //  [ohmygod showInView:(UIView*)[[DHClass(BrowserController) sharedBrowserController] browserLayer]];
-  
-  [SDModalAlert block:ohmygod];	
+  [ohmygod showInView:(UIView*)[[DHClass(BrowserController) sharedBrowserController] browserLayer]];
   [ohmygod release];
+  [SDModalAlert block:ohmygod];	
 }
 
 @end
