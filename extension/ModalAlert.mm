@@ -86,13 +86,10 @@ UIAlertView* activeAlert;
 @implementation SDModalAlert
 
 + (void)block:(UIView *)view {
-  BOOL lolz = NO;
   view.hidden = FALSE;
+  [[UIApplication sharedApplication] endIgnoringInteractionEvents];
+
   while (!view.hidden && view.superview != nil) {
-	if (!lolz){
-	  [[UIApplication sharedApplication] endIgnoringInteractionEvents];
-	  lolz = YES;
-	}
     [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
   }
 }

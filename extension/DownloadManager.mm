@@ -897,6 +897,10 @@ commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
 }
 /*}}}*/
 
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  actionSheet.hidden = YES; 
+}
+
 - (void)actionSheet:(UIActionSheet *)actionSheet 
 clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (actionSheet.tag == kActionSheet) {
