@@ -63,7 +63,7 @@ static id sharedNc = nil;
 - (BOOL)pausesPages { return NO; }
 - (int)panelType { return 44; }
 - (int)panelState { return 1; }
-- (BOOL)shouldShowButtonBar { return NO; }
+- (BOOL)shouldShowButtonBar { return ([UIDevice instancesRespondToSelector:@selector(isWildcat)] && [[UIDevice currentDevice] isWildcat]) ? YES : NO; }
 - (BOOL)isDismissible { return _isDismissible; }
 
 #undef MARK
