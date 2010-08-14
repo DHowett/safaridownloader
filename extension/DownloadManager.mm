@@ -148,12 +148,14 @@ static id resourceBundle = nil;
   self.navigationItem.rightBarButtonItem = cancelButton;
   self.navigationItem.rightBarButtonItem.enabled = YES;
   
-  UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" 
-                                                                 style:UIBarButtonItemStyleDone 
-                                                                target:[SDDownloadManagerNavigationController sharedInstance] 
-                                                                action:@selector(close)];
-  self.navigationItem.leftBarButtonItem = doneButton;
-  self.navigationItem.leftBarButtonItem.enabled = YES;
+  if(![UIDevice instancesRespondToSelector:@selector(isWildcat)] || ![[UIDevice currentDevice] isWildcat]) {
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" 
+                                                                   style:UIBarButtonItemStyleDone 
+                                                                  target:[SDDownloadManagerNavigationController sharedInstance] 
+                                                                  action:@selector(close)];
+    self.navigationItem.leftBarButtonItem = doneButton;
+    self.navigationItem.leftBarButtonItem.enabled = YES;
+  }
   
   _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
   _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
