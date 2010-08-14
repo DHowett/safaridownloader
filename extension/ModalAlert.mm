@@ -302,7 +302,7 @@ static UIImage* savedIcon = nil;
                                                        delegate:delegate
                                               cancelButtonTitle:cancel
                                          destructiveButtonTitle:destructive
-                                              otherButtonTitles:other, nil];
+                                              otherButtonTitles:@"Download To...", other, nil];
   [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
   ohmygod.tag = tag;
   
