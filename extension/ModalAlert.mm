@@ -37,21 +37,21 @@ UIAlertView* activeAlert;
            delegate:(id)delegate 
   cancelButtonTitle:(NSString *)cancelButtonTitle 
       okButtonTitle:(NSString *)okayButtonTitle {
-	if ((self = [super initWithTitle:title 
+  if ((self = [super initWithTitle:title 
                            message:message
                           delegate:delegate 
                  cancelButtonTitle:cancelButtonTitle
                  otherButtonTitles:okayButtonTitle, nil])) {
-		self.textField = [[self addTextFieldWithValue:@"" label:@""] retain];
-	}
-	return self;
+	self.textField = [[self addTextFieldWithValue:@"" label:@""] retain];
+  }
+  return self;
 }
 - (NSString *)enteredText {
-	return textField.text;
+  return textField.text;
 }
 - (void)dealloc {
-	[textField release];
-	[super dealloc];
+  [textField release];
+  [super dealloc];
 }
 @end
 
@@ -152,7 +152,7 @@ static UIImage* savedIcon = nil;
   [activeAlert setTransform:CGAffineTransformMakeScale(1, 1.1)];
   [activeAlert show];
   [activeAlert release];
-	[listingIndicator startAnimating];   
+  [listingIndicator startAnimating];   
 }
 
 + (void)dismissLoadingAlert {
@@ -163,7 +163,7 @@ static UIImage* savedIcon = nil;
   Class BrowserController = objc_getClass("BrowserController");
   BrowserController* sbc = [BrowserController sharedBrowserController];
   
-//  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+  //  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
   UIView *enclosingView = (UIView*)[sbc browserLayer]; // transitionview
   
   int orientation = [[BrowserController sharedBrowserController] orientation];
@@ -182,10 +182,10 @@ static UIImage* savedIcon = nil;
    */
   
   // Determine the animation's path.
-	CGPoint startPoint = CGPointMake(buttonFrame.origin.x + buttonFrame.size.width / 2, buttonFrame.origin.y + buttonFrame.size.height / 2);
-	CGPoint curvePoint1 = CGPointMake(startPoint.x + 90, startPoint.y - 150);
-	CGPoint endPoint = CGPointMake(CGRectGetMidX(cellFrame), CGRectGetMidY(cellFrame));
-	CGPoint curvePoint2 = CGPointMake(startPoint.x + 140, endPoint.y - 40);
+  CGPoint startPoint = CGPointMake(buttonFrame.origin.x + buttonFrame.size.width / 2, buttonFrame.origin.y + buttonFrame.size.height / 2);
+  CGPoint curvePoint1 = CGPointMake(startPoint.x + 90, startPoint.y - 150);
+  CGPoint endPoint = CGPointMake(CGRectGetMidX(cellFrame), CGRectGetMidY(cellFrame));
+  CGPoint curvePoint2 = CGPointMake(startPoint.x + 140, endPoint.y - 40);
   
   // Create the animation's path.
   CGPathRef path = NULL;
@@ -287,41 +287,44 @@ static UIImage* savedIcon = nil;
                                      tag:(NSInteger)tag
                                 delegate:(id)delegate {
   
-    UIAlertView *ohmygod = [[UIAlertView alloc] initWithTitle:title
+  UIAlertView *ohmygod = [[UIAlertView alloc] initWithTitle:title
                                                     message:message
                                                    delegate:delegate 
                                           cancelButtonTitle:cancel 
-                                          otherButtonTitles:destructive, @"Download To...", @"View", nil];
-    ohmygod.tag = tag;
-    [ohmygod show];
-    
-//  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:title
-//                                                       delegate:delegate
-//                                              cancelButtonTitle:cancel
-//                                         destructiveButtonTitle:destructive
-//                                              otherButtonTitles:other, nil];
-//  [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
-//  ohmygod.tag = tag;
+                                          otherButtonTitles:destructive, @"Download To...", nil];
+  if (other) {
+	[ohmygod addButtonWithTitle:other];
+  }
+  ohmygod.tag = tag;
+  [ohmygod show];
   
-//  UILabel *nameLabel = MSHookIvar<UILabel *>(ohmygod, "_bodyTextLabel");;
-//  UIFont *filenameFont = [nameLabel font];
-//  CGSize filenameSize = [message sizeWithFont:filenameFont];
-//  CGRect screenRect = [[UIScreen mainScreen] bounds];
-//  CGRect nameLabelRect = CGRectMake((screenRect.size.width / 2) - (filenameSize.width / 2), filenameSize.height,
-//                                    filenameSize.width, filenameSize.height);
-//  [nameLabel setFrame:nameLabelRect];
-//  [nameLabel setText:message];
+  //  UIActionSheet *ohmygod = [[UIActionSheet alloc] initWithTitle:title
+  //                                                       delegate:delegate
+  //                                              cancelButtonTitle:cancel
+  //                                         destructiveButtonTitle:destructive
+  //                                              otherButtonTitles:other, nil];
+  //  [ohmygod setMessage:@"FILLER TEXT OH MY GOD"];
+  //  ohmygod.tag = tag;
   
-//  UIImageView *iconImageView = [[UIImageView alloc]
-//                                initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension] orMimeType:mimetype]];
-//  iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
-//  [ohmygod addSubview:iconImageView];
-//  [iconImageView release];
-    
-//  [ohmygod showInView:(UIView*)[[DHClass(BrowserController) sharedBrowserController] browserLayer]];
+  //  UILabel *nameLabel = MSHookIvar<UILabel *>(ohmygod, "_bodyTextLabel");;
+  //  UIFont *filenameFont = [nameLabel font];
+  //  CGSize filenameSize = [message sizeWithFont:filenameFont];
+  //  CGRect screenRect = [[UIScreen mainScreen] bounds];
+  //  CGRect nameLabelRect = CGRectMake((screenRect.size.width / 2) - (filenameSize.width / 2), filenameSize.height,
+  //                                    filenameSize.width, filenameSize.height);
+  //  [nameLabel setFrame:nameLabelRect];
+  //  [nameLabel setText:message];
+  
+  //  UIImageView *iconImageView = [[UIImageView alloc]
+  //                                initWithImage:[[DownloadManager sharedManager] iconForExtension:[message pathExtension] orMimeType:mimetype]];
+  //  iconImageView.center = CGPointMake(nameLabel.frame.origin.x - 15.0f, nameLabel.center.y + nameLabel.frame.size.height);
+  //  [ohmygod addSubview:iconImageView];
+  //  [iconImageView release];
+  
+  //  [ohmygod showInView:(UIView*)[[DHClass(BrowserController) sharedBrowserController] browserLayer]];
   
   [SDModalAlert block:ohmygod];	
-    [ohmygod release];
+  [ohmygod release];
 }
 
 @end
