@@ -401,7 +401,7 @@ static BOOL _legacy = NO;
 - (id)specifiers {
 	NSString *plist = [self.specifier propertyForKey:@"plist"] ?: @"SafariDownloader";
 	if(_specifiers == nil) {
-		_specifiers = [[self localizedSpecifiersWithSpecifiers:[self loadSpecifiersFromPlistName:plist target:self]] retain];
+		_specifiers = [[self loadSpecifiersFromPlistName:plist target:self] retain];
 //	[specifiers addObjectsFromArray:extraSpecs];
 		NSMutableArray *removals = [NSMutableArray array];
 		for(PSSpecifier *s in _specifiers) {

@@ -6,7 +6,7 @@
 #import <UIKit/UIPreferencesDeleteTableCell.h>
 #import <DHLocalizedListController.h>
 
-@interface SDSettingsController : DHLocalizedListController {
+@interface SDSettingsController : PSListController {
 }
 - (id)initForContentSize:(CGSize)size;
 - (id)specifiers;
