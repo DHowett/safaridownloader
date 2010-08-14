@@ -291,7 +291,7 @@ static UIImage* savedIcon = nil;
                                                     message:message
                                                    delegate:delegate 
                                           cancelButtonTitle:cancel 
-                                          otherButtonTitles:destructive, @"Download To...", nil];
+                                          otherButtonTitles:destructive, @"Download To...", @"View", nil];
     ohmygod.tag = tag;
     [ohmygod show];
     
