@@ -1,14 +1,14 @@
 #import <UIKit/UIKit.h>
 #import "BaseCell.h"
 
-@interface DownloadCell : BaseCell {
-	BOOL finished;
-	BOOL failed;
-	UIProgressView *progressView;
-	NSString *nameLabel;
-	NSString *progressLabel;
-	NSString *completionLabel;
-	NSString *sizeLabel;
+@interface SDDownloadCell : SDBaseCell {
+  BOOL finished;
+  BOOL failed;
+  UIProgressView *progressView;
+  NSString *nameLabel;
+  NSString *progressLabel;
+  NSString *completionLabel;
+  NSString *sizeLabel;
   UIImage  *_icon;
 }
 

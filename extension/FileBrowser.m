@@ -7,6 +7,8 @@
 
 #import "Safari/BrowserController.h"
 
+#import "SandCastle.h"
+
 #define HOME_DIR @"/private/var/mobile/Media/Downloads/"
 #define kNewFolderAlert 239530
 
@@ -14,10 +16,10 @@ extern UIImage *_UIImageWithName(NSString *);
 void UIKeyboardEnableAutomaticAppearance(void);
 void UIKeyboardDisableAutomaticAppearance(void);
 
-FileBrowser* activeInstance;
-BOOL alertViewShown;
+static YFFileBrowser* activeInstance;
+static BOOL alertViewShown;
 
-@interface PathObject : NSObject {
+@interface YFPathObject : NSObject {
   NSString* name;
   NSString* fullpath;
   BOOL isDir;
@@ -25,17 +27,20 @@ BOOL alertViewShown;
 @property (nonatomic, copy) NSString* name;
 @property (nonatomic, copy) NSString* fullpath;
 @property (assign) BOOL isDir;
+
++ (id)objectWithName:(NSString*)n path:(NSString*)p isDir:(BOOL)dir;
+- (id)initWithName:(NSString*)n path:(NSString*)p isDir:(BOOL)dir;
 @end
 
-@implementation PathObject
+@implementation YFPathObject
 @synthesize name, fullpath, isDir;
 
 + (id)objectWithName:(NSString*)n path:(NSString*)p isDir:(BOOL)dir {
-  return [[[PathObject alloc] initWithName:n path:p isDir:dir] autorelease]; 
+  return [[[YFPathObject alloc] initWithName:n path:p isDir:dir] autorelease]; 
 }
 
 - (id)initWithName:(NSString*)n path:(NSString*)p isDir:(BOOL)dir {
-  if (self = [super init]) {
+  if ((self = [super init])) {
     self.name = n;
     self.fullpath = p;
     self.isDir = dir;
@@ -45,12 +50,12 @@ BOOL alertViewShown;
 
 @end
 
-@implementation FileBrowser
+@implementation YFFileBrowser
 
 @synthesize context, data, currentPath, file;
 @synthesize browserDelegate = _browserDelegate;
 
-+ (FileBrowser*)activeInstance {
++ (YFFileBrowser*)activeInstance {
   return activeInstance; 
 }
 
@@ -62,11 +67,11 @@ BOOL alertViewShown;
            context:(id)ctx 
           delegate:(id)del {  
   NSString *messageString = [self resizeToFitCount:1];
-  if (self = [super initWithTitle:@"Downloads\n\n\n\n" 
+  if ((self = [super initWithTitle:@"Downloads\n\n\n\n" 
                           message:messageString 
                          delegate:self 
                 cancelButtonTitle:@"Cancel" 
-                otherButtonTitles:@"Save", nil]) {
+                otherButtonTitles:@"Save", nil])) {
     self.file = fil;
     self.browserDelegate = del;
     self.context = ctx;
@@ -80,17 +85,17 @@ BOOL alertViewShown;
 - (void)enumerateForDirsInPath:(NSString*)path 
                      fillArray:(NSMutableArray*)array 
                       maxCount:(NSInteger)count {
-    BOOL halt = (count > 0) ? YES : NO;
-    NSArray* list = [[objc_getClass("SandCastle") sharedInstance] directoryContentsAtPath:path];  
-    int i;
-    for (i=0; i<list.count; i++) {
-        NSAutoreleasePool* pool = [NSAutoreleasePool new];
-        NSString* curFile = [list objectAtIndex:i];
-        NSString* curPath = [path stringByAppendingPathComponent:curFile];
-        BOOL isDir = [[objc_getClass("SandCastle") sharedInstance] pathIsDir:curPath];
-        [array addObject:[PathObject objectWithName:curFile path:curPath isDir:isDir]];
-        [pool drain];
-    }
+  //BOOL halt = (count > 0) ? YES : NO;
+  NSArray* list = [[objc_getClass("SandCastle") sharedInstance] directoryContentsAtPath:path];  
+  int i;
+  for (i=0; i<list.count; i++) {
+	NSAutoreleasePool* pool = [NSAutoreleasePool new];
+	NSString* curFile = [list objectAtIndex:i];
+	NSString* curPath = [path stringByAppendingPathComponent:curFile];
+	BOOL isDir = [[objc_getClass("SandCastle") sharedInstance] pathIsDir:curPath];
+	[array addObject:[YFPathObject objectWithName:curFile path:curPath isDir:isDir]];
+	[pool drain];
+  }
 }
 
 - (void)setCurrentPath:(NSString*)path {
@@ -113,7 +118,7 @@ BOOL alertViewShown;
   else {
     navButton.alpha = 1;
   }
-    self.data = contents;
+  self.data = contents;
 }
 
 - (NSString*)resizeToFitCount:(NSUInteger)count {
@@ -139,10 +144,10 @@ BOOL alertViewShown;
 clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (alert.tag == kNewFolderAlert) {
     if (buttonIndex != [alert cancelButtonIndex]) {
-      NSString *entered = [(AlertPrompt *)alert enteredText];
-        Class SandCastle = objc_getClass("SandCastle");
-        [[SandCastle sharedInstance] createDirectoryAtResolvedPath:[currentPath stringByAppendingPathComponent:entered]];
-        self.currentPath = [currentPath stringByAppendingPathComponent:entered];
+      NSString *entered = [(SDAlertPrompt *)alert enteredText];
+	  Class SandCastle = objc_getClass("SandCastle");
+	  [[SandCastle sharedInstance] createDirectoryAtResolvedPath:[currentPath stringByAppendingPathComponent:entered]];
+	  self.currentPath = [currentPath stringByAppendingPathComponent:entered];
     }
   }
   else {
@@ -184,15 +189,15 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
 
 - (void)newFolder {
   //UIKeyboardEnableAutomaticAppearance(); // w00t!
-  AlertPrompt *prompt = [AlertPrompt alloc];
-	prompt = [prompt initWithTitle:@"New Folder" 
+  SDAlertPrompt *prompt = [SDAlertPrompt alloc];
+  prompt = [prompt initWithTitle:@"New Folder" 
                          message:@"Enter a name for the new folder" 
                         delegate:self 
                cancelButtonTitle:@"Cancel" 
                    okButtonTitle:@"OK"];
   prompt.tag = kNewFolderAlert;
-	[prompt show];
-	[prompt release];
+  [prompt show];
+  [prompt release];
 }
 
 - (void)prepare {
@@ -221,7 +226,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   [newButton addTarget:self action:@selector(newFolder) forControlEvents:UIControlEventTouchUpInside];
   newButton.frame = CGRectMake(236, 10, 34, 30);
   [self addSubview:newButton];
-
+  
   UIImageView *shadows = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 261, tableHeight)];
   shadows.image = [_UIImageWithName(@"UIPopupAlertListShadow.png") stretchableImageWithLeftCapWidth:5 topCapHeight:7];
   [container addSubview:shadows];
@@ -237,20 +242,20 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
     cell.textLabel.font = [UIFont boldSystemFontOfSize:15];
   }  
   
-  PathObject* item = [data objectAtIndex:indexPath.row];
+  YFPathObject* item = [data objectAtIndex:indexPath.row];
   cell.textLabel.text = item.name;
   
   if (item.isDir) {
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     cell.selectionStyle = UITableViewCellSelectionStyleBlue;
     cell.textLabel.textColor = [UIColor blackColor];
-    cell.imageView.image = [Resources iconForFolder];
+    cell.imageView.image = [SDResources iconForFolder];
   }
   else {
     cell.accessoryType = UITableViewCellAccessoryNone;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.textLabel.textColor = [UIColor grayColor];
-    cell.imageView.image = [Resources iconForExtension:[item.name pathExtension]];
+    cell.imageView.image = [SDResources iconForExtension:[item.name pathExtension]];
   }
   
   return cell;
@@ -259,7 +264,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   [tableView deselectRowAtIndexPath:indexPath animated:YES];
   
-  PathObject* item = [data objectAtIndex:indexPath.row];
+  YFPathObject* item = [data objectAtIndex:indexPath.row];
   if (!item.isDir)
     return;
   CATransition *animation = [CATransition animation];

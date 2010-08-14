@@ -1,4 +1,4 @@
-@interface AlertPrompt : UIAlertView 
+@interface SDAlertPrompt : UIAlertView 
 {
 	UITextField	*textField;
 }
@@ -7,21 +7,21 @@
 - (id)initWithTitle:(NSString *)title message:(NSString *)message delegate:(id)delegate cancelButtonTitle:(NSString *)cancelButtonTitle okButtonTitle:(NSString *)okButtonTitle;
 @end
 
-@interface QuickAlert : NSObject
+@interface SDQuickAlert : NSObject
 + (void)showMessage:(NSString*)msg;
 + (void)showMessage:(NSString*)msg description:(NSString*)desc;
 + (void)showError:(NSString*)msg;
 + (void)showSuccess:(NSString*)msg;
-+ (void)showLoadingAlert;
-+ (void)updateProgress:(CGFloat)prog;
-+ (void)dismissLoadingAlert;
+//+ (void)showLoadingAlert;
+//+ (void)updateProgress:(CGFloat)prog;
+//+ (void)dismissLoadingAlert;
 @end
 
-@interface QuickAlert (internal)
+@interface SDQuickAlert (internal)
 + (void)createAlertWithTitle:(NSString*)t message:(NSString*)message;
 @end
 
-@interface ModalAlert : NSObject 
+@interface SDModalAlert : NSObject 
 
 + (void)showLoadingAlertWithIconName:(NSString*)name orMimeType:(NSString *)mimeType;
 + (void)dismissLoadingAlert;

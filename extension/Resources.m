@@ -9,10 +9,10 @@
 #import "Resources.h"
 #define SUPPORT_BUNDLE_PATH @"/Library/Application Support/Safari Downloader"
 
-@implementation Resources
+@implementation SDResources
 
 + (void)initialize {
-  if (self == [Resources class]) {
+  if (self == [SDResources class]) {
     resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
   } 
 }

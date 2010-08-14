@@ -1,44 +1,44 @@
 #import "BaseCell.h"
 
-@interface BaseCellView : UIView
+@interface SDBaseCellView : UIView
 @end
 
-@implementation BaseCellView
+@implementation SDBaseCellView
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  ((BaseCell *)[self superview]).selected = YES;
+  ((SDBaseCell *)[self superview]).selected = YES;
   [super touchesBegan:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  ((BaseCell *)[self superview]).selected = NO;
+  ((SDBaseCell *)[self superview]).selected = NO;
   [super touchesEnded:touches withEvent:event];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  ((BaseCell *)[self superview]).selected = NO;
+  ((SDBaseCell *)[self superview]).selected = NO;
   [super touchesCancelled:touches withEvent:event];
 }
 
 - (void)drawRect:(CGRect)r {
-	[(BaseCell *)[self superview] drawContentView:r];
+	[(SDBaseCell *)[self superview] drawContentView:r];
 }
 
 @end
 
-@implementation BaseCell
+@implementation SDBaseCell
 
-- (id)initWithFrame:(CGRect)frame reuseIdentifier:(NSString *)reuseIdentifier {
-  if((self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier])) 
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+  if((self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])) 
   {
-		contentView = [[BaseCellView alloc] initWithFrame:CGRectZero];
-		contentView.opaque = YES;
+	contentView = [[SDBaseCellView alloc] initWithFrame:CGRectZero];
+	contentView.opaque = YES;
     self.opaque = YES;
-		[self addSubview:contentView];
-		[contentView release];
+	[self addSubview:contentView];
+	[contentView release];
   }
   return self;
 }

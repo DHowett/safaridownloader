@@ -34,10 +34,10 @@
 - (void)setMessage:(id)message;
 @end
 
-@interface FileBrowserPanel : NSObject <BrowserPanel>
+@interface SDFileBrowserPanel : NSObject <BrowserPanel>
 @end
 
-@interface DownloadManagerNavigationController : UINavigationController <BrowserPanel> {
+@interface SDDownloadManagerNavigationController : UINavigationController <BrowserPanel> {
 	BOOL _isDismissible;
 }
 + (id)sharedInstance;
@@ -54,25 +54,25 @@ typedef enum
   SDActionTypeDownloadAs = 4,
 } SDActionType;
 
-@interface DownloadManager : UIViewController <SafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate> {
-  UITableView*      _tableView;
-  NSMutableSet*     _mimeTypes;
-  NSMutableSet*     _extensions;
+@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate> {
+  UITableView*			  _tableView;
+  NSMutableSet*		  _mimeTypes;
+  NSMutableSet*		  _extensions;
   NSMutableDictionary* _classMappings;
   NSMutableDictionary* _launchActions;
-  NSMutableArray*   _currentDownloads;
-  NSMutableArray*   _finishedDownloads;
-  NSOperationQueue* _downloadQueue;
-  UIToolbarButton*  _portraitDownloadButton;
-  UIToolbarButton*  _landscapeDownloadButton;
-  NSURLRequest* currentRequest;
-  SafariDownload* curDownload;
-  NSDictionary      *_userPrefs;
-  BOOL		     _visible;
-  NSURL		    *_loadingURL;
-  BOOL _isDismissible;
-  FileBrowserPanel* _fbPanel;
-  id<BrowserPanel> _oldPanel;
+  NSMutableArray*		  _currentDownloads;
+  NSMutableArray*		  _finishedDownloads;
+  NSOperationQueue*	  _downloadQueue;
+  UIToolbarButton*	  _portraitDownloadButton;
+  UIToolbarButton*	  _landscapeDownloadButton;
+  NSURLRequest*		  currentRequest;
+  SDSafariDownload*	  curDownload;
+  NSDictionary			  *_userPrefs;
+  BOOL					  _visible;
+  NSURL					  *_loadingURL;
+  BOOL					  _isDismissible;
+  SDFileBrowserPanel*  _fbPanel;
+  id<BrowserPanel>	  _oldPanel;
 }
 
 @property (nonatomic, assign) UIToolbarButton*  portraitDownloadButton;
@@ -104,14 +104,10 @@ typedef enum
 - (BOOL)addDownloadWithURL:(NSURL*)url browser:(BOOL)b;
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)url browser:(BOOL)b;
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType browser:(BOOL)b;
-- (BOOL)addDownload:(SafariDownload *)download browser:(BOOL)b;
-- (BOOL)cancelDownload:(SafariDownload *)download;
+- (BOOL)addDownload:(SDSafariDownload *)download browser:(BOOL)b;
+- (BOOL)cancelDownload:(SDSafariDownload *)download;
 - (BOOL)cancelDownloadWithURL:(NSURL *)url;
 - (IBAction)cancelAllDownloads;
-
-//- (DownloadManagerPanel*)browserPanel;
-- (void)showDownloadManager;
-- (IBAction)hideDownloadManager;
 
 - (void)updateBadges;
 @end

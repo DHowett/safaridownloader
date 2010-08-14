@@ -5,10 +5,13 @@
 
 #import "NSObject.h"
 
+#ifndef BPANEL
+#define BPANEL
 @protocol BrowserPanel <NSObject>
 -(int)panelType;
 -(int)panelState;
 -(BOOL)allowsRotation;
 -(BOOL)pausesPages;
 @end
+#endif
 

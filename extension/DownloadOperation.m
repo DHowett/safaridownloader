@@ -7,15 +7,13 @@
 #import "Safari/BrowserController.h"
 #import "WebUI4/WebUIAuthenticationManager.h"
 
-#ifndef DEBUG
-//#define NSLog(...)
-#endif
+#import "SandCastle.h"
 
-@interface DownloadOperation (extra)
+@interface SDDownloadOperation (extra)
 id _authenticationView = nil;
 @end
 
-@implementation DownloadOperation
+@implementation SDDownloadOperation
 @synthesize delegate = _delegate;
 @synthesize temporaryPath = _temporaryPath;
 
@@ -321,8 +319,8 @@ fail:
   NSString *resumeDataPath = [NSString stringWithFormat:@"/tmp/.partial/%@.plist", [_delegate filename]];
   NSString *outputPath = [NSString stringWithFormat:@"/tmp/.partial/%@", [_delegate filename]];
   
-  NSLog(resumeDataPath);
-  NSLog(outputPath);
+  //NSLog(resumeDataPath);
+  //NSLog(outputPath);
   
   if ([[NSFileManager defaultManager] fileExistsAtPath:resumeDataPath] == NO) {
     NSLog(@"resume file not found");

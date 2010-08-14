@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface Resources : NSObject
+@interface SDResources : NSObject
 NSBundle* resourceBundle;
 + (UIImage *)iconForFolder;
 + (UIImage *)iconForExtension:(NSString *)extension;

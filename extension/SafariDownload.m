@@ -7,14 +7,11 @@
 //
 
 #import "SafariDownload.h"
-
-#ifndef DEBUG
-//#define NSLog(...)
-#endif
+#import "SandCastle.h"
 
 #define DEF_SAVE_PATH @"/var/mobile/Media/Downloads"
 
-@implementation SafariDownload
+@implementation SDSafariDownload
 @synthesize
 delegate    = _delegate,
 urlReq      = _urlRequest,
@@ -104,7 +101,7 @@ savePath    = _savePath;
     _savePath = [DEF_SAVE_PATH retain];
   else
     _savePath = [pth retain];
-  [[NSFileManager defaultManager] createDirectoryAtPath:_savePath withIntermediateDirectories:NO attributes:nil error:nil];
+  [[objc_getClass("SandCastle") sharedInstance] createDirectoryAtResolvedPath:_savePath];
 }
 
 - (void)setSize:(NSInteger)length {
@@ -155,7 +152,7 @@ savePath    = _savePath;
   [_delegate performSelectorOnMainThread:@selector(downloadDidFail:) withObject:self waitUntilDone:NO];
 }
 
-- (BOOL)isEqual:(SafariDownload*)comparator {
+- (BOOL)isEqual:(SDSafariDownload*)comparator {
   if ([self.urlReq URL] == nil || [comparator.urlReq URL] == nil)
     return NO;
   return [[self.urlReq URL] isEqual:[comparator.urlReq URL]];

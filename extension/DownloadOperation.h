@@ -2,7 +2,7 @@
 #import "NSURLDownload.h"
 #import "WebUI/AuthenticationView.h"
 
-@protocol DownloadOperationDelegate
+@protocol SDDownloadOperationDelegate
 - (NSURLRequest *)urlReq;
 - (NSString *)filename;
 - (BOOL)useSuggest;
@@ -16,27 +16,27 @@
 - (void)downloadCancelled;
 @end
 
-@interface DownloadOperation : NSOperation {
-  id             _delegate;
-  NSURLDownload* _downloader;
+@interface SDDownloadOperation : NSOperation {
+  id					  _delegate;
+  NSURLDownload*	  _downloader;
   NSURLCredential*  _authCredential;
-  NSURLResponse* _response;
-  NSTimeInterval _start;
-  BOOL           _keepAlive;
-  float          _bytes;
-  NSTimer*       _timer;
-  int            _retryCount;
-  BOOL           _noUpdate;
-  BOOL           _wasResumed;
-  long long      _resumedFrom;
-  float          _downloadedBytes;
-  BOOL           _requiresAuthentication;
-    NSString*   _temporaryPath;
+  NSURLResponse*	  _response;
+  NSTimeInterval	  _start;
+  BOOL				  _keepAlive;
+  float				  _bytes;
+  NSTimer*			  _timer;
+  int					  _retryCount;
+  BOOL				  _noUpdate;
+  BOOL				  _wasResumed;
+  long long			  _resumedFrom;
+  float				  _downloadedBytes;
+  BOOL				  _requiresAuthentication;
+  NSString*			  _temporaryPath;
 }
 
 + (id)authView;
 
-@property (assign) id<DownloadOperationDelegate> delegate;
+@property (assign) id<SDDownloadOperationDelegate> delegate;
 @property (nonatomic, copy) NSString* temporaryPath;
 
 - (id)initWithDelegate:(id)del;

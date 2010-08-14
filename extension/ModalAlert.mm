@@ -1,5 +1,5 @@
 //
-//  ModalAlert.m
+//  SDModalAlert.m
 //  Downloader
 //
 //  Created by Youssef Francis on 8/3/09.
@@ -20,7 +20,7 @@
 
 DHLateClass(BrowserController);
 
-@interface ModalAlert (priv)
+@interface SDModalAlert (priv)
 UIAlertView* activeAlert;
 @end
 
@@ -29,7 +29,7 @@ UIAlertView* activeAlert;
 - (id)addTextFieldWithValue:(id)value label:(id)label;
 @end
 
-@implementation AlertPrompt
+@implementation SDAlertPrompt
 @synthesize textField;
 @synthesize enteredText;
 - (id)initWithTitle:(NSString *)title 
@@ -55,9 +55,9 @@ UIAlertView* activeAlert;
 }
 @end
 
-@implementation QuickAlert
-static UIAlertView* alertView = nil;
-static UIProgressView* progressView = nil;
+@implementation SDQuickAlert
+//static UIAlertView* alertView = nil;
+//static UIProgressView* progressView = nil;
 
 + (void)showMessage:(NSString*)msg {
   [self createAlertWithTitle:msg message:nil];
@@ -87,7 +87,7 @@ static UIProgressView* progressView = nil;
 
 @end
 
-@implementation ModalAlert
+@implementation SDModalAlert
 
 + (void)block:(UIView *)view {
   view.hidden = FALSE;
@@ -109,11 +109,11 @@ static UIProgressView* progressView = nil;
   [alert show];
   [alert release];
   
-  [ModalAlert block:alert];	
+  [SDModalAlert block:alert];	
 }
 
 + (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
-  [[DownloadManager sharedManager] updateBadges];
+  [[SDDownloadManager sharedManager] updateBadges];
   UITransitionView* parent = [[objc_getClass("BrowserController") sharedBrowserController] browserLayer];
   UIView* v = [parent viewWithTag:12345];
   [v removeFromSuperview];
@@ -141,7 +141,7 @@ static UIImage* savedIcon = nil;
   [activeAlert addSubview:listingIndicator];
   [listingIndicator release];
   
-  savedIcon = [[[DownloadManager sharedManager] iconForExtension:[name pathExtension] orMimeType:mimeType] retain];
+  savedIcon = [[[SDDownloadManager sharedManager] iconForExtension:[name pathExtension] orMimeType:mimeType] retain];
   
   UIImageView* icon = [[UIImageView alloc] initWithImage:savedIcon];
   icon.frame = CGRectMake(18, 14, 22, 22);
@@ -163,12 +163,12 @@ static UIImage* savedIcon = nil;
   Class BrowserController = objc_getClass("BrowserController");
   BrowserController* sbc = [BrowserController sharedBrowserController];
   
-  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
-  UIView *enclosingView = [sbc browserLayer]; // transitionview
+//  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+  UIView *enclosingView = (UIView*)[sbc browserLayer]; // transitionview
   
   int orientation = [[BrowserController sharedBrowserController] orientation];
-  UIView *button = (orientation == 0 ? ([[DownloadManager sharedManager] portraitDownloadButton]) : 
-                    ([[DownloadManager sharedManager] landscapeDownloadButton]));
+  UIView *button = (orientation == 0 ? ([[SDDownloadManager sharedManager] portraitDownloadButton]) : 
+                    ([[SDDownloadManager sharedManager] landscapeDownloadButton]));
   CGRect tempCellFrame = [button frame];
   CGRect cellFrame;
   if (!button) cellFrame = CGRectMake(260, 440, 34, 36);
@@ -266,7 +266,7 @@ static UIImage* savedIcon = nil;
   //  [[objc_getClass("BrowserController") sharedBrowserController] showKeyboard:YES atPoint:CGPointMake(0, window.frame.size.height-216) inLayer:window belowLayer:nil forSheet:YES];
   
   [[objc_getClass("BrowserController") sharedBrowserController] _showKeyboardForSheet:YES];
-  [ModalAlert block:alert];
+  [SDModalAlert block:alert];
   [[objc_getClass("BrowserController") sharedBrowserController] _hideKeyboardForSheet:YES];
   NSDictionary* ret = [NSMutableDictionary dictionary];
   if (userField.text.length > 0 && passField.text.length > 0) {
@@ -291,7 +291,7 @@ static UIImage* savedIcon = nil;
                                                     message:message
                                                    delegate:delegate 
                                           cancelButtonTitle:cancel 
-                                          otherButtonTitles:destructive, @"Save As...", nil];
+                                          otherButtonTitles:destructive, @"Download To...", nil];
     ohmygod.tag = tag;
     [ohmygod show];
     
@@ -320,7 +320,7 @@ static UIImage* savedIcon = nil;
     
 //  [ohmygod showInView:(UIView*)[[DHClass(BrowserController) sharedBrowserController] browserLayer]];
   
-  [ModalAlert block:ohmygod];	
+  [SDModalAlert block:ohmygod];	
     [ohmygod release];
 }
 

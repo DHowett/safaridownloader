@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@interface BaseCell : UITableViewCell {
+@interface SDBaseCell : UITableViewCell {
 	UIView *contentView;
 }
 

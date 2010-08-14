@@ -15,8 +15,6 @@
 #import "Safari/TabDocument.h"
 
 #import "Safari/RotatablePopoverController.h"
-//#import <WebKit/DOMHTMLAnchorElement.h>
-//typedef void* GSEventRef;
 
 char __attribute((section("__MISC, UDID"))) udid[41] = "0000000000000000000000000000000000000000";
 
@@ -130,8 +128,8 @@ static void initCustomToolbar(void) {
 
 - (void)applicationResume:(GSEventRef)event {
   %orig;
-  [[DownloadManager sharedManager] updateUserPreferences];
-  [[DownloadManager sharedManager] updateFileTypes];
+  [[SDDownloadManager sharedManager] updateUserPreferences];
+  [[SDDownloadManager sharedManager] updateFileTypes];
 }
 
 - (void)applicationWillSuspend {
@@ -167,9 +165,9 @@ static void initCustomToolbar(void) {
 
     int tag = button.tag;
     if(tag == 61)
-      [[DownloadManager sharedManager] setPortraitDownloadButton:button];
+      [[SDDownloadManager sharedManager] setPortraitDownloadButton:button];
     else if(tag == 62)
-      [[DownloadManager sharedManager] setLandscapeDownloadButton:button];
+      [[SDDownloadManager sharedManager] setLandscapeDownloadButton:button];
 
     curButton++;
   }
@@ -180,9 +178,9 @@ static void initCustomToolbar(void) {
 %hook BrowserController -(id)_panelForPanelType:(int)type {
   %log;
   if (type == 44) {
-    return [DownloadManagerNavigationController sharedInstance];
+    return [SDDownloadManagerNavigationController sharedInstance];
   } else if (type == 88) {
-    return [DownloadOperation authView];
+    return [SDDownloadOperation authView];
   }
   return %orig;
 }
@@ -197,7 +195,7 @@ decidePolicyForNewWindowAction:(NSDictionary *)action
                        request:(NSURLRequest *)request
                   newFrameName:(NSString *)newFrameName
               decisionListener:(id<WebPolicyDecisionListener>)decisionListener {
-  DownloadManager* downloader = [DownloadManager sharedManager];
+  SDDownloadManager* downloader = [SDDownloadManager sharedManager];
   NSURLRequest* _currentRequest = downloader.currentRequest;
   
   if (_currentRequest != nil && [_currentRequest isEqual:request]) 
@@ -242,7 +240,7 @@ decidePolicyForNavigationAction:(NSDictionary *)action
                decisionListener:(id<WebPolicyDecisionListener>)decisionListener {
   NSLog(@"NAV: decidePolicyForNavigationAction, req: %@", request);
   
-  DownloadManager* downloader = [DownloadManager sharedManager];
+  SDDownloadManager* downloader = [SDDownloadManager sharedManager];
   NSURLRequest* _currentRequest = downloader.currentRequest;
   NSLog(@"NAV: req: %@ - cur: %@", request, _currentRequest);
   
@@ -285,7 +283,7 @@ decidePolicyForMIMEType:(NSString *)type
        decisionListener:(id<WebPolicyDecisionListener>)decisionListener {
   NSLog(@"MIME: decidePolicyForMIMEType %@, request: @", type, request);
   
-  DownloadManager* downloader = [DownloadManager sharedManager];
+  SDDownloadManager* downloader = [SDDownloadManager sharedManager];
   NSURLRequest* _currentRequest = downloader.currentRequest;
   NSLog(@"MIME: req: %@ - cur: %@", request, _currentRequest);
   
@@ -373,11 +371,16 @@ struct interactionnot32 {
 
 static NSURL *interactionURL = nil;
 
+@interface DOMNode : NSObject
+-(DOMNode*)parentNode;
+-(NSURL*)absoluteLinkURL;
+@end
+
 %hook UIWebDocumentView
 - (void)actionSheet:(UIActionSheet *)sheet clickedButtonAtIndex:(int)index {
   if(index == 1336) {
     if(interactionURL)
-      [[DownloadManager sharedManager] addDownloadWithURL:interactionURL browser:YES];
+      [[SDDownloadManager sharedManager] addDownloadWithURL:interactionURL browser:YES];
   }
   %orig;
   [interactionURL release];
@@ -436,8 +439,8 @@ static void showBrowserSheetHookInternals(UIWebDocumentView *self, UIActionSheet
 #pragma mark -/*}}}*/
 
 void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-  [[DownloadManager sharedManager] updateUserPreferences];
-  [[DownloadManager sharedManager] updateFileTypes];
+  [[SDDownloadManager sharedManager] updateUserPreferences];
+  [[SDDownloadManager sharedManager] updateFileTypes];
 }
 
 #if 0
@@ -448,6 +451,7 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 }
 %end
 #endif
+
 %hook BrowserController
 - (void)_setShowingCurrentPanel:(BOOL)showing animate:(BOOL)animate {
   %log;
@@ -484,7 +488,7 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 - (void)_presentModalViewControllerFromDownloadsButton:(id)x {
   if(_wildCat) {
     id rpc = [[%c(RotatablePopoverController) alloc] initWithContentViewController:x];
-    [rpc setPresentationRect:[[[DownloadManager sharedManager] portraitDownloadButton] frame]];
+    [rpc setPresentationRect:[[[SDDownloadManager sharedManager] portraitDownloadButton] frame]];
     [rpc setPresentationView:[self buttonBar]];
     [rpc setPermittedArrowDirections:1];
     [rpc setPassthroughViews:[NSArray arrayWithObject:[self buttonBar]]];

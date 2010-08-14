@@ -1,6 +1,6 @@
 //
-//  SafariDownload.h
-//  SafariDownload
+//  SDSafariDownload.h
+//  SDSafariDownload
 //
 //  Created by Youssef Francis on 7/21/09.
 //  Copyright 2009 Brancipater Software. All rights reserved.
@@ -9,20 +9,20 @@
 #import <Foundation/Foundation.h>
 #import "DownloadOperation.h"
 
-@class SafariDownload;
-@protocol SafariDownloadDelegate
+@class SDSafariDownload;
+@protocol SDSafariDownloadDelegate
 
-- (void)downloadDidBegin:(SafariDownload*)download;
-- (void)downloadDidReceiveAuthenticationChallenge:(SafariDownload*)download;
-- (void)downloadDidProvideFilename:(SafariDownload*)download;
-- (void)downloadDidFinish:(SafariDownload*)download;
-- (void)downloadDidUpdate:(SafariDownload*)download;
-- (void)downloadDidFail:(SafariDownload*)download;
-- (void)downloadDidCancel:(SafariDownload*)download;
+- (void)downloadDidBegin:(SDSafariDownload*)download;
+- (void)downloadDidReceiveAuthenticationChallenge:(SDSafariDownload*)download;
+- (void)downloadDidProvideFilename:(SDSafariDownload*)download;
+- (void)downloadDidFinish:(SDSafariDownload*)download;
+- (void)downloadDidUpdate:(SDSafariDownload*)download;
+- (void)downloadDidFail:(SDSafariDownload*)download;
+- (void)downloadDidCancel:(SDSafariDownload*)download;
 
 @end
 
-@interface SafariDownload : NSObject <NSCoding, DownloadOperationDelegate>
+@interface SDSafariDownload : NSObject <NSCoding, SDDownloadOperationDelegate>
 {
   id             _delegate;
   NSURLRequest*  _urlRequest;
@@ -39,11 +39,11 @@
   BOOL           _useSuggested;
   BOOL           _complete;
   BOOL           _failed;
-  DownloadOperation *downloadOperation;
+  SDDownloadOperation *downloadOperation;
 }
 
-@property (assign)            id<SafariDownloadDelegate> delegate;
-@property (nonatomic, retain) DownloadOperation *downloadOperation;
+@property (assign)            id<SDSafariDownloadDelegate> delegate;
+@property (nonatomic, retain) SDDownloadOperation *downloadOperation;
 @property (nonatomic, retain) NSURLRequest    *urlReq;
 @property (nonatomic, retain) NSDate          *startDate;
 @property (nonatomic, retain) NSString        *filename;

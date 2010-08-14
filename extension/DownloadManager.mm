@@ -15,7 +15,9 @@
 
 #import "UIKitExtra/UIDocumentInteractionController.h"
 
-#define DL_ARCHIVE_PATH @"/tmp/safaridownloads.plist"
+#import "SandCastle.h"
+
+#define DL_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloads.plist"
 #define kDownloadSheet 993349
 #define kActionSheet 903403
 
@@ -23,23 +25,27 @@
 DHLateClass(Application);
 DHLateClass(BrowserController);
 
+@interface LSApplicationProxy : NSObject
+- (id)app;
+- (id)localizedName;
+@end
+
 @interface UIApplication (Safari)
 - (void)applicationOpenURL:(id)url;
 @end
 
-@implementation FileBrowserPanel
+@implementation SDFileBrowserPanel
 - (BOOL)allowsRotation { return NO; }
 - (BOOL)pausesPages { return NO; }
 - (int)panelType { return 45; }
 - (int)panelState { return 1; }
 @end
 
-@implementation DownloadManagerNavigationController
+@implementation SDDownloadManagerNavigationController
 static id sharedNc = nil;
 + (void)initialize  {
-  if (self == [DownloadManagerNavigationController class]) {
-    NSLog(@"INITIALIZE!!");
-    sharedNc = [[self alloc] initWithRootViewController:[DownloadManager sharedManager]];
+  if (self == [SDDownloadManagerNavigationController class]) {
+    sharedNc = [[self alloc] initWithRootViewController:[SDDownloadManager sharedManager]];
   }
 }
 
@@ -67,7 +73,6 @@ static id sharedNc = nil;
   [[$BrowserController sharedBrowserController] hideBrowserPanelType:44];
 }
 
-static int markthing = 0;
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   [[$BrowserController sharedBrowserController] didShowBrowserPanel:[[$BrowserController sharedBrowserController] browserPanel]];
@@ -92,7 +97,7 @@ static int markthing = 0;
 }
 @end
 
-@implementation DownloadManager
+@implementation SDDownloadManager
 @synthesize 
 portraitDownloadButton = _portraitDownloadButton,
 landscapeDownloadButton = _landscapeDownloadButton,
@@ -111,7 +116,7 @@ static id resourceBundle = nil;
 }
 
 + (void)initialize  {
-  if (self == [DownloadManager class]) {
+  if (self == [SDDownloadManager class]) {
     sharedManager = [[self alloc] init];
   }
 }
@@ -121,8 +126,8 @@ static id resourceBundle = nil;
 }
 
 - (id)init {
-  if (self = [super init]) {
-    _fbPanel = [[FileBrowserPanel alloc] init];
+  if ((self = [super init])) {
+    _fbPanel = [[SDFileBrowserPanel alloc] init];
     resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
     _currentDownloads = [NSMutableArray new];
     _finishedDownloads = [NSMutableArray new];
@@ -136,7 +141,6 @@ static id resourceBundle = nil;
 }
 
 - (void)loadView { 
-  NSLog(@"LOADVIEW!!");
   UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
                                                                    style:UIBarButtonItemStyleBordered 
                                                                   target:self 
@@ -146,7 +150,7 @@ static id resourceBundle = nil;
   
   UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" 
                                                                  style:UIBarButtonItemStyleDone 
-                                                                target:[DownloadManagerNavigationController sharedInstance] 
+                                                                target:[SDDownloadManagerNavigationController sharedInstance] 
                                                                 action:@selector(close)];
   self.navigationItem.leftBarButtonItem = doneButton;
   self.navigationItem.leftBarButtonItem.enabled = YES;
@@ -190,15 +194,13 @@ static id resourceBundle = nil;
 #pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
 static SDActionType _actionType = SDActionTypeNone;
 
-// WebPolicyDelegate SafariDownloader Addition
+// WebPolicyDelegate SDSafariDownloader Addition
 - (SDActionType) webView:(WebView *)webView 
             decideAction:(NSDictionary*)action
               forRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType 
                  inFrame:(WebFrame *)frame
-            withListener:(id<WebPolicyDecisionListener>)listener {
-  NSLog(@"WE GOT CALLED!!!!");
-  
+            withListener:(id<WebPolicyDecisionListener>)listener {  
   NSString *url = [[request URL] absoluteString];
   
   if (![url hasPrefix:@"http://"] && 
@@ -224,7 +226,7 @@ static SDActionType _actionType = SDActionTypeNone;
     else 
       other = @"View";
     
-    [ModalAlert showDownloadActionSheetWithTitle:@"What would you like to do?"
+    [SDModalAlert showDownloadActionSheetWithTitle:@"What would you like to do?"
                                          message:filename
                                         mimetype:mimeType
                                     cancelButton:@"Cancel"
@@ -242,18 +244,13 @@ static SDActionType _actionType = SDActionTypeNone;
       [frame stopLoading];
       BOOL downloadAdded = NO;
       BOOL saveAs = (_actionType == SDActionTypeDownloadAs);
-      if(mimeType != nil)
+      if (mimeType != nil)
         downloadAdded = [self addDownloadWithRequest:request 
                                          andMimeType:mimeType
                                              browser:saveAs];
       else
         downloadAdded = [self addDownloadWithRequest:request
                                              browser:saveAs];
-      
-      if (downloadAdded)
-        NSLog(@"successfully added download");
-      else
-        NSLog(@"add download failed");
       return _actionType;
     } 
     else {
@@ -266,7 +263,6 @@ static SDActionType _actionType = SDActionTypeNone;
     NSLog(@"Request %@ unsupported", request);
     return SDActionTypeNone;
   }
-  NSLog(@"RETURNING NO!");
   return SDActionTypeNone;
 }
 
@@ -313,16 +309,16 @@ static SDActionType _actionType = SDActionTypeNone;
       }
     }
   }
-  NSLog(@"%@", _mimeTypes);
+  //NSLog(@"%@", _mimeTypes);
   
-    Class SandCastle = objc_getClass("SandCastle");
+  Class SandCastle = objc_getClass("SandCastle");
   if (_launchActions) [_launchActions release];
   _launchActions = [[NSMutableDictionary alloc] init];
   if ([[SandCastle sharedInstance] fileExistsAtPath:@"/Applications/iFile.app"]) {
-//    NSDictionary *iFile = [NSDictionary dictionaryWithContentsOfFile:@"/Applications/iFile.app/Info.plist"];
-//    NSString *iFileVersion = [iFile objectForKey:@"CFBundleVersion"];
-//    if (![iFileVersion isEqualToString:@"1.0.0"])
-      [_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
+	//    NSDictionary *iFile = [NSDictionary dictionaryWithContentsOfFile:@"/Applications/iFile.app/Info.plist"];
+	//    NSString *iFileVersion = [iFile objectForKey:@"CFBundleVersion"];
+	//    if (![iFileVersion isEqualToString:@"1.0.0"])
+	[_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
   }
   return;
 }
@@ -368,7 +364,7 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (UIImage*)iconForExtension:(NSString *)extension 
-                   orMimeType:(NSString *)mimeType {
+				  orMimeType:(NSString *)mimeType {
   NSString *mimeIconPath = [self iconPathForMIME:mimeType];
   NSString *extIconPath = [self iconPathForName:extension];
   NSString *iconPath = nil;
@@ -383,8 +379,6 @@ static SDActionType _actionType = SDActionTypeNone;
 
 - (BOOL)supportedRequest:(NSURLRequest *)request
             withMimeType:(NSString *)mimeType {
-  NSLog(@"mimetype count: %d", [_mimeTypes count]);
-  NSLog(@"extensions count: %d", [_extensions count]);
   
   if (mimeType != nil && [_mimeTypes containsObject:mimeType]) {
     NSLog(@"mimeType: %@ supported!", mimeType);
@@ -404,8 +398,11 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark Persistent Storage/*{{{*/
 
 - (void)saveData {
-    //NSLog(@"archiving to path: %@", DL_ARCHIVE_PATH);
-    //[NSKeyedArchiver archiveRootObject:_currentDownloads toFile:DL_ARCHIVE_PATH]; 
+  NSString* tempDL = [@"/tmp" stringByAppendingPathComponent:[DL_ARCHIVE_PATH lastPathComponent]];
+  NSData* dl = [NSKeyedArchiver archivedDataWithRootObject:_currentDownloads];
+  NSLog(@"archiving to path: %@", tempDL);
+  [dl writeToFile:tempDL atomically:NO];
+  [[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:tempDL toPath:DL_ARCHIVE_PATH];    
 }
 
 #pragma mark -
@@ -428,21 +425,21 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark -/*}}}*/
 #pragma mark Download Management/*{{{*/
 
-- (SafariDownload *)downloadWithURL:(NSURL*)url {
-  for (SafariDownload *download in _currentDownloads) {
+- (SDSafariDownload *)downloadWithURL:(NSURL*)url {
+  for (SDSafariDownload *download in _currentDownloads) {
     if ([[download.urlReq URL] isEqual:url])
       return download;
   }
   return nil; 
 }
 
-- (void)fileBrowser:(FileBrowser*)browser 
+- (void)fileBrowser:(YFFileBrowser*)browser 
       didSelectPath:(NSString*)path 
             forFile:(id)file 
         withContext:(id)download {
   [self enableRotations];
-  ((SafariDownload*)download).savePath = path;
-  DownloadOperation *op = [[DownloadOperation alloc] initWithDelegate:(SafariDownload*)download];
+  ((SDSafariDownload*)download).savePath = path;
+  SDDownloadOperation *op = [[SDDownloadOperation alloc] initWithDelegate:(SDSafariDownload*)download];
   [_downloadQueue addOperation:op];
   [op release];
   [_currentDownloads addObject:download];
@@ -455,30 +452,29 @@ static SDActionType _actionType = SDActionTypeNone;
   }
 }
 
-- (void)fileBrowserDidCancel:(FileBrowser*)browser {
+- (void)fileBrowserDidCancel:(YFFileBrowser*)browser {
   NSLog(@"fileBrowserDidCancel");
   [self enableRotations];
 }
 
 // everything eventually goes through this method
-- (BOOL)addDownload:(SafariDownload*)download browser:(BOOL)browser {
+- (BOOL)addDownload:(SDSafariDownload*)download browser:(BOOL)browser {
   if (![_currentDownloads containsObject:download]) {
-    [self disableRotations];
-      
-      if (browser) {
-          FileBrowser* f = [[FileBrowser alloc] initWithFile:download.filename 
-                                                     context:download
-                                                    delegate:self];
-          [f show];
-          [f release];
-      }
-      else {
-          [self fileBrowser:nil 
-              didSelectPath:@"/var/mobile/Media/Downloads" 
-                    forFile:download.filename 
-                withContext:download];
-      }
-      
+	if (browser) {
+	  //[self disableRotations];
+	  YFFileBrowser* f = [[YFFileBrowser alloc] initWithFile:download.filename 
+													 context:download
+													delegate:self];
+	  [f show];
+	  [f release];
+	}
+	else {
+	  [self fileBrowser:nil 
+		  didSelectPath:@"/var/mobile/Media/Downloads" 
+				forFile:download.filename 
+			withContext:download];
+	}
+	
     return YES;
   }
   return NO;
@@ -495,12 +491,12 @@ static SDActionType _actionType = SDActionTypeNone;
     use = YES;
   }
   
-  SafariDownload* download = [[SafariDownload alloc] initWithRequest:[NSURLRequest requestWithURL:url]
-                                                                name:filename
-                                                            delegate:self
-                                                        useSuggested:use];
+  SDSafariDownload* download = [[SDSafariDownload alloc] initWithRequest:[NSURLRequest requestWithURL:url]
+																	name:filename
+																delegate:self
+															useSuggested:use];
   
-    return [self addDownload:download browser:browser];
+  return [self addDownload:download browser:browser];
 }
 
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request browser:(BOOL)browser {
@@ -514,14 +510,16 @@ static SDActionType _actionType = SDActionTypeNone;
   if ([self downloadWithURL:[request URL]])
     return NO;
   
-  SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
-                                                                name:filename
-                                                            delegate:self
-                                                        useSuggested:use];
-    return [self addDownload:download browser:browser];
+  SDSafariDownload* download = [[SDSafariDownload alloc] initWithRequest:request
+																	name:filename
+																delegate:self
+															useSuggested:use];
+  return [self addDownload:download browser:browser];
 }
 
-- (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType browser:(BOOL)browser {
+- (BOOL)addDownloadWithRequest:(NSURLRequest*)request 
+						 andMimeType:(NSString *)mimeType 
+							  browser:(BOOL)browser {
   BOOL use = NO;
   NSString *filename = [self fileNameForURL:[request URL]];
   if (filename == nil) {
@@ -532,12 +530,12 @@ static SDActionType _actionType = SDActionTypeNone;
   if ([self downloadWithURL:[request URL]])
     return NO;
   
-  SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
-                                                                name:filename
-                                                            delegate:self
-                                                        useSuggested:use];
+  SDSafariDownload* download = [[SDSafariDownload alloc] initWithRequest:request
+																						  name:filename
+																					 delegate:self
+																				useSuggested:use];
   download.mimetype = mimeType;
-    return [self addDownload:download browser:browser];
+  return [self addDownload:download browser:browser];
 }
 
 - (BOOL)addDownloadWithInfo:(NSDictionary*)info browser:(BOOL)b {
@@ -545,18 +543,18 @@ static SDActionType _actionType = SDActionTypeNone;
   if ([self downloadWithURL:[request URL]])
     return NO;
   
-  SafariDownload* download = [[SafariDownload alloc] initWithRequest:request
-                                                                name:[info objectForKey:@"name"]
-                                                            delegate:self
-                                                        useSuggested:NO];
-    return [self addDownload:download browser:b];
+  SDSafariDownload* download = [[SDSafariDownload alloc] initWithRequest:request
+																	name:[info objectForKey:@"name"]
+																delegate:self
+															useSuggested:NO];
+  return [self addDownload:download browser:b];
 }
 
 // everything eventually goes through this method
-- (BOOL)cancelDownload:(SafariDownload *)download {
+- (BOOL)cancelDownload:(SDSafariDownload *)download {
   if (download != nil) {
     @try {
-      DownloadOperation *op = download.downloadOperation;
+      SDDownloadOperation *op = download.downloadOperation;
       [op cancel];
       download.downloadOperation = nil;
     }
@@ -568,7 +566,8 @@ static SDActionType _actionType = SDActionTypeNone;
     [_currentDownloads removeObject:download];
     
     if (_currentDownloads.count == 0) {
-      [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+      [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] 
+					 withRowAnimation:UITableViewRowAnimationFade];
     } 
     else {
       [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
@@ -587,8 +586,8 @@ static SDActionType _actionType = SDActionTypeNone;
   return NO; 
 }
 
-- (void)deleteDownload:(SafariDownload*)download {
-
+- (void)deleteDownload:(SDSafariDownload*)download {
+  
 }
 
 - (void)cancelAllDownloads {
@@ -613,17 +612,17 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (void)alertView:(UIAlertView *)alert clickedButtonAtIndex:(NSInteger)buttonIndex {
-    if (alert.tag == kDownloadSheet) {
-        NSString* title = [alert buttonTitleAtIndex:buttonIndex];
-        if([title isEqualToString:@"Cancel"])
-            _actionType = SDActionTypeCancel;
-        else if([title isEqualToString:@"View"]) 
-            _actionType = SDActionTypeView;
-        else if ([title isEqualToString:@"Download"])
-            _actionType = SDActionTypeDownload;
-        else if ([title isEqualToString:@"Save As..."])
-            _actionType = SDActionTypeDownloadAs;
-    }
+  if (alert.tag == kDownloadSheet) {
+	NSString* title = [alert buttonTitleAtIndex:buttonIndex];
+	if([title isEqualToString:@"Cancel"])
+	  _actionType = SDActionTypeCancel;
+	else if([title isEqualToString:@"View"]) 
+	  _actionType = SDActionTypeView;
+	else if ([title isEqualToString:@"Download"])
+	  _actionType = SDActionTypeDownload;
+	else if ([title isEqualToString:@"Download To..."])
+	  _actionType = SDActionTypeDownloadAs;
+  }
   else if (buttonIndex == 1) {
     if (_currentDownloads.count > 0) {
       [self saveData];
@@ -634,36 +633,36 @@ static SDActionType _actionType = SDActionTypeNone;
   } 
 }
 
-- (DownloadCell*)cellForDownload:(SafariDownload*)download {
+- (SDDownloadCell*)cellForDownload:(SDSafariDownload*)download {
   NSUInteger row = [_currentDownloads indexOfObject:download];
-  DownloadCell *cell = (DownloadCell*)[_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
+  SDDownloadCell *cell = (SDDownloadCell*)[_tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
   return cell;
 }
 
 #pragma mark -/*}}}*/
-#pragma mark SafariDownloadDelegate Methods/*{{{*/
+#pragma mark SDSafariDownloadDelegate Methods/*{{{*/
 
-- (void)downloadDidBegin:(SafariDownload*)download {
+- (void)downloadDidBegin:(SDSafariDownload*)download {
   [self updateBadges];
-  DownloadCell *cell = [self cellForDownload:download];
+  SDDownloadCell *cell = [self cellForDownload:download];
   cell.nameLabel = download.filename;
   cell.progressLabel = @"Downloading...";
   cell.completionLabel = @"0%";
 }
 
-- (void)downloadDidReceiveAuthenticationChallenge:(SafariDownload *)download {
-  DownloadCell *cell = [self cellForDownload:download];
+- (void)downloadDidReceiveAuthenticationChallenge:(SDSafariDownload *)download {
+  SDDownloadCell *cell = [self cellForDownload:download];
   cell.progressLabel = @"Awaiting Authentication...";
 }
 
-- (void)downloadDidProvideFilename:(SafariDownload*)download {
-  DownloadCell *cell = [self cellForDownload:download];
+- (void)downloadDidProvideFilename:(SDSafariDownload*)download {
+  SDDownloadCell *cell = [self cellForDownload:download];
   cell.nameLabel = download.filename;
 }
 
-- (void)downloadDidFinish:(SafariDownload*)download {
+- (void)downloadDidFinish:(SDSafariDownload*)download {
   NSLog(@"downloadDidFinish");
-  DownloadCell* cell = [self cellForDownload:download];
+  SDDownloadCell* cell = [self cellForDownload:download];
   
   download.downloadOperation = nil; // no-op atm
   cell.progressLabel = @"Download Complete";
@@ -697,8 +696,8 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 // not used, too much of an overhead :<
-- (void)updateProgressForDownload:(SafariDownload*)download {
-  DownloadCell* cell = [self cellForDownload:download];
+- (void)updateProgressForDownload:(SDSafariDownload*)download {
+  SDDownloadCell* cell = [self cellForDownload:download];
   float progress = cell.progressView.progress;
   progress += (download.progress - progress)/4;
   cell.progressView.progress = progress;
@@ -709,23 +708,23 @@ static SDActionType _actionType = SDActionTypeNone;
   }
 }
 
-- (void)downloadDidUpdate:(SafariDownload*)download {
-  DownloadCell* cell = [self cellForDownload:download];
+- (void)downloadDidUpdate:(SDSafariDownload*)download {
+  SDDownloadCell* cell = [self cellForDownload:download];
   cell.progressView.progress = download.progress;
   cell.completionLabel = [NSString stringWithFormat:@"%d%%", (int)(download.progress*100.0f)];
   cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
   cell.sizeLabel = download.sizeString;
 }
 
-- (void)downloadDidCancel:(SafariDownload*)download {   
+- (void)downloadDidCancel:(SDSafariDownload*)download {   
   [self updateBadges];
   [self saveData];  
   download.downloadOperation = nil;
 }
 
-- (void)downloadDidFail:(SafariDownload*)download {
+- (void)downloadDidFail:(SDSafariDownload*)download {
   NSLog(@"downloadDidFail");
-  DownloadCell* cell = [self cellForDownload:download];
+  SDDownloadCell* cell = [self cellForDownload:download];
   
   download.downloadOperation = nil;
   cell.progressLabel = @"Download Failed";
@@ -759,8 +758,6 @@ static SDActionType _actionType = SDActionTypeNone;
 
 #pragma mark -/*}}}*/
 #pragma mark UIViewController Methods/*{{{*/
-
-static int animationType = 0;
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning]; 
@@ -808,29 +805,29 @@ static int animationType = 0;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  static NSString *CellIdentifier = @"DownloadCell";
+  static NSString *CellIdentifier = @"SDDownloadCell";
   BOOL finished = NO;
-  SafariDownload *download = nil;
+  SDSafariDownload *download = nil;
   
   if(tableView.numberOfSections == 2 && indexPath.section == 0) {
     download = [_currentDownloads objectAtIndex:indexPath.row];
     finished = NO;
   } else {
-    CellIdentifier = @"FinishedDownloadCell";
+    CellIdentifier = @"FinishedSDDownloadCell";
     download = [_finishedDownloads objectAtIndex:indexPath.row];
     finished = YES;
   }
   
-  DownloadCell *cell = (DownloadCell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  SDDownloadCell *cell = (SDDownloadCell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
-    cell = [[[DownloadCell alloc] initWithFrame:CGRectZero reuseIdentifier:CellIdentifier] autorelease];
+    cell = [[[SDDownloadCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
   }
   
   // Set up the cell...
   cell.finished = finished;
   cell.failed = download.failed;
   cell.icon = [self iconForExtension:[download.filename pathExtension] orMimeType:download.mimetype];
-	cell.nameLabel = download.filename;
+  cell.nameLabel = download.filename;
   cell.sizeLabel = download.sizeString;
   if(!finished && !download.failed) {
     cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
@@ -864,7 +861,8 @@ static int animationType = 0;
                                                otherButtonTitles:nil];
     if (curDownload.failed) [launch addButtonWithTitle:@"Retry"];
     else {
-      UIDocumentInteractionController *x = [objc_getClass("UIDocumentInteractionController") interactionControllerWithURL:[NSURL fileURLWithPath:[NSString stringWithFormat:@"/var/mobile/Media/Downloads/%@", curDownload.filename]]];
+      UIDocumentInteractionController *x = [objc_getClass("UIDocumentInteractionController") interactionControllerWithURL:
+											[NSURL fileURLWithPath:[NSString stringWithFormat:@"/var/mobile/Media/Downloads/%@", curDownload.filename]]];
       if(x) {
         NSArray *applications = [x _applications:YES];
         for(LSApplicationProxy *app in applications) {
@@ -887,14 +885,17 @@ static int animationType = 0;
   return YES;
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (NSString *)tableView:(UITableView *)tableView 
+titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
   if (tableView.numberOfSections == 2 && indexPath.section == 0)
     return @"Cancel"; 
   else // local files
     return @"Clear";
 }
 
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+- (void)tableView:(UITableView *)tableView 
+commitEditingStyle:(UITableViewCellEditingStyle)editingStyle 
+ forRowAtIndexPath:(NSIndexPath *)indexPath {
   if (editingStyle == UITableViewCellEditingStyleDelete) {
     if (tableView.numberOfSections == 2 && indexPath.section == 0)
       [self cancelDownload:[_currentDownloads objectAtIndex:indexPath.row]];
@@ -907,7 +908,8 @@ static int animationType = 0;
 }
 /*}}}*/
 
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+- (void)actionSheet:(UIActionSheet *)actionSheet 
+clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (actionSheet.tag == kActionSheet) {
     NSString *button = [actionSheet buttonTitleAtIndex:buttonIndex];
     NSString *action = [_launchActions objectForKey:button];
@@ -917,19 +919,21 @@ static int animationType = 0;
       int section = (_currentDownloads.count > 0) ? 1 : 0;
       
       [_finishedDownloads removeObjectAtIndex:row];
-      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
-        
-        [[objc_getClass("SandCastle") sharedInstance] removeItemAtResolvedPath:path];
-        
-        //[[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] 
+								withRowAnimation:UITableViewRowAnimationFade];
+	  
+	  [[objc_getClass("SandCastle") sharedInstance] removeItemAtResolvedPath:path];
+	  
+	  //[[NSFileManager defaultManager] removeItemAtPath:path error:nil];
     } else if([button isEqualToString:@"Retry"]) {
       int row = [_finishedDownloads indexOfObject:curDownload];
       int section = (_currentDownloads.count > 0) ? 1 : 0;
       [_finishedDownloads removeObjectAtIndex:row];
-      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] withRowAnimation:UITableViewRowAnimationFade];
+      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] 
+								withRowAnimation:UITableViewRowAnimationFade];
       curDownload.failed = NO;
       curDownload.useSuggest = NO;
-      [self addDownload:curDownload];
+      [self addDownload:curDownload browser:NO];
     } else if(action) {
       Class Application = objc_getClass("Application");
       NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Media/Downloads/%@", curDownload.filename];
