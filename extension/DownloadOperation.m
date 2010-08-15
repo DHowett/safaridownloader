@@ -59,7 +59,7 @@ id _authenticationView = nil;
     [_timer invalidate];
     _timer = nil;
   }
-  [self storeResumeData];
+  //[self storeResumeData];
 }
 
 - (void)cancelFromAuthenticationView:(id)authenticationView {
@@ -175,7 +175,7 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
   if (_wasResumed) return;
   if ([_delegate useSuggest] || [_delegate filename] == nil) {
       self.temporaryPath = [NSString stringWithFormat:@"/tmp/.partial/%@", filename];
-      [download setDestination:_temporaryPath allowOverwrite:YES];
+      [download setDestination:_temporaryPath allowOverwrite:NO];
       [_delegate setFilename:filename];
   }
 }
@@ -225,12 +225,7 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 	_timer = nil;
   }
   
-  if (_bytes > 0) {
-	[self storeResumeData];
-  }
-  else {
-	[[NSFileManager defaultManager] removeItemAtPath:_temporaryPath error:nil];
-  }
+  
   
   _bytes = 0.0;
   _downloadedBytes = 0.0;
@@ -246,8 +241,9 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
   NSNumber* waitobj = [prefs objectForKey:@"AutoRetryInterval"];
   float wait = (waitobj!=nil) ? [waitobj floatValue] : 1;
   
+  NSInteger code = [error code];
+  
   if (!doNotRetry) {
-	NSInteger code = [error code];
 	if (_retryCount < max_retries
 		&& code != NSURLErrorCancelled
 		&& code != NSURLErrorBadURL
@@ -291,6 +287,15 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
   
 fail:
   NSLog(@"we have failed!");
+  if (code != NSURLErrorCancelled) {
+	NSLog(@"not canceled, canceling!");
+	[download cancel];
+  }
+  else {
+	NSLog(@"download naturally canceled, storing resume data!");
+	[self storeResumeData];
+  }
+
   _noUpdate = YES;
   _keepAlive = NO;
   [_delegate downloadFailedWithError:error];
@@ -314,13 +319,9 @@ fail:
   return NO;
 }
 
-//- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path {
-//  NSString *curFn = [_delegate filename];
-//  NSString *newFn = [path lastPathComponent];
-//  NSLog(@"didCreateDestination:%@", path);
-//  if(![newFn isEqualToString:curFn]) [_delegate setFilename:newFn];
-//  return;
-//}
+- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path {
+  self.temporaryPath = path;
+}
 
 - (BOOL)beginDownload {
   BOOL resumeResult = [self resumeDownload];
@@ -343,7 +344,7 @@ fail:
     [_downloader setDeletesFileUponFailure: NO];
     if (![_delegate useSuggest] && [_delegate filename] != nil) {
         self.temporaryPath = [NSString stringWithFormat:@"/tmp/.partial/%@", [_delegate filename]];
-        [_downloader setDestination:_temporaryPath allowOverwrite:YES];
+        [_downloader setDestination:_temporaryPath allowOverwrite:NO];
     }
     _start = [NSDate timeIntervalSinceReferenceDate];
     _bytes = 0.0;
@@ -396,9 +397,10 @@ fail:
 }
 
 - (void)cancelDownload {
+  NSLog(@"cancelDownload!");
   _noUpdate = YES;
   [_downloader cancel];
-  //[self storeResumeData];
+  [self storeResumeData];
   _keepAlive = NO;
 }
 
