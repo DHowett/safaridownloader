@@ -23,9 +23,11 @@ static BOOL alertViewShown;
   NSString* name;
   NSString* fullpath;
   BOOL isDir;
+  UIImage*	icon;
 }
 @property (nonatomic, copy) NSString* name;
 @property (nonatomic, copy) NSString* fullpath;
+@property (nonatomic, retain) UIImage* icon;
 @property (assign) BOOL isDir;
 
 + (id)objectWithName:(NSString*)n path:(NSString*)p isDir:(BOOL)dir;
@@ -33,7 +35,7 @@ static BOOL alertViewShown;
 @end
 
 @implementation YFPathObject
-@synthesize name, fullpath, isDir;
+@synthesize name, fullpath, isDir, icon;
 
 + (id)objectWithName:(NSString*)n path:(NSString*)p isDir:(BOOL)dir {
   return [[[YFPathObject alloc] initWithName:n path:p isDir:dir] autorelease]; 
@@ -41,9 +43,11 @@ static BOOL alertViewShown;
 
 - (id)initWithName:(NSString*)n path:(NSString*)p isDir:(BOOL)dir {
   if ((self = [super init])) {
-    self.name = n;
-    self.fullpath = p;
-    self.isDir = dir;
+	self.name = n;
+	self.fullpath = p;
+	self.isDir = dir;
+	self.icon = dir ? [SDResources iconForFolder] : 
+						   [SDResources iconForExtension:[n pathExtension]];
   }
   return self;
 }
@@ -68,10 +72,10 @@ static BOOL alertViewShown;
           delegate:(id)del {  
   NSString *messageString = [self resizeToFitCount:1];
   if ((self = [super initWithTitle:@"Downloads\n\n\n\n" 
-                          message:messageString 
-                         delegate:self 
-                cancelButtonTitle:@"Cancel" 
-                otherButtonTitles:@"Save", nil])) {
+						   message:messageString 
+						  delegate:self 
+				 cancelButtonTitle:@"Cancel" 
+				 otherButtonTitles:@"Save", nil])) {
     self.file = fil;
     self.browserDelegate = del;
     self.context = ctx;
@@ -85,17 +89,22 @@ static BOOL alertViewShown;
 - (void)enumerateForDirsInPath:(NSString*)path 
                      fillArray:(NSMutableArray*)array 
                       maxCount:(NSInteger)count {
-  //BOOL halt = (count > 0) ? YES : NO;
   NSArray* list = [[objc_getClass("SandCastle") sharedInstance] directoryContentsAtPath:path];  
-  int i;
-  for (i=0; i<list.count; i++) {
+  NSMutableArray* aux = [NSMutableArray new];
+  for (NSString* curFile in list) {
+	if ([curFile hasPrefix:@"."])
+	  continue;
 	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-	NSString* curFile = [list objectAtIndex:i];
 	NSString* curPath = [path stringByAppendingPathComponent:curFile];
-	BOOL isDir = [[objc_getClass("SandCastle") sharedInstance] pathIsDir:curPath];
-	[array addObject:[YFPathObject objectWithName:curFile path:curPath isDir:isDir]];
+	if ([[objc_getClass("SandCastle") sharedInstance] pathIsDir:curPath])
+	  [array addObject:[YFPathObject objectWithName:curFile path:curPath isDir:YES]];
 	[pool drain];
   }
+  for (NSString* f in aux) {
+	NSString* curPath = [path stringByAppendingPathComponent:f];
+	[array addObject:[YFPathObject objectWithName:f path:curPath isDir:NO]];
+  }
+  [aux release];
 }
 
 - (void)setCurrentPath:(NSString*)path {
@@ -112,7 +121,8 @@ static BOOL alertViewShown;
   
   self.title = [[currentPath lastPathComponent] stringByAppendingString:@"\n\n\n\n"];
   [navButton setTitle:[[currentPath stringByDeletingLastPathComponent] lastPathComponent]];
-  if ([currentPath isEqualToString:@"/"]) {
+  if ([currentPath isEqualToString:@"/private/var/mobile"] || 
+	   [currentPath isEqualToString:@"/var/mobile"]) {
     navButton.alpha = 0;
   }
   else {
@@ -130,13 +140,7 @@ static BOOL alertViewShown;
 
 - (void)setData:(NSArray*)dat {
   [data release];
-  
-  NSMutableArray* temp = [dat mutableCopy];
-  [temp removeObject:@".partial"];
-  data = [temp copy];
-  [temp release];
-  
-  [self setMessage:[self resizeToFitCount:[dat count]]];
+  data = [dat copy];
   [myTableView reloadData];
 }
 
@@ -244,18 +248,17 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   
   YFPathObject* item = [data objectAtIndex:indexPath.row];
   cell.textLabel.text = item.name;
+  cell.imageView.image = item.icon;
   
   if (item.isDir) {
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     cell.selectionStyle = UITableViewCellSelectionStyleBlue;
     cell.textLabel.textColor = [UIColor blackColor];
-    cell.imageView.image = [SDResources iconForFolder];
   }
   else {
     cell.accessoryType = UITableViewCellAccessoryNone;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.textLabel.textColor = [UIColor grayColor];
-    cell.imageView.image = [SDResources iconForExtension:[item.name pathExtension]];
   }
   
   return cell;
