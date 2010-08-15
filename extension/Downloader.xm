@@ -138,12 +138,6 @@ static void initCustomToolbar(void) {
   [[SDDownloadManager sharedManager] updateFileTypes];
 }
 
-- (void)applicationWillSuspend {
-  BrowserController *sbc = [$BrowserController sharedBrowserController];
-  if([[sbc browserPanel] panelType] == 44)
-    [sbc hideBrowserPanelType:44];
-  %orig;
-}
 %end
 
 %hook BrowserButtonBar - (void)positionButtons:(NSArray *)buttons tags:(int *)tags count:(int)count group:(int)group {
