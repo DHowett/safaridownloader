@@ -137,7 +137,8 @@ static id resourceBundle = nil;
 	
 	[self updateUserPreferences];
 
-	NSInteger maxdown = (_userPrefs!=nil) ? [[_userPrefs objectForKey:@"MaxConcurrentDownloads"] intValue] : 5;
+	NSNumber* maxdownobj = [_userPrefs objectForKey:@"MaxConcurrentDownloads"];
+	NSInteger maxdown = (maxdownobj!=nil) ? [maxdownobj intValue] : 5;
 	
 	_downloadQueue = [NSOperationQueue new];
     [_downloadQueue setMaxConcurrentOperationCount:maxdown];
