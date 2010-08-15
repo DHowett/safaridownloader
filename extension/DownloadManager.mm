@@ -135,8 +135,12 @@ static id resourceBundle = nil;
     _fbPanel = [[SDFileBrowserPanel alloc] init];
     resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
 	
+	[self updateUserPreferences];
+
+	NSInteger maxdown = (_userPrefs!=nil) ? [[_userPrefs objectForKey:@"MaxConcurrentDownloads"] intValue] : 5;
+	
 	_downloadQueue = [NSOperationQueue new];
-    [_downloadQueue setMaxConcurrentOperationCount:5];
+    [_downloadQueue setMaxConcurrentOperationCount:maxdown];
 	
 	NSString* tempDL = [@"/tmp" stringByAppendingPathComponent:[DL_ARCHIVE_PATH lastPathComponent]];
 	[[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:DL_ARCHIVE_PATH toPath:tempDL];
@@ -176,7 +180,6 @@ static id resourceBundle = nil;
 	if (_finishedDownloads == nil)
 	  _finishedDownloads = [[NSMutableArray alloc] init];
 	
-    [self updateUserPreferences];
     [self updateFileTypes];
     _visible = NO;
   }
