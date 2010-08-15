@@ -408,7 +408,7 @@ fail:
     _keepAlive = YES;
     [_downloader setDeletesFileUponFailure: NO];
     _start = [NSDate timeIntervalSinceReferenceDate];
-    _resumeData = [NSPropertyListSerialization propertyListFromData:resumeData mutabilityOption:NSPropertyListMutableContainersAndLeaves format:NULL errorDescription:NULL];
+    _resumeData = [[NSPropertyListSerialization propertyListFromData:resumeData mutabilityOption:NSPropertyListMutableContainersAndLeaves format:NULL errorDescription:NULL] retain];
   }
   
   return YES;
