@@ -418,6 +418,8 @@ fail:
 - (void)deleteDownload {
   NSString *resumePath = [NSString stringWithFormat:@"/tmp/.partial/%@.plist", [_delegate filename]];
   [[NSFileManager defaultManager] removeItemAtPath:resumePath error:nil];
+  [_resumeData release];
+  _resumeData = nil;
   if (_temporaryPath != nil) {
 	[[NSFileManager defaultManager] removeItemAtPath:_temporaryPath error:nil];
   }
