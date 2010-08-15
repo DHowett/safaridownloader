@@ -32,6 +32,7 @@
   float				  _downloadedBytes;
   BOOL				  _requiresAuthentication;
   NSString*			  _temporaryPath;
+  NSMutableDictionary* _resumeData;
 }
 
 + (id)authView;

@@ -145,6 +145,7 @@ savePath    = _savePath;
 }
 
 - (void)downloadStarted {
+  NSLog(@"downloadStarted, inform delegate: %@", _delegate);
   [_delegate performSelectorOnMainThread:@selector(downloadDidBegin:) withObject:self waitUntilDone:NO];
 }
 

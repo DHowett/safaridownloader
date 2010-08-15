@@ -29,6 +29,7 @@ id _authenticationView = nil;
   [_downloader release];
   [_response release];
   [_temporaryPath release];
+  [_resumeData release];
   [super dealloc];
 }
 
@@ -59,7 +60,7 @@ id _authenticationView = nil;
     [_timer invalidate];
     _timer = nil;
   }
-  //[self storeResumeData];
+  [self storeResumeData];
 }
 
 - (void)cancelFromAuthenticationView:(id)authenticationView {
@@ -164,10 +165,11 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 
 - (void)downloadDidBegin:(NSURLDownload *)download {
   _keepAlive = YES;
-  NSLog(@"download started!"); 
+  NSLog(@"download started! informing delegate: %@", _delegate); 
   _start = [NSDate timeIntervalSinceReferenceDate]; 
   [_delegate downloadStarted];
   _timer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(progressHeartbeat:) userInfo:nil repeats:YES];
+  NSLog(@"created timer: %@", _timer);
 }
 
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename {
@@ -183,12 +185,27 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 
 - (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)resp {
   _keepAlive = YES;
+  
   NSLog(@"download:didReceiveResponse: %@", resp);
+  
   if ([resp respondsToSelector:@selector(allHeaderFields)]) {
-	NSLog(@"Received response: %@", [resp allHeaderFields]);
+	NSDictionary* responseDict = [(NSHTTPURLResponse*)resp allHeaderFields];
+	NSString* eTag = [responseDict objectForKey:@"Etag"];
+	if (eTag != nil) {
+	  _resumeData = [NSMutableDictionary new];
+	  [_resumeData setObject:eTag forKey:@"NSURLDownloadEntityTag"];
+	  if ([responseDict objectForKey:@"Last-Modified"]) {
+		[_resumeData setObject:[responseDict objectForKey:@"Last-Modified"] forKey:@"NSURLDownloadServerModificationDate"];
+	  }
+	  NSURL* url = [[_delegate urlReq] URL];
+	  if (url) {
+		[_resumeData setObject:[url absoluteString] forKey:@"NSURLDownloadURL"];
+	  }
+	  [_resumeData setObject:[NSNumber numberWithUnsignedInt:0] forKey:@"NSURLDownloadBytesReceived"];
+	}
   }
 
-	long long expectedContentLength = [resp expectedContentLength];
+  long long expectedContentLength = [resp expectedContentLength];
   [_delegate setDownloadSize:expectedContentLength];
   _resumedFrom = 0.0;
 	_start = [NSDate timeIntervalSinceReferenceDate];
@@ -199,13 +216,16 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
   _keepAlive = YES;
   _bytes += (float)length;
   _downloadedBytes += (float)length;
-  //NSLog(@"didReceiveDataOfLength: %u, _bytes now = %.1f", length, _bytes);
+  
+  //NSLog(@"didReceiveDataOfLength");
   
   float avspd = (float)(_downloadedBytes/1024)/(float)([NSDate timeIntervalSinceReferenceDate] - _start);
   if (avspd > 500 && avspd < 2048) { // throttle
     NSUInteger sleepTime = 50000*((avspd-500)/1000);
     usleep(sleepTime);
   }
+  
+  [_resumeData setObject:[NSNumber numberWithUnsignedInt:_bytes] forKey:@"NSURLDownloadBytesReceived"];
 }
 
 - (void)download:(NSURLDownload *)download willResumeWithResponse:(NSURLResponse *)resp fromByte:(long long)startingByte {
@@ -229,8 +249,6 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 	[_timer invalidate];
 	_timer = nil;
   }
-  
-  
   
   _bytes = 0.0;
   _downloadedBytes = 0.0;
@@ -325,6 +343,7 @@ fail:
 }
 
 - (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path {
+  NSLog(@"download:didCreateDestination: %@", path);
   self.temporaryPath = path;
 }
 
@@ -349,6 +368,7 @@ fail:
     [_downloader setDeletesFileUponFailure: NO];
     if (![_delegate useSuggest] && [_delegate filename] != nil) {
         self.temporaryPath = [NSString stringWithFormat:@"/tmp/.partial/%@", [_delegate filename]];
+		  NSLog(@"setting download destination: %@", _temporaryPath);
         [_downloader setDestination:_temporaryPath allowOverwrite:NO];
     }
     _start = [NSDate timeIntervalSinceReferenceDate];
@@ -398,10 +418,10 @@ fail:
 
 - (void)deleteDownload {
   NSString *resumePath = [NSString stringWithFormat:@"/tmp/.partial/%@.plist", [_delegate filename]];
-  if (_temporaryPath) {
+  [[NSFileManager defaultManager] removeItemAtPath:resumePath error:nil];
+  if (_temporaryPath != nil) {
 	[[NSFileManager defaultManager] removeItemAtPath:_temporaryPath error:nil];
   }
-  [[NSFileManager defaultManager] removeItemAtPath:resumePath error:nil];
 }
 
 - (void)cancelDownload {
@@ -413,12 +433,10 @@ fail:
 }
 
 - (void)storeResumeData {
-  NSData *data = [_downloader resumeData];
-  NSLog(@"storing resume data with length: %u", [data length]);
-  if (data != nil) {
+  if (_resumeData != nil) {
     NSLog(@"storing resume data OK!");
     NSString *path = [NSString stringWithFormat:@"/tmp/.partial/%@.plist", [_delegate filename]];
-    [data writeToFile:path atomically:YES];
+    [_resumeData writeToFile:path atomically:YES];
   }
 }
 

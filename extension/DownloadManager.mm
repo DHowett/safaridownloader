@@ -456,14 +456,18 @@ static SDActionType _actionType = SDActionTypeNone;
 - (void)saveData {
   NSString* tempLOC = [@"/tmp" stringByAppendingPathComponent:[LOC_ARCHIVE_PATH lastPathComponent]];
   NSData* loc = [NSKeyedArchiver archivedDataWithRootObject:_finishedDownloads];
-  [loc writeToFile:tempLOC atomically:YES];
-  [[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:tempLOC toPath:LOC_ARCHIVE_PATH];
+  if (loc) {
+	[loc writeToFile:tempLOC atomically:NO];
+	[[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:tempLOC toPath:LOC_ARCHIVE_PATH];
+  }
   
   NSString* tempDL = [@"/tmp" stringByAppendingPathComponent:[DL_ARCHIVE_PATH lastPathComponent]];
   NSData* dl = [NSKeyedArchiver archivedDataWithRootObject:_currentDownloads];
-  NSLog(@"archiving to path: %@", tempDL);
-  [dl writeToFile:tempDL atomically:YES];
-  [[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:tempDL toPath:DL_ARCHIVE_PATH];
+  if (dl) {
+	NSLog(@"archiving to path: %@", tempDL);
+	[dl writeToFile:tempDL atomically:NO];
+	[[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:tempDL toPath:DL_ARCHIVE_PATH];
+  }
 }
 
 #pragma mark -
@@ -514,7 +518,6 @@ static SDActionType _actionType = SDActionTypeNone;
     [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
                       withRowAnimation:UITableViewRowAnimationFade];
   }
-  [self saveData];
 }
 
 - (void)fileBrowserDidCancel:(YFFileBrowser*)browser {
@@ -702,11 +705,13 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark SDSafariDownloadDelegate Methods/*{{{*/
 
 - (void)downloadDidBegin:(SDSafariDownload*)download {
+  NSLog(@"DownloadManager downloadDidBegin: %@", download);
   [self updateBadges];
   SDDownloadCell *cell = [self cellForDownload:download];
   cell.nameLabel = download.filename;
   cell.progressLabel = @"Downloading...";
   cell.completionLabel = @"0%";
+  [self saveData];
 }
 
 - (void)downloadDidReceiveAuthenticationChallenge:(SDSafariDownload *)download {
@@ -717,6 +722,7 @@ static SDActionType _actionType = SDActionTypeNone;
 - (void)downloadDidProvideFilename:(SDSafariDownload*)download {
   SDDownloadCell *cell = [self cellForDownload:download];
   cell.nameLabel = download.filename;
+  [self saveData];
 }
 
 - (void)downloadDidFinish:(SDSafariDownload*)download {
