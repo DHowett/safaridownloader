@@ -1,3 +1,7 @@
+export ADDITIONAL_CFLAGS = -include $(FW_PROJECT_DIR)/release.h
+ifeq ($(RELEASE),1)
+	export ADDITIONAL_CFLAGS += -DRELEASE
+endif
 SUBPROJECTS = extension preferences
 STOREPACKAGE=1
 export GO_EASY_ON_ME = 1
