@@ -24,7 +24,7 @@ static bool _fourPointOh = NO;
 static UIToolbarButton *_actionButton;
 static UIToolbarButton *_bookmarksButton;
 
-@interface UIActionSheet (Private)
+@interface UIActionSheet (SDMPrivate)
 -(id)buttons;
 -(void)presentFromRect:(CGRect)rect inView:(id)view direction:(int)direction allowInteractionWithViews:(id)views backgroundStyle:(int)style animated:(BOOL)animated;
 @end
