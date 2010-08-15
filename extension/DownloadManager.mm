@@ -19,7 +19,6 @@
 #define LOC_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloaded.plist"
 #define kDownloadSheet 993349
 
-DHLateClass(Application);
 DHLateClass(BrowserController);
 
 @interface UIDevice (Wildcat)
@@ -886,8 +885,10 @@ static SDActionType _actionType = SDActionTypeNone;
   if(!finished && !download.failed) {
     cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
     cell.progressView.progress = download.progress;
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
   } 
   else {
+    cell.selectionStyle = UITableViewCellSelectionStyleBlue;
     if (download.failed) {
       cell.progressLabel = @"Download Failed";
     }
