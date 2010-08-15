@@ -2,7 +2,7 @@ Package: net.howett.safaridownloader
 Name: Safari Download Manager
 Pre-Depends: firmware (>= 3.0)
 Depends: mobilesubstrate, preferenceloader, sandcastle (>= 0.0.2)
-Conflicts: net.howett.downloader
+Conflicts: net.howett.downloader, com.bigboss.patchsafari2
 Replaces: net.howett.downloader
 Version: 1.4.99
 Architecture: iphoneos-arm
