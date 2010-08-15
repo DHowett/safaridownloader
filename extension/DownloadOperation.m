@@ -239,8 +239,11 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
   NSDictionary* prefs = [[SDDownloadManager sharedManager] userPrefs];
   BOOL doNotRetry = [[prefs objectForKey:@"AutoRetryDisabled"] boolValue];
   NSUInteger max_retries = [[prefs objectForKey:@"AutoRetryCount"] unsignedIntValue];
-  if (!prefs)
+  float wait = [[prefs objectForKey:@"AutoRetryInterval"] floatValue];
+  if (!prefs) {
 	max_retries = 3;
+	wait = 1;
+  }
   
   if (!doNotRetry) {
 	NSInteger code = [error code];
@@ -266,7 +269,6 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 	  [_delegate setRetryString:[NSString stringWithFormat:@"Retrying %u of %u times", _retryCount+1, max_retries]];
 	  _retryCount++;
 	  
-	  float wait = [[prefs objectForKey:@"AutoRetryInterval"] floatValue];
 	  if (wait > 0) {
 		NSLog(@"waiting for %.1f seconds before continuing");
 		usleep((int)(wait*1000000));
