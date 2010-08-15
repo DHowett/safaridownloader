@@ -94,11 +94,11 @@ static BOOL alertViewShown;
   for (NSString* curFile in list) {
 	if ([curFile hasPrefix:@"."])
 	  continue;
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
 	NSString* curPath = [path stringByAppendingPathComponent:curFile];
 	if ([[objc_getClass("SandCastle") sharedInstance] pathIsDir:curPath])
 	  [array addObject:[YFPathObject objectWithName:curFile path:curPath isDir:YES]];
-	[pool drain];
+	else
+	  [aux addObject:curFile];
   }
   for (NSString* f in aux) {
 	NSString* curPath = [path stringByAppendingPathComponent:f];
@@ -230,6 +230,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   [newButton addTarget:self action:@selector(newFolder) forControlEvents:UIControlEventTouchUpInside];
   newButton.frame = CGRectMake(236, 10, 34, 30);
   [self addSubview:newButton];
+  [newButton release];
   
   UIImageView *shadows = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 261, tableHeight)];
   shadows.image = [_UIImageWithName(@"UIPopupAlertListShadow.png") stretchableImageWithLeftCapWidth:5 topCapHeight:7];
