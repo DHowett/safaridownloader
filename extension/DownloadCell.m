@@ -61,6 +61,11 @@ icon = _icon;
   RefreshCellSetter(_icon, ic);
 }
 
+- (void)setFrame:(CGRect)frame {
+  [self setNeedsDisplay];
+  [super setFrame:frame];
+}
+
 - (void)setFinished:(BOOL)x 
 {
   finished = x;
