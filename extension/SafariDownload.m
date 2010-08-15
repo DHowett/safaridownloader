@@ -51,39 +51,39 @@ savePath    = _savePath;
 
 - (id)initWithCoder:(NSCoder *)coder {
   if ((self = [super init])) {
-    self.urlReq     = [coder decodeObject];
-    self.startDate  = [coder decodeObject];
-    self.filename   = [coder decodeObject];
-    self.sizeString = [coder decodeObject];
-    self.timeString = [coder decodeObject];
-    self.time       = [coder decodeIntForKey:   @"time"    ];
-    self.progress   = [coder decodeFloatForKey: @"progress"];
-    self.speed      = [coder decodeFloatForKey: @"speed"   ];
-    self.size       = [coder decodeBoolForKey:  @"size"    ];
-    self.complete   = [coder decodeBoolForKey:  @"complete"];
-    self.useSuggest = [coder decodeBoolForKey:  @"suggest" ];
-    self.failed     = [coder decodeBoolForKey:  @"failed"  ];
-    self.mimetype   = [coder decodeObject];
-    self.savePath   = [coder decodeObjectForKey:@"savePath"];
+    self.urlReq     = [coder decodeObjectForKey:   @"urlReq"];
+    self.startDate  = [coder decodeObjectForKey:@"startDate"];
+    self.filename   = [coder decodeObjectForKey: @"filename"];
+    self.sizeString = [coder decodeObjectForKey:  @"sizeStr"];
+    self.timeString = [coder decodeObjectForKey:  @"timeStr"];
+    self.time       = [coder decodeIntForKey:    @"time"    ];
+    self.progress   = [coder decodeFloatForKey:  @"progress"];
+    self.speed      = [coder decodeFloatForKey:  @"speed"   ];
+    self.size       = [coder decodeIntForKey:    @"size"    ];
+    self.complete   = [coder decodeBoolForKey:   @"complete"];
+    self.useSuggest = [coder decodeBoolForKey:   @"suggest" ];
+    self.failed     = [coder decodeBoolForKey:   @"failed"  ];
+    self.mimetype   = [coder decodeObjectForKey: @"mimeType"];
+    self.savePath   = [coder decodeObjectForKey: @"savePath"];
   }
   return self;
 }
 
 -(void)encodeWithCoder:(NSCoder*)coder {
-  [coder encodeObject: _urlRequest     ];
-  [coder encodeObject: _startDate      ];
-  [coder encodeObject: _filename       ];
-  [coder encodeObject: _sizeString     ];
-  [coder encodeObject: _timeString     ];
-  [coder encodeInt:    _time_remaining forKey:@"time"    ];
-  [coder encodeFloat:  _progress       forKey:@"progress"];
-  [coder encodeFloat:  _speed          forKey:@"speed"   ];
-  [coder encodeInt:    _size           forKey:@"size"    ];
-  [coder encodeBool:   _complete       forKey:@"complete"];
-  [coder encodeBool:   _useSuggested   forKey:@"suggest" ];
-  [coder encodeBool:   _failed         forKey:@"failed"  ];
-  [coder encodeObject: _mimetype       ];
-  [coder encodeObject: _savePath       forKey:@"savePath"];
+  [coder encodeObject: _urlRequest		forKey:   @"urlReq"];
+  [coder encodeObject: _startDate		forKey:@"startDate"];
+  [coder encodeObject: _filename			forKey: @"filename"];
+  [coder encodeObject: _sizeString		forKey:  @"sizeStr"];
+  [coder encodeObject: _timeString		forKey:  @"timeStr"];
+  [coder encodeInt:    _time_remaining forKey: @"time"    ];
+  [coder encodeFloat:  _progress       forKey: @"progress"];
+  [coder encodeFloat:  _speed          forKey: @"speed"   ];
+  [coder encodeInt:    _size           forKey: @"size"    ];
+  [coder encodeBool:   _complete       forKey: @"complete"];
+  [coder encodeBool:   _useSuggested   forKey: @"suggest" ];
+  [coder encodeBool:   _failed         forKey: @"failed"  ];
+  [coder encodeObject: _mimetype       forKey: @"mimeType"];
+  [coder encodeObject: _savePath       forKey: @"savePath"];
 }
 
 - (void)setDownloadSize:(NSInteger)length {
@@ -105,6 +105,7 @@ savePath    = _savePath;
 }
 
 - (void)setSize:(NSInteger)length {
+  _size = length;
   double rSize = (double)(length/((double)1024)); // kb
   NSString *ord = @"K";
   if (rSize > 1024.0) {
@@ -112,6 +113,11 @@ savePath    = _savePath;
     rSize /= (double)1024;
   }
   self.sizeString = [NSString stringWithFormat:@"%.1lf%@B", rSize, ord];
+}
+
+- (void)setRetryString:(NSString*)status {
+  self.timeString = status;
+  [_delegate performSelectorOnMainThread:@selector(downloadWillRetry:) withObject:self waitUntilDone:NO];
 }
 
 - (void)setFilename:(NSString*)nam {
@@ -162,6 +168,7 @@ savePath    = _savePath;
   NSLog(@"SAFARI DOWNLOAD DEALLOC!");
   _delegate = nil;
   [_urlRequest release];
+  [_startDate release];
   [_filename release];
   [_sizeString release];
   [_timeString release];

@@ -412,7 +412,7 @@ static void showBrowserSheetHookInternals(UIWebDocumentView *self, UIActionSheet
     NSLog(@"url is %@", interactionURL);
     if([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]
     || [scheme isEqualToString:@"ftp"]) {
-      [sheet addButtonWithTitle:@"Download..."];
+      [sheet addButtonWithTitle:@"Download To..."];
       myButton = [buttons lastObject];
       [myButton retain];
       [myButton setTag:1337];

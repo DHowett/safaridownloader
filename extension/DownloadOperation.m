@@ -28,12 +28,12 @@ id _authenticationView = nil;
   _delegate = nil;
   [_downloader release];
   [_response release];
-    [_temporaryPath release];
+  [_temporaryPath release];
   [super dealloc];
 }
 
 - (void)progressHeartbeat:(NSTimer*)timer {
-  NSLog(@"Heartbeat firing, _keepalive %d _response %@", _keepAlive, _response);
+  //NSLog(@"Heartbeat firing, _keepalive %d _response %@", _keepAlive, _response);
   if (_keepAlive && _response && !_noUpdate) {
     long long expectedLength = [_response expectedContentLength];
     if(_wasResumed) expectedLength += _resumedFrom;
@@ -41,7 +41,9 @@ id _authenticationView = nil;
     float percentComplete=(float)(_bytes/expectedLength);
     
 #if 0
-    if (percentComplete > 0.2) {
+	static int doTwice = 0;
+    if (percentComplete > 0.2 && doTwice < 2) {
+	  doTwice++;
       NSLog(@"SIMULATING FAILURE!!");
       [_downloader cancel];
       [_timer invalidate];
@@ -50,13 +52,14 @@ id _authenticationView = nil;
     }
 #endif
     
-    NSLog(@"HOLY CRAP. HEARTBEAT FIRING. PROGRESS: %f", _bytes);
+    //NSLog(@"HOLY CRAP. HEARTBEAT FIRING. PROGRESS: %f", _bytes);
     [_delegate setProgress:percentComplete speed:avspd];
   }
   else if (!_keepAlive) {
     [_timer invalidate];
     _timer = nil;
   }
+  //[self storeResumeData];
 }
 
 - (void)cancelFromAuthenticationView:(id)authenticationView {
@@ -216,46 +219,74 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error {
   NSLog(@"didFailWithError: %@", error);
-  if (_downloadedBytes > 0) {
+  
+  if (_timer && [_timer isValid]) {
+	[_timer invalidate];
+	_timer = nil;
+  }
+  
+  if (_bytes > 0) {
 	[self storeResumeData];
   }
-  NSInteger code = [error code];
-  if (_retryCount < 3
-      && code != NSURLErrorCancelled
-      && code != NSURLErrorBadURL
-      && code != NSURLErrorUnsupportedURL
-      && code != NSURLErrorDataLengthExceedsMaximum
-      && code != NSURLErrorHTTPTooManyRedirects
-      && code != NSURLErrorNotConnectedToInternet
-      && code != NSURLErrorUserCancelledAuthentication
-      && code != NSURLErrorUserAuthenticationRequired
-      && code != NSURLErrorZeroByteResource
-      && code != NSURLErrorNoPermissionsToReadFile
-      && code != NSURLErrorCannotCreateFile
-      && code != NSURLErrorCannotOpenFile
-      && code != NSURLErrorCannotWriteToFile
-      && code != NSURLErrorCannotCloseFile
-      && code != NSURLErrorCannotRemoveFile
-      && code != NSURLErrorCannotMoveFile) {
-    NSLog(@"retry count is %d, resuming", _retryCount);
-    _retryCount++;
-    if ([self beginDownload] == NO) {
-      NSLog(@"download failed to begin, failing");
-      goto fail;
-    }
-    else {
-      NSLog(@"download began successfully");
-      return;
-    }
+  else {
+	[[NSFileManager defaultManager] removeItemAtPath:_temporaryPath error:nil];
   }
-  else
-    goto fail;
+  
+  _bytes = 0.0;
+  _downloadedBytes = 0.0;
+  _resumedFrom = 0;
+  
+  NSDictionary* prefs = [[SDDownloadManager sharedManager] userPrefs];
+  BOOL doNotRetry = [[prefs objectForKey:@"AutoRetryDisabled"] boolValue];
+    
+  if (!doNotRetry) {
+	NSUInteger max_retries = [[prefs objectForKey:@"AutoRetryCount"] unsignedIntValue];
+	NSInteger code = [error code];
+	if (_retryCount < max_retries
+		&& code != NSURLErrorCancelled
+		&& code != NSURLErrorBadURL
+		&& code != NSURLErrorUnsupportedURL
+		&& code != NSURLErrorDataLengthExceedsMaximum
+		&& code != NSURLErrorHTTPTooManyRedirects
+		&& code != NSURLErrorNotConnectedToInternet
+		&& code != NSURLErrorUserCancelledAuthentication
+		&& code != NSURLErrorUserAuthenticationRequired
+		&& code != NSURLErrorZeroByteResource
+		&& code != NSURLErrorNoPermissionsToReadFile
+		&& code != NSURLErrorCannotCreateFile
+		&& code != NSURLErrorCannotOpenFile
+		&& code != NSURLErrorCannotWriteToFile
+		&& code != NSURLErrorCannotCloseFile
+		&& code != NSURLErrorCannotRemoveFile
+		&& code != NSURLErrorCannotMoveFile) {
+	  NSLog(@"retry count is %u < %u, retrying", _retryCount, max_retries);
+	  [_delegate setProgress:0 speed:0];
+	  [_delegate setRetryString:[NSString stringWithFormat:@"Retrying %u of %u times", _retryCount+1, max_retries]];
+	  _retryCount++;
+	  
+	  float wait = [[prefs objectForKey:@"AutoRetryInterval"] floatValue];
+	  if (wait > 0) {
+		NSLog(@"waiting for %.1f seconds before continuing");
+		usleep((int)(wait*1000000));
+	  }
+	  
+	  if ([self beginDownload] == NO) {
+		NSLog(@"download failed to begin, failing");
+		goto fail;
+	  }
+	  else {
+		NSLog(@"download began successfully");
+		return;
+	  }
+	}
+	else
+	  goto fail;
+	
+  }
   
 fail:
   NSLog(@"we have failed!");
   _noUpdate = YES;
-  [_timer invalidate];
-  _timer = nil;
   _keepAlive = NO;
   [_delegate downloadFailedWithError:error];
 }
@@ -325,14 +356,14 @@ fail:
   //NSLog(outputPath);
   
   if ([[NSFileManager defaultManager] fileExistsAtPath:resumeDataPath] == NO) {
-    NSLog(@"resume file not found");
+    NSLog(@"RESUME file not found");
     [[NSFileManager defaultManager] removeItemAtPath:outputPath error:nil];
     return NO;
   }
   
   NSData *resumeData = [NSData dataWithContentsOfFile:resumeDataPath];
   if (resumeData == nil || [resumeData length] == 0) {
-    NSLog(@"data is nil");
+    NSLog(@"RESUME data is nil");
       [[NSFileManager defaultManager] removeItemAtPath:resumeDataPath error:nil];
       [[NSFileManager defaultManager] removeItemAtPath:outputPath error:nil];
     return NO;

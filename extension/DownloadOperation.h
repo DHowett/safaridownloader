@@ -25,7 +25,7 @@
   BOOL				  _keepAlive;
   float				  _bytes;
   NSTimer*			  _timer;
-  int					  _retryCount;
+  NSUInteger		  _retryCount;
   BOOL				  _noUpdate;
   BOOL				  _wasResumed;
   long long			  _resumedFrom;

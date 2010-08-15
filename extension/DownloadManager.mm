@@ -15,7 +15,8 @@
 
 #import "SandCastle.h"
 
-#define DL_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloads.plist"
+#define DL_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloading.plist"
+#define LOC_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloaded.plist"
 #define kDownloadSheet 993349
 
 DHLateClass(Application);
@@ -126,12 +127,55 @@ static id resourceBundle = nil;
 
 - (id)init {
   if ((self = [super init])) {
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self 
+														  selector:@selector(saveData) 
+																name:UIApplicationWillTerminateNotification object:nil];
+	
     _fbPanel = [[SDFileBrowserPanel alloc] init];
     resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
-    _currentDownloads = [NSMutableArray new];
-    _finishedDownloads = [NSMutableArray new];
-    _downloadQueue = [NSOperationQueue new];
+	
+	_downloadQueue = [NSOperationQueue new];
     [_downloadQueue setMaxConcurrentOperationCount:5];
+	
+	NSString* tempDL = [@"/tmp" stringByAppendingPathComponent:[DL_ARCHIVE_PATH lastPathComponent]];
+	[[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:DL_ARCHIVE_PATH toPath:tempDL];
+	
+	NSString* tempLOC = [@"/tmp" stringByAppendingPathComponent:[LOC_ARCHIVE_PATH lastPathComponent]];
+	[[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:LOC_ARCHIVE_PATH toPath:tempLOC];
+	
+	@try {
+	  _currentDownloads = [[NSKeyedUnarchiver unarchiveObjectWithFile:tempDL] retain];
+	}
+	@catch (id nothing) {
+	  _currentDownloads = nil;
+	  NSLog(@"corrupt data");
+	}
+	
+	//NSLog(@"Got CurrentDownloads: %@", _currentDownloads);
+	if (!_currentDownloads)
+	  _currentDownloads = [[NSMutableArray alloc] init];
+	
+	for (SDSafariDownload *dl in _currentDownloads) {
+	  [dl setDelegate:self];
+	  SDDownloadOperation *op = [[SDDownloadOperation alloc] initWithDelegate:dl];
+	  dl.downloadOperation = op;
+	  [_downloadQueue addOperation:op];
+	  [op release];
+	}
+	
+	@try {
+	  _finishedDownloads = [[NSKeyedUnarchiver unarchiveObjectWithFile:tempLOC] retain];
+	}
+	@catch (id nothing) {
+	  _finishedDownloads = nil;
+	  NSLog(@"corrupt data");
+	}
+	
+	//NSLog(@"Got FinishedDownloads: %@", _finishedDownloads);
+	if (_finishedDownloads == nil)
+	  _finishedDownloads = [[NSMutableArray alloc] init];
+	
     [self updateUserPreferences];
     [self updateFileTypes];
     _visible = NO;
@@ -140,10 +184,10 @@ static id resourceBundle = nil;
 }
 
 - (void)loadView { 
-  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel All" 
+  UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Clear All" 
                                                                    style:UIBarButtonItemStyleBordered 
                                                                   target:self 
-                                                                  action:@selector(cancelAllDownloads)];
+                                                                  action:@selector(clearAllDownloads)];
   self.navigationItem.rightBarButtonItem = cancelButton;
   self.navigationItem.rightBarButtonItem.enabled = YES;
   
@@ -390,27 +434,32 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark Persistent Storage/*{{{*/
 
 - (void)saveData {
+  NSString* tempLOC = [@"/tmp" stringByAppendingPathComponent:[LOC_ARCHIVE_PATH lastPathComponent]];
+  NSData* loc = [NSKeyedArchiver archivedDataWithRootObject:_finishedDownloads];
+  [loc writeToFile:tempLOC atomically:YES];
+  [[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:tempLOC toPath:LOC_ARCHIVE_PATH];
+  
   NSString* tempDL = [@"/tmp" stringByAppendingPathComponent:[DL_ARCHIVE_PATH lastPathComponent]];
   NSData* dl = [NSKeyedArchiver archivedDataWithRootObject:_currentDownloads];
   NSLog(@"archiving to path: %@", tempDL);
-  [dl writeToFile:tempDL atomically:NO];
-  [[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:tempDL toPath:DL_ARCHIVE_PATH];    
+  [dl writeToFile:tempDL atomically:YES];
+  [[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:tempDL toPath:DL_ARCHIVE_PATH];
 }
 
 #pragma mark -
 
-- (void)disableRotations {
-  Class BrowserController = objc_getClass("BrowserController");
-  _oldPanel = [[[BrowserController sharedBrowserController] browserPanel] retain];
-  [[BrowserController sharedBrowserController] _setBrowserPanel:_fbPanel]; 
-}
-
-- (void)enableRotations {
-  Class BrowserController = objc_getClass("BrowserController");
-  [[BrowserController sharedBrowserController] _setBrowserPanel:_oldPanel];
-  [_oldPanel release];
-  _oldPanel = nil;
-}
+//- (void)disableRotations {
+//  Class BrowserController = objc_getClass("BrowserController");
+//  _oldPanel = [[[BrowserController sharedBrowserController] browserPanel] retain];
+//  [[BrowserController sharedBrowserController] _setBrowserPanel:_fbPanel]; 
+//}
+//
+//- (void)enableRotations {
+//  Class BrowserController = objc_getClass("BrowserController");
+//  [[BrowserController sharedBrowserController] _setBrowserPanel:_oldPanel];
+//  [_oldPanel release];
+//  _oldPanel = nil;
+//}
 
 #pragma mark -
 
@@ -428,13 +477,14 @@ static SDActionType _actionType = SDActionTypeNone;
 - (void)fileBrowser:(YFFileBrowser*)browser 
       didSelectPath:(NSString*)path 
             forFile:(id)file 
-        withContext:(id)download {
-  [self enableRotations];
-  ((SDSafariDownload*)download).savePath = path;
-  SDDownloadOperation *op = [[SDDownloadOperation alloc] initWithDelegate:(SDSafariDownload*)download];
-  ((SDSafariDownload*)download).downloadOperation = op;
+        withContext:(id)dl {
+  SDSafariDownload* download = (SDSafariDownload*)dl;
+  SDDownloadOperation *op = [[SDDownloadOperation alloc] initWithDelegate:download];
+  download.downloadOperation = op;
+  download.savePath = path;
   [_downloadQueue addOperation:op];
   [op release];
+  
   [_currentDownloads addObject:download];
   if (_currentDownloads.count == 1) {
     [_tableView insertSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
@@ -443,18 +493,17 @@ static SDActionType _actionType = SDActionTypeNone;
     [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
                       withRowAnimation:UITableViewRowAnimationFade];
   }
+  [self saveData];
 }
 
 - (void)fileBrowserDidCancel:(YFFileBrowser*)browser {
   NSLog(@"fileBrowserDidCancel");
-  [self enableRotations];
 }
 
 // everything eventually goes through this method
 - (BOOL)addDownload:(SDSafariDownload*)download browser:(BOOL)browser {
   if (![_currentDownloads containsObject:download]) {
 	if (browser) {
-	  //[self disableRotations];
 	  YFFileBrowser* f = [[YFFileBrowser alloc] initWithFile:download.filename 
 													 context:download
 													delegate:self];
@@ -604,12 +653,19 @@ static SDActionType _actionType = SDActionTypeNone;
   [alert release];
 }
 
+- (void)clearAllDownloads {
+  NSLog(@"clearAllDownloads!"); 
+  [_finishedDownloads removeAllObjects];
+  [self saveData];
+  [_tableView reloadData];
+}
+
 - (void)alertView:(UIAlertView *)alert clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (buttonIndex == 1) {
     if (_currentDownloads.count > 0) {
-      [self saveData];
       [_downloadQueue cancelAllOperations];
       [_currentDownloads removeAllObjects];
+		[self saveData];
       [_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
     }
   } 
@@ -690,6 +746,12 @@ static SDActionType _actionType = SDActionTypeNone;
   }
 }
 
+- (void)downloadWillRetry:(SDSafariDownload*)download {
+  SDDownloadCell* cell = [self cellForDownload:download];
+  cell.progressView.progress = 0.0f;
+  cell.progressLabel = download.timeString;
+}
+
 - (void)downloadDidUpdate:(SDSafariDownload*)download {
   SDDownloadCell* cell = [self cellForDownload:download];
   cell.progressView.progress = download.progress;
@@ -766,10 +828,16 @@ static SDActionType _actionType = SDActionTypeNone;
 #pragma mark UITableView methods/*{{{*/
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-  if (_currentDownloads.count > 0)
-    return 2;
-  else
-    return 1;
+  if (_currentDownloads.count > 0) {
+	self.navigationItem.rightBarButtonItem.title = @"Cancel All";
+	self.navigationItem.rightBarButtonItem.action = @selector(cancelAllDownloads);
+	return 2;
+  }
+  else {
+	self.navigationItem.rightBarButtonItem.title = @"Clear All";
+	self.navigationItem.rightBarButtonItem.action = @selector(clearAllDownloads);
+	return 1;
+  }
 }
 
 - (NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
@@ -780,7 +848,7 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  if(tableView.numberOfSections == 2 && section == 0)
+  if (tableView.numberOfSections == 2 && section == 0)
     return [_currentDownloads count];
   else
     return [_finishedDownloads count];
@@ -869,6 +937,7 @@ commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
                         withRowAnimation:UITableViewRowAnimationFade];
     }
   }
+  [self saveData];
 }
 /*}}}*/
 

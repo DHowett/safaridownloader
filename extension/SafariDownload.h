@@ -19,6 +19,7 @@
 - (void)downloadDidUpdate:(SDSafariDownload*)download;
 - (void)downloadDidFail:(SDSafariDownload*)download;
 - (void)downloadDidCancel:(SDSafariDownload*)download;
+- (void)downloadWillRetry:(SDSafariDownload*)download;
 
 @end
 
@@ -63,5 +64,6 @@
 - (void)downloadFailedWithError:(NSError *)err;
 - (void)setProgress:(float)prog speed:(float)spd;
 - (void)downloadStarted;
+- (void)setRetryString:(NSString*)status;
 
 @end
