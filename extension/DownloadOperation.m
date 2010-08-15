@@ -238,9 +238,11 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
   
   NSDictionary* prefs = [[SDDownloadManager sharedManager] userPrefs];
   BOOL doNotRetry = [[prefs objectForKey:@"AutoRetryDisabled"] boolValue];
-    
+  NSUInteger max_retries = [[prefs objectForKey:@"AutoRetryCount"] unsignedIntValue];
+  if (!prefs)
+	max_retries = 3;
+  
   if (!doNotRetry) {
-	NSUInteger max_retries = [[prefs objectForKey:@"AutoRetryCount"] unsignedIntValue];
 	NSInteger code = [error code];
 	if (_retryCount < max_retries
 		&& code != NSURLErrorCancelled
