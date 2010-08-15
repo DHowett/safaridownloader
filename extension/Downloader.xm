@@ -587,11 +587,23 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   return [self transitionView];
 }
 %end
+%end
 
 %group Firmware_lt_32
+%hook BrowserController
 %new(v@:i) // Missing on < 4.0
 - (void)_forceDismissModalViewController:(BOOL)animated {
   [self _forceDismissModalViewController];
+}
+%end
+
+%hook Application
+- (void)applicationWillSuspend {
+  BrowserController *sbc = [$BrowserController sharedBrowserController];
+  if([[sbc browserPanel] panelType] == 44)
+    [sbc hideBrowserPanelType:44];
+    [sbc _setShowingDownloads:NO animate:YES];
+  %orig;
 }
 %end
 %end
