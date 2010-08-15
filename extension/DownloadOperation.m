@@ -176,6 +176,7 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
   if ([_delegate useSuggest] || [_delegate filename] == nil) {
       self.temporaryPath = [NSString stringWithFormat:@"/tmp/.partial/%@", filename];
       [download setDestination:_temporaryPath allowOverwrite:NO];
+      filename = [SDDownloadManager uniqueFilenameForFilename:filename atPath:[_delegate savePath]];
       [_delegate setFilename:filename];
   }
 }

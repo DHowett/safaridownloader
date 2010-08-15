@@ -106,6 +106,20 @@ loadingURL = _loadingURL,
 currentRequest;
 
 #pragma mark -
++ (id)uniqueFilenameForFilename:(NSString *)filename atPath:(NSString *)path {
+  Class $SandCastle = objc_getClass("SandCastle");
+  SandCastle *sc = [$SandCastle sharedInstance];
+  NSString *orig_fnpart = [filename stringByDeletingPathExtension];
+  NSString *orig_ext = [filename pathExtension];
+  int dup = 1;
+  while([sc fileExistsAtPath:[path stringByAppendingPathComponent:filename]]) {
+    filename = [NSString stringWithFormat:@"%@-%d%s%@", orig_fnpart, dup, orig_ext ? "." : "", orig_ext];
+    dup++;
+  }
+  return filename;
+}
+
+#pragma mark -
 #pragma mark Singleton Methods/*{{{*/
 static id sharedManager = nil;
 static id resourceBundle = nil;
@@ -488,6 +502,7 @@ static SDActionType _actionType = SDActionTypeNone;
   SDDownloadOperation *op = [[SDDownloadOperation alloc] initWithDelegate:download];
   download.downloadOperation = op;
   download.savePath = path;
+  download.filename = [SDDownloadManager uniqueFilenameForFilename:download.filename atPath:download.savePath];
   [_downloadQueue addOperation:op];
   [op release];
   

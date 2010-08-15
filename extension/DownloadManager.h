@@ -85,6 +85,8 @@ typedef enum
 @property (nonatomic, assign, getter=isVisible) BOOL visible;
 @property (nonatomic, retain) NSURL *loadingURL;
 
++ (id)uniqueFilenameForFilename:(NSString *)filename atPath:(NSString *)path;
+
 + (id)sharedManager;
 - (void)updateUserPreferences;
 - (void)updateFileTypes;
