@@ -205,7 +205,7 @@ static id resourceBundle = nil;
   }
   
   _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
-  _tableView.autoresizingMask =  UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  _tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   _tableView.delegate = self;
   _tableView.dataSource = self;
   _tableView.rowHeight = 56;
