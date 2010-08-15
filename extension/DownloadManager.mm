@@ -906,6 +906,10 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+  if (tableView.numberOfSections == 2 && indexPath.section == 0) {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    return;
+  }
   _currentSelectedIndexPath = indexPath;
   if (tableView.numberOfSections == 1 || indexPath.section == 1) {
     id download = [_finishedDownloads objectAtIndex:indexPath.row];
