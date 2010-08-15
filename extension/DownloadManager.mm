@@ -140,7 +140,7 @@ static id resourceBundle = nil;
 	NSInteger maxdown = (maxdownobj!=nil) ? [maxdownobj intValue] : 5;
 	
 	_downloadQueue = [NSOperationQueue new];
-    [_downloadQueue setMaxConcurrentOperationCount:maxdown];
+  [_downloadQueue setMaxConcurrentOperationCount:maxdown];
 	
 	NSString* tempDL = [@"/tmp" stringByAppendingPathComponent:[DL_ARCHIVE_PATH lastPathComponent]];
 	[[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:DL_ARCHIVE_PATH toPath:tempDL];
@@ -237,6 +237,9 @@ static id resourceBundle = nil;
 
 - (void)updateUserPreferences {
   self.userPrefs = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
+	NSNumber* maxdownobj = [_userPrefs objectForKey:@"MaxConcurrentDownloads"];
+	NSInteger maxdown = (maxdownobj!=nil) ? [maxdownobj intValue] : 5;
+  [_downloadQueue setMaxConcurrentOperationCount:maxdown];
 }
 #pragma mark -/*}}}*/
 #pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
@@ -883,7 +886,11 @@ static SDActionType _actionType = SDActionTypeNone;
   cell.nameLabel = download.filename;
   cell.sizeLabel = download.sizeString;
   if(!finished && !download.failed) {
-    cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
+    if([download.downloadOperation isExecuting]) {
+      cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %.1fKB/sec", download.speed];
+    } else {
+      cell.progressLabel = @"Waiting...";
+    }
     cell.progressView.progress = download.progress;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
   } 
