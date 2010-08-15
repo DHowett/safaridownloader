@@ -59,7 +59,7 @@ id _authenticationView = nil;
     [_timer invalidate];
     _timer = nil;
   }
-  //[self storeResumeData];
+  [self storeResumeData];
 }
 
 - (void)cancelFromAuthenticationView:(id)authenticationView {
