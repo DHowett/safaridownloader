@@ -13,6 +13,7 @@
 #import "WebPolicyDelegate.h"
 #import "UIKitExtra/UIToolbarButton.h"
 #import "FileBrowser.h"
+#import "SDDownloadActionSheet.h"
 
 #define kProgressViewTag 238823
 #define progressViewForCell(cell) ((UIProgressView*)[cell viewWithTag:kProgressViewTag])
@@ -54,12 +55,11 @@ typedef enum
   SDActionTypeDownloadAs = 4,
 } SDActionType;
 
-@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate> {
+@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate, SDDownloadActionSheetDelegate> {
   UITableView*			  _tableView;
   NSMutableSet*		  _mimeTypes;
   NSMutableSet*		  _extensions;
   NSMutableDictionary* _classMappings;
-  NSMutableDictionary* _launchActions;
   NSMutableArray*		  _currentDownloads;
   NSMutableArray*		  _finishedDownloads;
   NSOperationQueue*	  _downloadQueue;

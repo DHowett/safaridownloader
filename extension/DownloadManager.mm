@@ -13,25 +13,16 @@
 #import "DownloaderCommon.h"
 #import "ModalAlert.h"
 
-#import "UIKitExtra/UIDocumentInteractionController.h"
-
 #import "SandCastle.h"
 
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloads.plist"
 #define kDownloadSheet 993349
-#define kActionSheet 903403
 
-@class LSApplicationProxy;
 DHLateClass(Application);
 DHLateClass(BrowserController);
 
 @interface UIDevice (Wildcat)
 - (BOOL)isWildcat;
-@end
-
-@interface LSApplicationProxy : NSObject
-- (id)app;
-- (id)localizedName;
 @end
 
 @interface UIApplication (Safari)
@@ -321,15 +312,6 @@ static SDActionType _actionType = SDActionTypeNone;
   }
   //NSLog(@"%@", _mimeTypes);
   
-  Class SandCastle = objc_getClass("SandCastle");
-  if (_launchActions) [_launchActions release];
-  _launchActions = [[NSMutableDictionary alloc] init];
-  if ([[SandCastle sharedInstance] fileExistsAtPath:@"/Applications/iFile.app"]) {
-	//    NSDictionary *iFile = [NSDictionary dictionaryWithContentsOfFile:@"/Applications/iFile.app/Info.plist"];
-	//    NSString *iFileVersion = [iFile objectForKey:@"CFBundleVersion"];
-	//    if (![iFileVersion isEqualToString:@"1.0.0"])
-	[_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
-  }
   return;
 }
 
@@ -853,30 +835,9 @@ static SDActionType _actionType = SDActionTypeNone;
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   [tableView deselectRowAtIndexPath:indexPath animated:YES];
   if (tableView.numberOfSections == 1 || indexPath.section == 1) {
-    curDownload = [_finishedDownloads objectAtIndex:indexPath.row];
-    UIActionSheet *launch = [[UIActionSheet alloc] initWithTitle:curDownload.filename
-                                                        delegate:self
-                                               cancelButtonTitle:nil
-                                          destructiveButtonTitle:@"Delete"
-                                               otherButtonTitles:nil];
-    if (curDownload.failed) [launch addButtonWithTitle:@"Retry"];
-    else {
-      UIDocumentInteractionController *x = [objc_getClass("UIDocumentInteractionController") interactionControllerWithURL:
-											[NSURL fileURLWithPath:[NSString stringWithFormat:@"/var/mobile/Media/Downloads/%@", curDownload.filename]]];
-      if(x) {
-        NSArray *applications = [x _applications:YES];
-        for(LSApplicationProxy *app in applications) {
-          [launch addButtonWithTitle:[NSString stringWithFormat:@"IPC open %@", [app localizedName]]];
-        }
-      } else {
-        for(NSString *title in _launchActions) {
-          [launch addButtonWithTitle:title];
-        }
-      }
-    }
-    launch.cancelButtonIndex = [launch addButtonWithTitle:@"Cancel"];
+    id download = [_finishedDownloads objectAtIndex:indexPath.row];
+    id launch = [[SDDownloadActionSheet alloc] initWithDownload:download delegate:self];
     [launch showInView:self.view];
-    launch.tag = kActionSheet;
     [launch release];
   }
 }
@@ -911,45 +872,37 @@ commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
 }
 /*}}}*/
 
+- (void)downloadActionSheet:(SDDownloadActionSheet *)actionSheet retryDownload:(SDSafariDownload *)download {
+  int row = [_finishedDownloads indexOfObject:download];
+  int section = (_currentDownloads.count > 0) ? 1 : 0;
+  [_finishedDownloads removeObjectAtIndex:row];
+  [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] 
+                    withRowAnimation:UITableViewRowAnimationFade];
+  download.failed = NO;
+  download.useSuggest = NO;
+  [self addDownload:download browser:NO];
+}
+
+- (void)downloadActionSheet:(SDDownloadActionSheet *)actionSheet deleteDownload:(SDSafariDownload *)download {
+NSLog(@"downloadActionSheet:%@ deleteDownload:%@", actionSheet, download);
+  NSString *path = [NSString stringWithFormat:@"%@/%@", download.savePath, download.filename];
+  int row = [_finishedDownloads indexOfObject:download];
+  int section = (_currentDownloads.count > 0) ? 1 : 0;
+
+  [_finishedDownloads removeObjectAtIndex:row];
+  [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] 
+                    withRowAnimation:UITableViewRowAnimationFade];
+
+  [[objc_getClass("SandCastle") sharedInstance] removeItemAtResolvedPath:path];
+}
+
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
   actionSheet.hidden = YES; 
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet 
 clickedButtonAtIndex:(NSInteger)buttonIndex {
-  if (actionSheet.tag == kActionSheet) {
-    NSString *button = [actionSheet buttonTitleAtIndex:buttonIndex];
-    NSString *action = [_launchActions objectForKey:button];
-    if([button isEqualToString:@"Delete"]) {
-      NSString *path = [NSString stringWithFormat:@"%@/%@", curDownload.savePath, curDownload.filename];
-      int row = [_finishedDownloads indexOfObject:curDownload];
-      int section = (_currentDownloads.count > 0) ? 1 : 0;
-      
-      [_finishedDownloads removeObjectAtIndex:row];
-      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] 
-								withRowAnimation:UITableViewRowAnimationFade];
-	  
-	  [[objc_getClass("SandCastle") sharedInstance] removeItemAtResolvedPath:path];
-	  
-	  //[[NSFileManager defaultManager] removeItemAtPath:path error:nil];
-    } else if([button isEqualToString:@"Retry"]) {
-      int row = [_finishedDownloads indexOfObject:curDownload];
-      int section = (_currentDownloads.count > 0) ? 1 : 0;
-      [_finishedDownloads removeObjectAtIndex:row];
-      [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] 
-								withRowAnimation:UITableViewRowAnimationFade];
-      curDownload.failed = NO;
-      curDownload.useSuggest = NO;
-      [self addDownload:curDownload browser:NO];
-    } else if(action) {
-      Class Application = objc_getClass("Application");
-      NSString *path = [NSString stringWithFormat:@"/private/var/mobile/Media/Downloads/%@", curDownload.filename];
-      path = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-      [[Application sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", action, path]]];
-    }
-    curDownload = nil;
-  }
-  else if (actionSheet.tag == kDownloadSheet) {
+  if (actionSheet.tag == kDownloadSheet) {
 	NSString* title = [actionSheet buttonTitleAtIndex:buttonIndex];
 	if([title isEqualToString:@"Cancel"])
 	  _actionType = SDActionTypeCancel;
