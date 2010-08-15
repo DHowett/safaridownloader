@@ -164,9 +164,6 @@ static id resourceBundle = nil;
 	
 	@try {
 	  _currentDownloads = [[NSKeyedUnarchiver unarchiveObjectWithFile:tempDL] retain];
-    for(SDSafariDownload *dl in _currentDownloads) {
-      [dl retain];
-    }
 	}
 	@catch (id nothing) {
 	  _currentDownloads = nil;
@@ -187,9 +184,6 @@ static id resourceBundle = nil;
 	
 	@try {
 	  _finishedDownloads = [[NSKeyedUnarchiver unarchiveObjectWithFile:tempLOC] retain];
-    for(SDSafariDownload *dl in _finishedDownloads) {
-      [dl retain];
-    }
 	}
 	@catch (id nothing) {
 	  _finishedDownloads = nil;
@@ -524,6 +518,9 @@ static SDActionType _actionType = SDActionTypeNone;
     [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:_currentDownloads.count-1 inSection:0]] 
                       withRowAnimation:UITableViewRowAnimationFade];
   }
+
+  // this should only be owned by the array
+  [download release];
 }
 
 - (void)fileBrowserDidCancel:(YFFileBrowser*)browser {
@@ -739,8 +736,10 @@ static SDActionType _actionType = SDActionTypeNone;
   // no need to update this here, it happens in cellFor...
   //cell.progressLabel = download.savePath;
   NSUInteger row = [_currentDownloads indexOfObject:download];
+  [download retain];
   [_currentDownloads removeObject:download];
   [_finishedDownloads addObject:download];
+  [download release];
   
   [self updateBadges];
   [self saveData];
@@ -807,8 +806,10 @@ static SDActionType _actionType = SDActionTypeNone;
   download.downloadOperation = nil;
   cell.progressLabel = @"Download Failed";
   NSUInteger row = [_currentDownloads indexOfObject:download];
+  [download retain];
   [_currentDownloads removeObject:download];
   [_finishedDownloads addObject:download];
+  [download release];
   
   [self updateBadges];
   [self saveData];
@@ -988,6 +989,7 @@ commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
 - (void)downloadActionSheet:(SDDownloadActionSheet *)actionSheet retryDownload:(SDSafariDownload *)download {
   int row = [_finishedDownloads indexOfObject:download];
   int section = (_currentDownloads.count > 0) ? 1 : 0;
+  [download retain];
   [_finishedDownloads removeObjectAtIndex:row];
   [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] 
                     withRowAnimation:UITableViewRowAnimationFade];

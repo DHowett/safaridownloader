@@ -37,7 +37,7 @@
 
 + (id)authView;
 
-@property (assign) id<SDDownloadOperationDelegate> delegate;
+@property (retain) id<SDDownloadOperationDelegate> delegate;
 @property (nonatomic, copy) NSString* temporaryPath;
 
 - (id)initWithDelegate:(id)del;

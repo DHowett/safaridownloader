@@ -25,7 +25,8 @@ id _authenticationView = nil;
 
 - (void)dealloc {
   NSLog(@"OPERATION DEALLOC!");
-  _delegate = nil;
+  //_delegate = nil;
+  [_delegate release];
   [_downloader release];
   [_response release];
   [_temporaryPath release];
