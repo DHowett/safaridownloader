@@ -724,7 +724,8 @@ static SDActionType _actionType = SDActionTypeNone;
   SDDownloadCell* cell = [self cellForDownload:download];
   
   download.downloadOperation = nil; // no-op atm
-  cell.progressLabel = @"Download Complete";
+  // no need to update this here, it happens in cellFor...
+  //cell.progressLabel = download.savePath;
   NSUInteger row = [_currentDownloads indexOfObject:download];
   [_currentDownloads removeObject:download];
   [_finishedDownloads addObject:download];
@@ -915,7 +916,7 @@ static SDActionType _actionType = SDActionTypeNone;
       cell.progressLabel = @"Download Failed";
     }
     else {
-      cell.progressLabel = @"Download Complete";
+      cell.progressLabel = [download.savePath stringByAbbreviatingWithTildeInPath];
     }
   }
   
