@@ -25,6 +25,10 @@
 DHLateClass(Application);
 DHLateClass(BrowserController);
 
+@interface UIDevice (Wildcat)
+- (BOOL)isWildcat;
+@end
+
 @interface LSApplicationProxy : NSObject
 - (id)app;
 - (id)localizedName;
@@ -94,6 +98,10 @@ static id sharedNc = nil;
 
 - (void)didHideBrowserPanel {
   [[[[$BrowserController sharedBrowserController] _modalViewController] view] performSelector:@selector(removeFromSuperview) withObject:nil afterDelay:0];
+}
+
+- (CGSize)contentSizeForViewInPopover {
+  return CGSizeMake(320.f, 480.f);
 }
 @end
 
