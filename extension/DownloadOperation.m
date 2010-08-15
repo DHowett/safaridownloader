@@ -183,7 +183,11 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 
 - (void)download:(NSURLDownload *)download didReceiveResponse:(NSURLResponse *)resp {
   _keepAlive = YES;
-  NSLog(@"Received response: %@", [resp allHeaderFields]);
+  NSLog(@"download:didReceiveResponse: %@", resp);
+  if ([resp respondsToSelector:@selector(allHeaderFields)]) {
+	NSLog(@"Received response: %@", [resp allHeaderFields]);
+  }
+
 	long long expectedContentLength = [resp expectedContentLength];
   [_delegate setDownloadSize:expectedContentLength];
   _resumedFrom = 0.0;
@@ -394,7 +398,9 @@ fail:
 
 - (void)deleteDownload {
   NSString *resumePath = [NSString stringWithFormat:@"/tmp/.partial/%@.plist", [_delegate filename]];
-  [[NSFileManager defaultManager] removeItemAtPath:_temporaryPath error:nil];
+  if (_temporaryPath) {
+	[[NSFileManager defaultManager] removeItemAtPath:_temporaryPath error:nil];
+  }
   [[NSFileManager defaultManager] removeItemAtPath:resumePath error:nil];
 }
 
