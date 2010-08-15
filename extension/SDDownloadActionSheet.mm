@@ -66,6 +66,7 @@ static NSMutableDictionary *_launchActions;
 }
 
 - (void)actionSheet:(SDDownloadActionSheet *)actionSheet clickedButtonAtIndex:(int)index {
+	[_sdDelegate downloadActionSheetWillDismiss:self];
 	NSString *button = index >= 0 ? [self buttonTitleAtIndex:index] : nil;
 	if([button isEqualToString:@"Delete"]) {
 		[_sdDelegate downloadActionSheet:actionSheet deleteDownload:_download];

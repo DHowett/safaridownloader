@@ -72,6 +72,7 @@ typedef enum
   NSURL					  *_loadingURL;
   BOOL					  _isDismissible;
   SDFileBrowserPanel*  _fbPanel;
+  NSIndexPath *_currentSelectedIndexPath;
   id<BrowserPanel>	  _oldPanel;
 }
 

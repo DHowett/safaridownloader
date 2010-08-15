@@ -5,6 +5,7 @@ extern const int kSDDownloadActionSheetTag;
 @class SDDownloadActionSheet;
 
 @protocol SDDownloadActionSheetDelegate
+- (void)downloadActionSheetWillDismiss:(SDDownloadActionSheet *)actionSheet;
 - (void)downloadActionSheet:(SDDownloadActionSheet *)actionSheet retryDownload:(SDSafariDownload *)download;
 - (void)downloadActionSheet:(SDDownloadActionSheet *)actionSheet deleteDownload:(SDSafariDownload *)download;
 @end

@@ -906,7 +906,7 @@ static SDActionType _actionType = SDActionTypeNone;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-  [tableView deselectRowAtIndexPath:indexPath animated:YES];
+  _currentSelectedIndexPath = indexPath;
   if (tableView.numberOfSections == 1 || indexPath.section == 1) {
     id download = [_finishedDownloads objectAtIndex:indexPath.row];
     id launch = [[SDDownloadActionSheet alloc] initWithDownload:download delegate:self];
@@ -968,6 +968,11 @@ NSLog(@"downloadActionSheet:%@ deleteDownload:%@", actionSheet, download);
                     withRowAnimation:UITableViewRowAnimationFade];
 
   [[objc_getClass("SandCastle") sharedInstance] removeItemAtResolvedPath:path];
+}
+
+- (void)downloadActionSheetWillDismiss:(SDDownloadActionSheet *)actionSheet {
+  [(UITableView *)self.view deselectRowAtIndexPath:_currentSelectedIndexPath animated:YES];
+  _currentSelectedIndexPath = nil;
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
