@@ -164,6 +164,9 @@ static id resourceBundle = nil;
 	
 	@try {
 	  _currentDownloads = [[NSKeyedUnarchiver unarchiveObjectWithFile:tempDL] retain];
+    for(SDSafariDownload *dl in _currentDownloads) {
+      [dl retain];
+    }
 	}
 	@catch (id nothing) {
 	  _currentDownloads = nil;
@@ -184,6 +187,9 @@ static id resourceBundle = nil;
 	
 	@try {
 	  _finishedDownloads = [[NSKeyedUnarchiver unarchiveObjectWithFile:tempLOC] retain];
+    for(SDSafariDownload *dl in _finishedDownloads) {
+      [dl retain];
+    }
 	}
 	@catch (id nothing) {
 	  _finishedDownloads = nil;
