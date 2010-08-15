@@ -608,6 +608,20 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 %end
 %end
 
+%group iPadHooks
+%hook BrowserButtonBar
+- (void)setFrame:(CGRect)frame {
+  %orig(CGRectMake(frame.origin.x, frame.origin.y, frame.size.width+26, frame.size.height));
+}
+%end
+%hook AddressView
+- (CGRect)_fieldRect {
+  CGRect frame = %orig;
+  return CGRectMake(frame.origin.x+26, frame.origin.y, frame.size.width-26, frame.size.height);
+}
+%end
+%end
+
 static _Constructor void DownloaderInitialize() {	
   DHScopedAutoreleasePool();
 
