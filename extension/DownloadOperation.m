@@ -189,20 +189,17 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
   NSLog(@"download:didReceiveResponse: %@", resp);
   
   if ([resp respondsToSelector:@selector(allHeaderFields)]) {
-	NSDictionary* responseDict = [(NSHTTPURLResponse*)resp allHeaderFields];
-	NSString* eTag = [responseDict objectForKey:@"Etag"];
-	if (eTag != nil) {
-	  _resumeData = [NSMutableDictionary new];
-	  [_resumeData setObject:eTag forKey:@"NSURLDownloadEntityTag"];
-	  if ([responseDict objectForKey:@"Last-Modified"]) {
-		[_resumeData setObject:[responseDict objectForKey:@"Last-Modified"] forKey:@"NSURLDownloadServerModificationDate"];
-	  }
-	  NSURL* url = [[_delegate urlReq] URL];
-	  if (url) {
-		[_resumeData setObject:[url absoluteString] forKey:@"NSURLDownloadURL"];
-	  }
-	  [_resumeData setObject:[NSNumber numberWithUnsignedInt:0] forKey:@"NSURLDownloadBytesReceived"];
-	}
+    NSDictionary* responseDict = [(NSHTTPURLResponse*)resp allHeaderFields];
+    NSString* eTag = [responseDict objectForKey:@"Etag"];
+    _resumeData = [NSMutableDictionary new];
+    if(eTag)
+      [_resumeData setObject:eTag forKey:@"NSURLDownloadEntityTag"];
+    if ([responseDict objectForKey:@"Last-Modified"])
+      [_resumeData setObject:[responseDict objectForKey:@"Last-Modified"] forKey:@"NSURLDownloadServerModificationDate"];
+    NSURL* url = [[_delegate urlReq] URL];
+    if (url)
+      [_resumeData setObject:[url absoluteString] forKey:@"NSURLDownloadURL"];
+    [_resumeData setObject:[NSNumber numberWithUnsignedInt:0] forKey:@"NSURLDownloadBytesReceived"];
   }
 
   long long expectedContentLength = [resp expectedContentLength];
