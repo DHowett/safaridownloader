@@ -62,7 +62,7 @@
 	    <key>cell</key>
 	    <string>PSSliderCell</string>
 	    <key>default</key>
-	    <real>3</real>
+	    <real>1</real>
 	    <key>defaults</key>
 	    <string>net.howett.safaridownloader</string>
 	    <key>key</key>
