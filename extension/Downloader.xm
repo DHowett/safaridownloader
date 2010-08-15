@@ -21,8 +21,12 @@ char __attribute((section("__MISC, UDID"))) udid[41] = "000000000000000000000000
 static bool _wildCat = NO;
 static bool _fourPointOh = NO;
 
+static UIToolbarButton *_actionButton;
+static UIToolbarButton *_bookmarksButton;
+
 @interface UIActionSheet (Private)
 -(id)buttons;
+-(void)presentFromRect:(CGRect)rect inView:(id)view direction:(int)direction allowInteractionWithViews:(id)views backgroundStyle:(int)style animated:(BOOL)animated;
 @end
 
 %class BrowserController
@@ -30,11 +34,13 @@ static bool _fourPointOh = NO;
 
 @interface BrowserController (SDMAdditions)
 - (void)_setShowingDownloads:(BOOL)showing animate:(BOOL)animate;
+- (void)_presentModalViewController:(id)x fromButton:(UIToolbarButton *)button;
 - (void)_presentModalViewControllerFromDownloadsButton:(id)x;
 - (void)toggleDownloadManagerFromButtonBar;
 - (void)_setBrowserPanel:(id)panel;
 - (void)setBrowserPanel:(id)panel;
 - (id)browserLayer;
+- (void)_forceDismissModalViewController:(BOOL)animate;
 @end
 
 @interface BrowserController (SafariFour)
@@ -168,6 +174,10 @@ static void initCustomToolbar(void) {
       [[SDDownloadManager sharedManager] setPortraitDownloadButton:button];
     else if(tag == 62)
       [[SDDownloadManager sharedManager] setLandscapeDownloadButton:button];
+    else if(tag == 1)
+      _bookmarksButton = button;
+    else if(tag == 15)
+      _actionButton = button;
 
     curButton++;
   }
@@ -484,11 +494,11 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   }
 }
 
-%new(v@:@)
-- (void)_presentModalViewControllerFromDownloadsButton:(id)x {
+%new(v@:@@)
+- (void)_presentModalViewController:(id)x fromButton:(UIToolbarButton *)button {
   if(_wildCat) {
     id rpc = [[%c(RotatablePopoverController) alloc] initWithContentViewController:x];
-    [rpc setPresentationRect:[[[SDDownloadManager sharedManager] portraitDownloadButton] frame]];
+    [rpc setPresentationRect:[button frame]];
     [rpc setPresentationView:[self buttonBar]];
     [rpc setPermittedArrowDirections:1];
     [rpc setPassthroughViews:[NSArray arrayWithObject:[self buttonBar]]];
@@ -500,6 +510,24 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
   }
 }
 
+%new(v@:@)
+- (void)_presentModalViewControllerFromDownloadsButton:(id)x {
+  [self _presentModalViewController:x fromButton:[[SDDownloadManager sharedManager] portraitDownloadButton]];
+}
+
+%group iPadHooks
+- (void)_presentModalViewControllerFromActionButton:(id)x {
+  [self _presentModalViewController:x fromButton:_actionButton];
+}
+
+- (void)_presentModalViewControllerFromBookmarksButton:(id)x {
+  [self _presentModalViewController:x fromButton:_bookmarksButton];
+}
+
+- (void)popupAlert:(UIActionSheet *)alert {
+  [alert presentFromRect:[_actionButton frame] inView:[self buttonBar] direction:1 allowInteractionWithViews:[NSArray arrayWithObjects:[self buttonBar], nil] backgroundStyle:0 animated:YES];
+}
+%end
 %group Firmware_ge_32
 %new(v@:)
 - (void)toggleDownloadManagerFromButtonBar {
@@ -592,6 +620,7 @@ static _Constructor void DownloaderInitialize() {
                                   0);
   if([UIDevice instancesRespondToSelector:@selector(isWildcat)] && [[UIDevice currentDevice] isWildcat]) {
     _wildCat = YES;
+    %init(iPadHooks);
   } else {
     _wildCat = NO;
   }
