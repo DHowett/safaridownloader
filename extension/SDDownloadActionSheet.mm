@@ -1,6 +1,6 @@
 #import <objc/runtime.h>
 #import "SDDownloadActionSheet.h"
-#import "SandCastle.h"
+#import <SandCastle/SandCastle.h>
 
 #import "UIKitExtra/UIDocumentInteractionController.h"
 

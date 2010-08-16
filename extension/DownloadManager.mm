@@ -13,7 +13,7 @@
 #import "DownloaderCommon.h"
 #import "ModalAlert.h"
 
-#import "SandCastle.h"
+#import <SandCastle/SandCastle.h>
 
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloading.plist"
 #define LOC_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloaded.plist"

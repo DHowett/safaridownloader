@@ -7,7 +7,7 @@
 
 #import "Safari/BrowserController.h"
 
-#import "SandCastle.h"
+#import <SandCastle/SandCastle.h>
 
 #define HOME_DIR @"/private/var/mobile/Media/Downloads/"
 #define kNewFolderAlert 239530

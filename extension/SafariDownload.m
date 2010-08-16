@@ -7,7 +7,7 @@
 //
 
 #import "SafariDownload.h"
-#import "SandCastle.h"
+#import <SandCastle/SandCastle.h>
 
 #define DEF_SAVE_PATH @"/var/mobile/Media/Downloads"
 

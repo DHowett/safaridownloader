@@ -6,7 +6,7 @@
 #import "Safari/BrowserController.h"
 #import <WebUI/WebUIAuthenticationManager.h>
 
-#import "SandCastle.h"
+#import <SandCastle/SandCastle.h>
 
 @interface SDDownloadOperation (extra)
 id _authenticationView = nil;
