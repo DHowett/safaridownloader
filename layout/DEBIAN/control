@@ -4,12 +4,12 @@ Pre-Depends: firmware (>= 3.0)
 Depends: mobilesubstrate, preferenceloader, sandcastle (>= 0.0.2)
 Conflicts: net.howett.downloader, com.bigboss.patchsafari2 (<= 2.0.2587-1)
 Replaces: net.howett.downloader
-Version: 1.4.99
+Version: 1.5.0
 Architecture: iphoneos-arm
 Description: A full Download Manager for Mobile Safari.
 Maintainer: Dustin Howett <dustin@howett.net>
 Author: Dustin Howett <dustin@howett.net>
-Section: Tweaks
+Section: Networking
 Depiction: http://howett.net/cydia/depict/sdm/index.html
 Homepage: http://howett.net/cydia/depict/sdm/index.html
 Sponsor: thebigboss.org <http://thebigboss.org>
