@@ -12,4 +12,5 @@ include framework/makefiles/aggregate.mk
 
 internal-stage::
 	-find _ -iname '*.plist' -print0 | xargs -0 plutil -convert binary1
+	-find _ -iname '*.png' -print0 | xargs -0 pincrush -i
 	$(FAKEROOT) chown -R 0:80 _
