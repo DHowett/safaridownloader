@@ -8,7 +8,10 @@ if [[ $1 == configure ]]; then
 		cp "/Library/Application Support/Safari Downloader/DefaultPrefs.plist" /var/mobile/Library/Preferences/net.howett.safaridownloader.plist
 		chown mobile.mobile /var/mobile/Library/Preferences/net.howett.safaridownloader.plist
 	fi
-	if [[ -e /var/mobile/Library/Downloads ]]; then
-		chown -R mobile.mobile /var/mobile/Library/Downloads
+	if [[ -e /var/mobile/Media/Downloads ]]; then
+		chown -R mobile.mobile /var/mobile/Media/Downloads
+	else
+		mkdir -p /var/mobile/Media/Downloads
+		chown -R mobile.mobile /var/mobile/Media/Downloads
 	fi
 fi
