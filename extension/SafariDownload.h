@@ -33,7 +33,7 @@
   NSString*      _sizeString;
   NSString*      _timeString;
   NSString*      _savePath;
-  NSInteger      _size;
+  long long      _size;
   NSInteger      _time_remaining;
   float          _progress;
   float          _speed;
@@ -52,8 +52,8 @@
 @property (nonatomic, retain) NSString        *sizeString;
 @property (nonatomic, retain) NSString        *timeString;
 @property (nonatomic, retain) NSString        *savePath;
+@property (assign) long long  size;
 @property (assign) NSInteger  time;
-@property (assign) NSInteger  size;
 @property (assign) float      progress;
 @property (assign) float      speed;
 @property (assign) BOOL       useSuggest;

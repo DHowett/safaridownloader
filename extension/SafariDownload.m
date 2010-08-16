@@ -86,7 +86,7 @@ savePath    = _savePath;
   [coder encodeObject: _savePath       forKey: @"savePath"];
 }
 
-- (void)setDownloadSize:(NSInteger)length {
+- (void)setDownloadSize:(long long)length {
   [self setSize:length]; 
 }
 
@@ -104,7 +104,7 @@ savePath    = _savePath;
   [[objc_getClass("SandCastle") sharedInstance] createDirectoryAtResolvedPath:_savePath];
 }
 
-- (void)setSize:(NSInteger)length {
+- (void)setSize:(long long)length {
   _size = length;
   double rSize = (double)(length/((double)1024)); // kb
   NSString *ord = @"K";
