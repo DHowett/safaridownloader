@@ -8,6 +8,9 @@ static id fileClassController = nil;
 
 static BOOL _legacy = NO;
 
+@interface PSListController (ViewControllerStuff)
+- (void)viewDidLoad;
+@end
 
 @interface SDFileTypeSetupController : PSSetupController {
 }
@@ -247,7 +250,6 @@ static BOOL _legacy = NO;
 }
 - (id)initForContentSize:(CGSize)size;
 - (void)dealloc;
-- (void)suspend;
 - (id)specifiers;
 @end
 
