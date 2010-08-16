@@ -31,6 +31,7 @@ static UIToolbarButton *_bookmarksButton;
 
 %class BrowserController
 %class DOMHTMLAnchorElement;
+%class DOMHTMLImageElement;
 
 @interface BrowserController (SDMAdditions)
 - (void)_setShowingDownloads:(BOOL)showing animate:(BOOL)animate;
@@ -378,6 +379,7 @@ static NSURL *interactionURL = nil;
 @interface DOMNode : NSObject
 -(DOMNode*)parentNode;
 -(NSURL*)absoluteLinkURL;
+-(NSURL*)absoluteImageURL;
 @end
 
 %hook UIWebDocumentView
@@ -392,21 +394,42 @@ static NSURL *interactionURL = nil;
 }
 
 static void showBrowserSheetHookInternals(UIWebDocumentView *self, UIActionSheet *sheet, DOMNode *&domElement) {
+  NSLog(@"DOM Element is %@", domElement);
   NSMutableArray *buttons = [sheet buttons];
+  NSString *downloadThing = @"";
   id myButton;
-  if(![domElement isKindOfClass:[$DOMHTMLAnchorElement class]]) {
-    NSLog(@"not htmlanchorelement oh no %@", domElement);
-    domElement = [domElement parentNode];
+
+  DOMNode *anchorNode = domElement;
+  while(anchorNode && ![anchorNode isKindOfClass:[$DOMHTMLAnchorElement class]]) {
+    NSLog(@"not htmlanchorelement oh no %@", anchorNode);
+    anchorNode = [anchorNode parentNode];
+  }
+
+  if(anchorNode) {
+    NSLog(@"100%% certainty that this is an anchor node. %@", anchorNode);
+    domElement = anchorNode;
+  } else {
+    NSLog(@"There's definitely not an anchor node here.");
   }
 
   if([domElement isKindOfClass:[$DOMHTMLAnchorElement class]]) {
     NSLog(@"htmlanchorelement yay %@", domElement);
     interactionURL = [[domElement absoluteLinkURL] copy];
+    downloadThing = @"Target";
+  } else if([domElement isKindOfClass:[$DOMHTMLImageElement class]]) {
+    NSLog(@"htmlimageelement yay %@", domElement);
+    interactionURL = [[domElement absoluteImageURL] copy];
+    downloadThing = @"Image";
+  } else {
+    interactionURL = nil;
+  }
+
+  if(interactionURL) {
     NSString *scheme = [interactionURL scheme];
     NSLog(@"url is %@", interactionURL);
     if([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]
     || [scheme isEqualToString:@"ftp"]) {
-      [sheet addButtonWithTitle:@"Download To..."];
+     [sheet addButtonWithTitle:[NSString stringWithFormat:@"Download %@...", downloadThing]];
       myButton = [buttons lastObject];
       [myButton retain];
       [myButton setTag:1337];
