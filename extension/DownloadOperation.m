@@ -3,9 +3,8 @@
 #import "DownloadOperation.h"
 #import "NSURLDownload.h"
 #import "ModalAlert.h"
-#import "WebUI/WebUI.h"
 #import "Safari/BrowserController.h"
-#import "WebUI4/WebUIAuthenticationManager.h"
+#import <WebUI/WebUIAuthenticationManager.h>
 
 #import "SandCastle.h"
 
