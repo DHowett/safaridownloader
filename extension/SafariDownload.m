@@ -106,13 +106,17 @@ savePath    = _savePath;
 
 - (void)setSize:(long long)length {
   _size = length;
-  double rSize = (double)(length/((double)1024)); // kb
-  NSString *ord = @"K";
-  if (rSize > 1024.0) {
-    ord = @"M";
-    rSize /= (double)1024;
+  if(length == 0) {
+    self.sizeString = @"0B";
+  } else {
+    double rSize = (double)(length/((double)1024)); // kb
+    NSString *ord = @"K";
+    if (rSize > 1024.0) {
+      ord = @"M";
+      rSize /= (double)1024;
+    }
+    self.sizeString = [NSString stringWithFormat:@"%.1lf%@B", rSize, ord];
   }
-  self.sizeString = [NSString stringWithFormat:@"%.1lf%@B", rSize, ord];
 }
 
 - (void)setRetryString:(NSString*)status {
