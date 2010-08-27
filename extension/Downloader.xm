@@ -623,9 +623,10 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 %hook Application
 - (void)applicationWillSuspend {
   BrowserController *sbc = [$BrowserController sharedBrowserController];
-  if([[sbc browserPanel] panelType] == 44)
+  if([[sbc browserPanel] panelType] == 44) {
     [sbc hideBrowserPanelType:44];
     [sbc _setShowingDownloads:NO animate:YES];
+  }
   %orig;
 }
 %end
