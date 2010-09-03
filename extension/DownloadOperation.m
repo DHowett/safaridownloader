@@ -399,9 +399,9 @@ fail:
   
   self.temporaryPath = [NSString stringWithFormat:@"/tmp/.partial/%@", [_delegate filename]];
   _downloader = [[NSURLDownload alloc] initWithResumeData:resumeData delegate:self path:outputPath];
-  [resumeData release];
   if (_downloader == nil) {
     NSLog(@"downloader is nil");
+    [resumeData release];
     return NO;
   }
   else {
@@ -411,6 +411,7 @@ fail:
     _start = [NSDate timeIntervalSinceReferenceDate];
     _resumeData = [[NSPropertyListSerialization propertyListFromData:resumeData mutabilityOption:NSPropertyListMutableContainersAndLeaves format:NULL errorDescription:NULL] retain];
   }
+  [resumeData release];
   
   return YES;
 }
