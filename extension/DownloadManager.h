@@ -113,4 +113,5 @@ typedef enum
 - (IBAction)cancelAllDownloads;
 
 - (void)updateBadges;
+- (int)downloadsRunning;
 @end

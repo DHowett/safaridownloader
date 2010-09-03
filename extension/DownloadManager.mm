@@ -1043,6 +1043,10 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   [_landscapeDownloadButton _setBadgeValue:val];
   //[[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 }
+
+- (int)downloadsRunning {
+  return _currentDownloads.count;
+}
 @end
 
 // vim:filetype=objc:ts=2:sw=2:expandtab
