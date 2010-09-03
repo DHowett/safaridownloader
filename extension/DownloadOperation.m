@@ -191,15 +191,16 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
   if ([resp respondsToSelector:@selector(allHeaderFields)]) {
     NSDictionary* responseDict = [(NSHTTPURLResponse*)resp allHeaderFields];
     NSString* eTag = [responseDict objectForKey:@"Etag"];
-    _resumeData = [NSMutableDictionary new];
-    if(eTag)
-      [_resumeData setObject:eTag forKey:@"NSURLDownloadEntityTag"];
-    if ([responseDict objectForKey:@"Last-Modified"])
-      [_resumeData setObject:[responseDict objectForKey:@"Last-Modified"] forKey:@"NSURLDownloadServerModificationDate"];
     NSURL* url = [[_delegate urlReq] URL];
-    if (url)
+    if (url && eTag) {
+      _resumeData = [NSMutableDictionary new];
+      if(eTag)
+        [_resumeData setObject:eTag forKey:@"NSURLDownloadEntityTag"];
+      if ([responseDict objectForKey:@"Last-Modified"])
+        [_resumeData setObject:[responseDict objectForKey:@"Last-Modified"] forKey:@"NSURLDownloadServerModificationDate"];
       [_resumeData setObject:[url absoluteString] forKey:@"NSURLDownloadURL"];
-    [_resumeData setObject:[NSNumber numberWithUnsignedInt:0] forKey:@"NSURLDownloadBytesReceived"];
+      [_resumeData setObject:[NSNumber numberWithUnsignedInt:0] forKey:@"NSURLDownloadBytesReceived"];
+    }
   }
 
   long long expectedContentLength = [resp expectedContentLength];
