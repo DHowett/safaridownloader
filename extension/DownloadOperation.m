@@ -313,7 +313,7 @@ fail:
   }
   else {
 	NSLog(@"download naturally canceled, storing resume data!");
-	[self storeResumeData];
+	[self deleteDownload];
   }
 
   _noUpdate = YES;
@@ -389,7 +389,7 @@ fail:
     return NO;
   }
   
-  NSData *resumeData = [NSData dataWithContentsOfFile:resumeDataPath];
+  NSData *resumeData = [[NSData dataWithContentsOfFile:resumeDataPath] retain];
   if (resumeData == nil || [resumeData length] == 0) {
     NSLog(@"RESUME data is nil");
       [[NSFileManager defaultManager] removeItemAtPath:resumeDataPath error:nil];
@@ -399,6 +399,7 @@ fail:
   
   self.temporaryPath = [NSString stringWithFormat:@"/tmp/.partial/%@", [_delegate filename]];
   _downloader = [[NSURLDownload alloc] initWithResumeData:resumeData delegate:self path:outputPath];
+  [resumeData release];
   if (_downloader == nil) {
     NSLog(@"downloader is nil");
     return NO;
@@ -428,7 +429,7 @@ fail:
   NSLog(@"cancelDownload!");
   _noUpdate = YES;
   [_downloader cancel];
-  [self storeResumeData];
+  [self deleteDownload];
   _keepAlive = NO;
 }
 
