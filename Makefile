@@ -1,4 +1,4 @@
-export ADDITIONAL_CFLAGS = -include $(FW_PROJECT_DIR)/release.h
+export ADDITIONAL_CFLAGS = -include $(THEOS_PROJECT_DIR)/release.h
 ifeq ($(RELEASE),1)
 	export ADDITIONAL_CFLAGS += -DRELEASE
 endif
@@ -11,6 +11,6 @@ include framework/makefiles/common.mk
 include framework/makefiles/aggregate.mk
 
 internal-stage::
-	-find _ -iname '*.plist' -print0 | xargs -0 plutil -convert binary1
-	-find _ -iname '*.png' -print0 | xargs -0 pincrush -i
+	#-find _ -iname '*.plist' -print0 | xargs -0 plutil -convert binary1
+	#-find _ -iname '*.png' -print0 | xargs -0 pincrush -i
 	$(FAKEROOT) chown -R 0:80 _

@@ -3,8 +3,6 @@
 #import <Preferences/PSTableCell.h>
 #import <Preferences/PSSetupListController.h>
 #import <Preferences/PSSetupController.h>
-#import <UIKit/UIPreferencesDeleteTableCell.h>
-#import <DHLocalizedListController.h>
 
 @interface SDSettingsController : PSListController {
 }

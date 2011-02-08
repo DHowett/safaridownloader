@@ -9,7 +9,7 @@ Downloader_OBJCC_FILES = Downloader.mm DownloadManager.mm ModalAlert.mm SDDownlo
 Downloader_LOGOS_FILES = AuthenticationView.mm
 Downloader_FRAMEWORKS = UIKit CoreGraphics QuartzCore
 Downloader_PRIVATE_FRAMEWORKS = WebUI
-Downloader_CFLAGS = -I$(FW_PROJECT_DIR) -mthumb
+Downloader_CFLAGS = -I$(THEOS_PROJECT_DIR) -mthumb
 Downloader_LDFLAGS = -mthumb
 
 include ../framework/makefiles/common.mk

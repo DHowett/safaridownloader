@@ -6,7 +6,7 @@ SDSettings_INSTALL_PATH = /System/Library/PreferenceBundles
 SDSettings_FRAMEWORKS = UIKit CoreGraphics
 SDSettings_PRIVATE_FRAMEWORKS = Preferences
 
-SDSettings_CFLAGS = -I$(FW_PROJECT_DIR) -mthumb
+SDSettings_CFLAGS = -I$(THEOS_PROJECT_DIR) -mthumb
 SDSettings_LDFLAGS = -mthumb
 
 SDSettings_BUNDLE_NAME = SafariDownloaderSettings
