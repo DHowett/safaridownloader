@@ -60,6 +60,7 @@ static id sharedNc = nil;
 - (int)panelState { return 1; }
 - (BOOL)shouldShowButtonBar { return ([UIDevice instancesRespondToSelector:@selector(isWildcat)] && [[UIDevice currentDevice] isWildcat]) ? YES : NO; }
 - (BOOL)isDismissible { return _isDismissible; }
+- (BOOL)disablesStatusBarPress { return NO; }
 
 #undef MARK
 #define MARK    NSLog(@"%s", __PRETTY_FUNCTION__);
