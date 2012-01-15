@@ -29,10 +29,6 @@ static UIToolbarButton *_bookmarksButton;
 -(void)presentFromRect:(CGRect)rect inView:(id)view direction:(int)direction allowInteractionWithViews:(id)views backgroundStyle:(int)style animated:(BOOL)animated;
 @end
 
-%class BrowserController
-%class DOMHTMLAnchorElement;
-%class DOMHTMLImageElement;
-
 @interface BrowserController (SDMAdditions)
 - (void)_setShowingDownloads:(BOOL)showing animate:(BOOL)animate;
 - (void)_presentModalViewController:(id)x fromButton:(UIToolbarButton *)button;
@@ -81,7 +77,7 @@ static void initCustomToolbar(void) {
   id x = [BrowserButtonBar imageButtonItemWithName:portraitIconFilename()
                                                tag:61
                                             action:@selector(toggleDownloadManagerFromButtonBar)
-                                            target:[NSValue valueWithNonretainedObject:[$BrowserController sharedBrowserController]]];
+                                            target:[NSValue valueWithNonretainedObject:[%c(BrowserController) sharedBrowserController]]];
 
   [mutButtonItems addObject:x];
   CFDictionaryRemoveValue(_groups, (void*)1);
@@ -91,7 +87,7 @@ static void initCustomToolbar(void) {
     id y = [BrowserButtonBar imageButtonItemWithName:landscapeIconFilename()
                                                  tag:62
                                               action:@selector(toggleDownloadManagerFromButtonBar)
-                                              target:[NSValue valueWithNonretainedObject:[$BrowserController sharedBrowserController]]];
+                                              target:[NSValue valueWithNonretainedObject:[%c(BrowserController) sharedBrowserController]]];
     [mutButtonItems addObject:y];
     CFDictionaryRemoveValue(_groups, (void*)2);
   }
@@ -232,7 +228,7 @@ decidePolicyForNewWindowAction:(NSDictionary *)action
   else { // if (_act == SDActionTypeDownload || action == SDActionTypeCancel) {
     NSLog(@"WDW: handled");
     NSLog(@"#####################################################");
-    [[DHClass(BrowserController) sharedBrowserController] setResourcesLoading:NO];
+    [[%c(BrowserController) sharedBrowserController] setResourcesLoading:NO];
   }
 }
 #define MIMETYPE_ORIG webView:decidePolicyForMIMEType:request:frame:decisionListener:
@@ -277,7 +273,7 @@ decidePolicyForNavigationAction:(NSDictionary *)action
   else { // if (_act == SDActionTypeDownload || action == SDActionTypeCancel) {
     NSLog(@"NAV: handled");
     NSLog(@"#####################################################");
-    [[DHClass(BrowserController) sharedBrowserController] setResourcesLoading:NO];
+    [[%c(BrowserController) sharedBrowserController] setResourcesLoading:NO];
   }
 }
 
@@ -316,7 +312,7 @@ decidePolicyForMIMEType:(NSString *)type
   else {
     NSLog(@"MIME: handled");
     NSLog(@"#####################################################");
-    [[DHClass(BrowserController) sharedBrowserController] setResourcesLoading:NO];
+    [[%c(BrowserController) sharedBrowserController] setResourcesLoading:NO];
   }
 }
 %end
@@ -400,7 +396,7 @@ static void showBrowserSheetHookInternals(UIWebDocumentView *self, UIActionSheet
   id myButton;
 
   DOMNode *anchorNode = domElement;
-  while(anchorNode && ![anchorNode isKindOfClass:[$DOMHTMLAnchorElement class]]) {
+  while(anchorNode && ![anchorNode isKindOfClass:%c(DOMHTMLAnchorElement)]) {
     NSLog(@"not htmlanchorelement oh no %@", anchorNode);
     anchorNode = [anchorNode parentNode];
   }
@@ -412,11 +408,11 @@ static void showBrowserSheetHookInternals(UIWebDocumentView *self, UIActionSheet
     NSLog(@"There's definitely not an anchor node here.");
   }
 
-  if([domElement isKindOfClass:[$DOMHTMLAnchorElement class]]) {
+  if([domElement isKindOfClass:%c(DOMHTMLAnchorElement)]) {
     NSLog(@"htmlanchorelement yay %@", domElement);
     interactionURL = [[domElement absoluteLinkURL] copy];
     downloadThing = @"Target";
-  } else if([domElement isKindOfClass:[$DOMHTMLImageElement class]]) {
+  } else if([domElement isKindOfClass:%c(DOMHTMLImageElement)]) {
     NSLog(@"htmlimageelement yay %@", domElement);
     interactionURL = [[domElement absoluteImageURL] copy];
     downloadThing = @"Image";
@@ -622,7 +618,7 @@ void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CF
 
 %hook Application
 - (void)applicationWillSuspend {
-  BrowserController *sbc = [$BrowserController sharedBrowserController];
+  BrowserController *sbc = [%c(BrowserController) sharedBrowserController];
   if([[sbc browserPanel] panelType] == 44) {
     [sbc hideBrowserPanelType:44];
     [sbc _setShowingDownloads:NO animate:YES];
