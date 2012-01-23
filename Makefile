@@ -1,14 +1,16 @@
+export DEBUG=1
+include framework/makefiles/common.mk
+
 export ADDITIONAL_CFLAGS = -include $(THEOS_PROJECT_DIR)/release.h
-ifeq ($(RELEASE),1)
-	export ADDITIONAL_CFLAGS += -DRELEASE
+SUBPROJECTS = extension
+ifneq ($(THEOS_TARGET_NAME),iphone_simulator)
+	SUBPROJECTS += preferences
 endif
-SUBPROJECTS = extension preferences
-STOREPACKAGE=1
+
 export RELEASE.CFLAGS = -DRELEASE
 
 export GO_EASY_ON_ME = 1
 
-include framework/makefiles/common.mk
 include framework/makefiles/aggregate.mk
 
 ifeq ($(findstring RELEASE,$(THEOS_SCHEMA)),)
