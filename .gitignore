@@ -1,0 +1,11 @@
+Safari
+WebUI
+UIKitExtra
+SandCastle
+obj
+extension/obj
+preferences/obj
+framework
+*.deb
+_
+.theos
