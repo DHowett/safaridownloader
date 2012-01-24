@@ -1,8 +1,8 @@
 #import "SDSettings.h"
 #import <objc/runtime.h>
 #import "extension/DownloaderCommon.h"
+#import "common/Resources.h"
 
-static id resourceBundle = nil;
 static id fileTypesDict = nil;
 static id fileClassController = nil;
 
@@ -357,7 +357,7 @@ static BOOL _legacy = NO;
 									     cell:c
 									     edit:nil];
 			[spec setProperty:fileClass forKey:@"class"];
-			[spec setProperty:[UIImage imageWithContentsOfFile:[resourceBundle pathForResource:[@"Class-" stringByAppendingString:fileClass] ofType:@"png" inDirectory:@"FileIcons"]] forKey:@"iconImage"];
+			[spec setProperty:[UIImage imageWithContentsOfFile:[[SDResources imageBundle] pathForResource:[@"Class-" stringByAppendingString:fileClass] ofType:@"png" inDirectory:@"Icons"]] forKey:@"iconImage"];
 			[(NSMutableArray *)_specifiers insertObject:spec atIndex:index++];
 		}
 
@@ -393,8 +393,7 @@ static BOOL _legacy = NO;
 	if((self = [super initForContentSize:size])) {
 //		extraSpecs = [NSMutableArray array];
 //		[extraSpecs addObject:spec];
-		resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
-		fileTypesDict = [[NSDictionary alloc] initWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" ofType:@"plist"]];
+		fileTypesDict = [[NSDictionary alloc] initWithContentsOfFile:[[SDResources supportBundle] pathForResource:@"FileTypes" ofType:@"plist"]];
 
 	}
 	return self;

@@ -1,0 +1,11 @@
+{
+    CFBundleDevelopmentRegion = English;
+    CFBundleIdentifier = net.howett.safaridownloader.images;
+    CFBundleInfoDictionaryVersion = 6.0;
+    CFBundlePackageType = BNDL;
+    CFBundleShortVersionString = 1.0;
+    CFBundleSignature = "????";
+    CFBundleVersion = 1.0;
+    DTPlatformName = iphoneos;
+    MinimumOSVersion = 3.0;
+}

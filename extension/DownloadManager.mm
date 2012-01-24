@@ -12,6 +12,7 @@
 #import "DownloadCell.h"
 #import "DownloaderCommon.h"
 #import "ModalAlert.h"
+#import "Resources.h"
 
 #import <SandCastle/SandCastle.h>
 
@@ -123,7 +124,6 @@ currentRequest;
 #pragma mark -
 #pragma mark Singleton Methods/*{{{*/
 static id sharedManager = nil;
-static id resourceBundle = nil;
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)inter {
   return NO; 
@@ -147,7 +147,6 @@ static id resourceBundle = nil;
 																name:UIApplicationWillTerminateNotification object:nil];
 	
     _fbPanel = [[SDFileBrowserPanel alloc] init];
-    resourceBundle = [[NSBundle alloc] initWithPath:SUPPORT_BUNDLE_PATH];
 	
 	[self updateUserPreferences];
 
@@ -337,7 +336,7 @@ static SDActionType _actionType = SDActionTypeNone;
 
 - (void)updateFileTypes {
   NSMutableDictionary *globalFileTypes = 
-  [NSMutableDictionary dictionaryWithContentsOfFile:[resourceBundle pathForResource:@"FileTypes" 
+  [NSMutableDictionary dictionaryWithContentsOfFile:[[SDResources supportBundle] pathForResource:@"FileTypes" 
                                                                              ofType:@"plist"]];
   NSArray *disabledItems = [_userPrefs objectForKey:@"DisabledItems"];
   NSDictionary *customTypes = [_userPrefs objectForKey:@"CustomItems"];
@@ -386,17 +385,17 @@ static SDActionType _actionType = SDActionTypeNone;
   NSString *t = [_classMappings objectForKey:name];
   NSLog(@"Class is %@", t);
   if (t != nil) iconPath = 
-    [resourceBundle pathForResource:[@"Class-" stringByAppendingString:t] 
-                             ofType:@"png" inDirectory:@"FileIcons"];
+    [[SDResources imageBundle] pathForResource:[@"Class-" stringByAppendingString:t] 
+                             ofType:@"png" inDirectory:@"Icons"];
   return iconPath;
 }
 
 - (NSString *)iconPathForName:(NSString *)name {
   NSString *iconPath = nil;
   if(name && [name length] > 0) {
-    iconPath = [resourceBundle pathForResource:name 
+    iconPath = [[SDResources imageBundle] pathForResource:name 
                                         ofType:@"png" 
-                                   inDirectory:@"FileIcons"];
+                                   inDirectory:@"Icons"];
     NSLog(@"name is %@", name);
   }
   return iconPath;
@@ -407,13 +406,13 @@ static SDActionType _actionType = SDActionTypeNone;
   if (mime && [mime length] > 0) {
     NSString *sanitaryMime = [mime stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
     NSString *mimeClass = [[mime componentsSeparatedByString:@"/"] objectAtIndex:0];
-    iconPath = [resourceBundle pathForResource:sanitaryMime
+    iconPath = [[SDResources imageBundle] pathForResource:sanitaryMime
                                         ofType:@"png" 
-                                   inDirectory:@"FileIcons"];
+                                   inDirectory:@"Icons"];
     if (!iconPath) {
-      iconPath = [resourceBundle pathForResource:mimeClass
+      iconPath = [[SDResources imageBundle] pathForResource:mimeClass
                                           ofType:@"png" 
-                                     inDirectory:@"FileIcons"];
+                                     inDirectory:@"Icons"];
     }
     NSLog(@"Sanitized mime type is %@ mime class is %@", sanitaryMime, mimeClass);
   }
@@ -429,8 +428,8 @@ static SDActionType _actionType = SDActionTypeNone;
   if(extIconPath != nil) iconPath = extIconPath;
   if(!iconPath) iconPath = [self iconPathForClassOfType:extension]; // Class-xxx lookup fallthrough
   if(!iconPath) iconPath = [self iconPathForClassOfType:mimeType]; // Class-xxx lookup fallthrough
-  if(!iconPath) iconPath = [resourceBundle pathForResource:@"unknownfile" 
-                                                    ofType:@"png"];
+  if(!iconPath) iconPath = [[SDResources imageBundle] pathForResource:@"unknown" 
+                                                               ofType:@"png" inDirectory:@"Icons"];
   return [UIImage imageWithContentsOfFile:iconPath];
 }
 
