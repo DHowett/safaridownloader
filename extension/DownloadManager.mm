@@ -46,7 +46,7 @@ static id sharedNc = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)inter {
-  return NO; 
+  return YES;
 }
 
 + (id)sharedInstance { return sharedNc; }
@@ -55,7 +55,7 @@ static id sharedNc = nil;
 - (unsigned)retainCount { return UINT_MAX; }
 - (void)release { }
 - (id)autorelease { return self; }
-- (BOOL)allowsRotation { return NO; }
+- (BOOL)allowsRotation { return YES; }
 - (BOOL)pausesPages { return NO; }
 - (int)panelType { return 44; }
 - (int)panelState { return 1; }
@@ -127,7 +127,7 @@ currentRequest;
 static id sharedManager = nil;
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)inter {
-  return NO; 
+  return YES;
 }
 
 + (void)initialize  {
