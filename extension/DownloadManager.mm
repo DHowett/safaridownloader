@@ -14,13 +14,13 @@
 #import "ModalAlert.h"
 #import "Resources.h"
 
+#import "SDMCommonClasses.h"
+
 #import <SandCastle/SandCastle.h>
 
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloading.plist"
 #define LOC_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloaded.plist"
 #define kDownloadSheet 993349
-
-DHLateClass(BrowserController);
 
 @interface UIDevice (Wildcat)
 - (BOOL)isWildcat;
@@ -67,30 +67,30 @@ static id sharedNc = nil;
 #define MARK    NSLog(@"%s", __PRETTY_FUNCTION__);
 
 - (void)close {
-  [[$BrowserController sharedBrowserController] hideBrowserPanelType:44];
+  [[SDM$BrowserController sharedBrowserController] hideBrowserPanelType:SDPanelTypeDownloadManager];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [[$BrowserController sharedBrowserController] didShowBrowserPanel:[[$BrowserController sharedBrowserController] browserPanel]];
+  [[SDM$BrowserController sharedBrowserController] didShowBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
 }
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
-  [[$BrowserController sharedBrowserController] willShowBrowserPanel:[[$BrowserController sharedBrowserController] browserPanel]];
+  [[SDM$BrowserController sharedBrowserController] willShowBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
 }
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
-  if ([[$BrowserController sharedBrowserController] browserPanel] == self)
-    [[$BrowserController sharedBrowserController] didHideBrowserPanel:[[$BrowserController sharedBrowserController] browserPanel]];
+  if ([[SDM$BrowserController sharedBrowserController] browserPanel] == self)
+    [[SDM$BrowserController sharedBrowserController] didHideBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
 }
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-  if([[$BrowserController sharedBrowserController] browserPanel] == self)
-    [[$BrowserController sharedBrowserController] closeBrowserPanel:[[$BrowserController sharedBrowserController] browserPanel]];
+  if([[SDM$BrowserController sharedBrowserController] browserPanel] == self)
+    [[SDM$BrowserController sharedBrowserController] closeBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
 }
 
 - (void)didHideBrowserPanel {
-  [[[[$BrowserController sharedBrowserController] _modalViewController] view] performSelector:@selector(removeFromSuperview) withObject:nil afterDelay:0];
+  [[[[SDM$BrowserController sharedBrowserController] _modalViewController] view] performSelector:@selector(removeFromSuperview) withObject:nil afterDelay:0];
 }
 
 - (CGSize)contentSizeForViewInPopover {

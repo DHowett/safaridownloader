@@ -5,8 +5,8 @@
 #import "ModalAlert.h"
 #import "Safari/BrowserController.h"
 #import <WebUI/WebUIAuthenticationManager.h>
-
 #import <SandCastle/SandCastle.h>
+#import "SDMCommonClasses.h"
 
 @interface SDDownloadOperation (extra)
 id _authenticationView = nil;
@@ -64,7 +64,7 @@ id _authenticationView = nil;
 }
 
 - (void)cancelFromAuthenticationView:(id)authenticationView {
-  [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];  
+  [[SDM$BrowserController sharedBrowserController] hideBrowserPanel];
   _requiresAuthentication = NO;
 }
 
@@ -74,7 +74,7 @@ id _authenticationView = nil;
 }
 
 - (void)logInFromAuthenticationView:(id)authenticationView withCredential:(id)credential {
-  [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];
+  [[SDM$BrowserController sharedBrowserController] hideBrowserPanel];
   [self setCredential:credential];
   _requiresAuthentication = NO;
 }
@@ -88,10 +88,10 @@ id _authenticationView = nil;
 }
 
 - (void)showAuthenticationChallenge:(NSURLAuthenticationChallenge*)challenge {
-  Class authView = objc_getClass("MyAuthenticationView");
-  if(authView != nil) { // We are somewhere where we can use the old authentication view.
-    _authenticationView = [[objc_getClass("MyAuthenticationView") alloc] initWithDelegate:self];
-    [[objc_getClass("BrowserController") sharedBrowserController] showBrowserPanelType:88];
+  Class authViewClass = SDM$MyAuthenticationView;
+  if(authViewClass != nil) { // We are somewhere where we can use the old authentication view.
+    _authenticationView = [[authViewClass alloc] initWithDelegate:self];
+    [[SDM$BrowserController sharedBrowserController] showBrowserPanelType:88];
     NSLog(@"setting challenge: %@", challenge);
     [_authenticationView setSavedChallenge:challenge];
     [_authenticationView setChallenge:challenge];
@@ -105,7 +105,7 @@ id _authenticationView = nil;
 }
 
 - (void)cancelFromAuthenticationManager:(id)authenticationManager forChallenge:(id)challenge {
-  [[objc_getClass("BrowserController") sharedBrowserController] hideBrowserPanel];  
+  [[SDM$BrowserController sharedBrowserController] hideBrowserPanel];
   _requiresAuthentication = NO;
   [authenticationManager autorelease];
 }

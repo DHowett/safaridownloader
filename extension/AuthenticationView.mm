@@ -3,6 +3,9 @@
 @class MyAuthenticationView;
 @class AuthenticationView; 
 
+#include "SDMCommonClasses.h"
+Class SDM$MyAuthenticationView;
+
 static Class _logos_class$_ungrouped$MyAuthenticationView,
 	     _logos_metaclass$_ungrouped$MyAuthenticationView;
 static Class _logos_superclass$_ungrouped$MyAuthenticationView;
@@ -58,5 +61,6 @@ static __attribute__((constructor)) void _avInit() {
 		class_addMethod(_logos_class$_ungrouped$MyAuthenticationView, @selector(didShowBrowserPanel), (IMP)&_logos_method$_ungrouped$MyAuthenticationView$didShowBrowserPanel, "v@:");
 		objc_registerClassPair(_logos_class$_ungrouped$MyAuthenticationView);
 		_logos_static_class$MyAuthenticationView = _logos_class$_ungrouped$MyAuthenticationView;
+		SDM$MyAuthenticationView = _logos_static_class$MyAuthenticationView;
 	}
 }

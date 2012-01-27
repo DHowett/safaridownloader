@@ -772,7 +772,8 @@ static _Constructor void DownloaderInitialize() {
   if([UIScreen instancesRespondToSelector:@selector(scale)]) {
     _fourPointOh = YES;
   }
-%init(Backgrounding);
+  %init(Backgrounding);
+  SDM$BrowserController = %c(BrowserController);
 }
 
 // vim:filetype=logos:ts=2:sw=2:expandtab

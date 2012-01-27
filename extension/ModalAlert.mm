@@ -13,8 +13,7 @@
 #import "Safari/TabDocument.h"
 #import "Safari/TabController.h"
 #import <QuartzCore/QuartzCore.h>
-
-DHLateClass(BrowserController);
+#import "SDMCommonClasses.h"
 
 @interface SDModalAlert (priv)
 UIAlertView* activeAlert;
@@ -113,7 +112,7 @@ UIAlertView* activeAlert;
 
 + (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
   [[SDDownloadManager sharedManager] updateBadges];
-  UITransitionView* parent = [[objc_getClass("BrowserController") sharedBrowserController] browserLayer];
+  UITransitionView* parent = [[SDM$BrowserController sharedBrowserController] browserLayer];
   UIView* v = [parent viewWithTag:12345];
   [v removeFromSuperview];
   [activeAlert dismissWithClickedButtonIndex:0 animated:YES];
@@ -159,19 +158,18 @@ static UIImage* savedIcon = nil;
   // Get the relevant frames.
   if (!activeAlert) return;
   
-  Class BrowserController = objc_getClass("BrowserController");
-  BrowserController* sbc = [BrowserController sharedBrowserController];
+  BrowserController* sbc = [SDM$BrowserController sharedBrowserController];
   
   //  UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
   UIView *enclosingView = (UIView*)[sbc browserLayer]; // transitionview
   
-  int orientation = [[BrowserController sharedBrowserController] orientation];
+  int orientation = [[SDM$BrowserController sharedBrowserController] orientation];
   UIView *button = (orientation == 0 ? ([[SDDownloadManager sharedManager] portraitDownloadButton]) : 
                     ([[SDDownloadManager sharedManager] landscapeDownloadButton]));
   CGRect tempCellFrame = [button frame];
   CGRect cellFrame;
   if (!button) cellFrame = CGRectMake(260, 440, 34, 36);
-  else cellFrame = [[[BrowserController sharedBrowserController] buttonBar] convertRect:tempCellFrame toView:enclosingView];
+  else cellFrame = [[[SDM$BrowserController sharedBrowserController] buttonBar] convertRect:tempCellFrame toView:enclosingView];
   
   //  CGRect cellFrame = GRectMake(260, 440, 34, 36);
   CGRect buttonFrame = [activeAlert convertRect:CGRectMake(18, 14, 22, 22) toView:enclosingView];
@@ -224,7 +222,7 @@ static UIImage* savedIcon = nil;
 }
 
 + (void)showAuthViewWithChallenge:(NSURLAuthenticationChallenge*)challenge {
-  BrowserController *brCont = [DHClass(BrowserController) sharedBrowserController];
+  BrowserController *brCont = [SDM$BrowserController sharedBrowserController];
   TabController* tabCont = [brCont tabController];
   TabDocument* tabDoc = [tabCont activeTabDocument];
   
@@ -262,11 +260,11 @@ static UIImage* savedIcon = nil;
   [userField becomeFirstResponder];
   
   //  UIWindow* window = [[UIApplication sharedApplication] keyWindow];
-  //  [[objc_getClass("BrowserController") sharedBrowserController] showKeyboard:YES atPoint:CGPointMake(0, window.frame.size.height-216) inLayer:window belowLayer:nil forSheet:YES];
+  //  [[SDM$BrowserController sharedBrowserController] showKeyboard:YES atPoint:CGPointMake(0, window.frame.size.height-216) inLayer:window belowLayer:nil forSheet:YES];
   
-  [[objc_getClass("BrowserController") sharedBrowserController] _showKeyboardForSheet:YES];
+  [[SDM$BrowserController sharedBrowserController] _showKeyboardForSheet:YES];
   [SDModalAlert block:alert];
-  [[objc_getClass("BrowserController") sharedBrowserController] _hideKeyboardForSheet:YES];
+  [[SDM$BrowserController sharedBrowserController] _hideKeyboardForSheet:YES];
   NSDictionary* ret = [NSMutableDictionary dictionary];
   if (userField.text.length > 0 && passField.text.length > 0) {
     [ret setValue:userField.text forKey:@"user"];
@@ -318,7 +316,7 @@ static UIImage* savedIcon = nil;
   [ohmygod addSubview:iconImageView];
   [iconImageView release];
   
-  [ohmygod showInView:(UIView*)[[DHClass(BrowserController) sharedBrowserController] browserLayer]];
+  [ohmygod showInView:(UIView*)[[SDM$BrowserController sharedBrowserController] browserLayer]];
   [ohmygod release];
   [SDModalAlert block:ohmygod];	
 }
