@@ -105,6 +105,7 @@ landscapeDownloadButton = _landscapeDownloadButton,
 userPrefs = _userPrefs,
 visible = _visible,
 loadingURL = _loadingURL,
+currentSelectedIndexPath = _currentSelectedIndexPath,
 currentRequest;
 
 #pragma mark -
@@ -230,6 +231,11 @@ static id sharedManager = nil;
 - (unsigned)retainCount { return UINT_MAX; }
 - (void)release { }
 - (id)autorelease { return self; }
+
+- (void)dealloc {
+  [_currentSelectedIndexPath release];
+  [super dealloc];
+}
 
 - (NSString*)fileNameForURL:(NSURL*)url {
   NSString *filename = [[[url absoluteString] lastPathComponent] 
@@ -946,7 +952,7 @@ static SDActionType _actionType = SDActionTypeNone;
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     return;
   }
-  _currentSelectedIndexPath = indexPath;
+  self.currentSelectedIndexPath = indexPath;
   if (tableView.numberOfSections == 1 || indexPath.section == 1) {
     id download = [_finishedDownloads objectAtIndex:indexPath.row];
     id launch = [[SDDownloadActionSheet alloc] initWithDownload:download delegate:self];
@@ -1012,8 +1018,8 @@ NSLog(@"downloadActionSheet:%@ deleteDownload:%@", actionSheet, download);
 }
 
 - (void)downloadActionSheetWillDismiss:(SDDownloadActionSheet *)actionSheet {
-  [(UITableView *)self.view deselectRowAtIndexPath:_currentSelectedIndexPath animated:YES];
-  _currentSelectedIndexPath = nil;
+  [(UITableView *)self.view deselectRowAtIndexPath:self.currentSelectedIndexPath animated:YES];
+  self.currentSelectedIndexPath = nil;
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
