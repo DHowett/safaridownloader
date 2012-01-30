@@ -14,7 +14,7 @@ export GO_EASY_ON_ME = 1
 include framework/makefiles/aggregate.mk
 
 ifeq ($(findstring RELEASE,$(THEOS_SCHEMA)),)
-PACKAGE_BUILDNAME = nonrelease
+PACKAGE_BUILDNAME = private
 endif
 
 internal-stage::
