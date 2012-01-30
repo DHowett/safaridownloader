@@ -2,8 +2,8 @@
 #import <objc/runtime.h>
 #import "extension/DownloaderCommon.h"
 #import "common/Resources.h"
+#import "common/SDFileType.h"
 
-static id fileTypesDict = nil;
 static id fileClassController = nil;
 
 static BOOL _legacy = NO;
@@ -274,15 +274,18 @@ static BOOL _legacy = NO;
 		_specifiers = [[NSMutableArray array] retain];
 		NSString *fileClass = [self.specifier propertyForKey:@"class"];
 		int c = [PSTableCell cellTypeFromString:@"PSSwitchCell"];
-		for(NSString *fileType in [fileTypesDict objectForKey:fileClass]) {
-			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileType
+		NSArray *category = [[SDFileType allCategories] objectForKey:fileClass];
+		category = [category sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+		for(SDFileType *fileType in category) {
+			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileType.name
 									   target:self
 									      set:@selector(set:spec:)
 									      get:@selector(get:)
 									   detail:nil
 									     cell:c
 									     edit:nil];
-			[spec setProperty:fileType forKey:@"id"];
+			[spec setProperty:fileType forKey:@"fileType"];
+			[spec setProperty:[SDResources iconForFileType:fileType] forKey:@"iconImage"];
 			[(NSMutableArray*)_specifiers addObject:spec];
 		}
 	}
@@ -290,7 +293,7 @@ static BOOL _legacy = NO;
 }
 
 - (CFBooleanRef)get:(PSSpecifier *)spec {
-	if([_disabledItems containsObject:spec.identifier]) {
+	if([_disabledItems containsObject:[[spec propertyForKey:@"fileType"] name]]) {
 		return kCFBooleanFalse;
 	} else {
 		return kCFBooleanTrue;
@@ -299,9 +302,9 @@ static BOOL _legacy = NO;
 
 - (void)set:(CFBooleanRef)enabled spec:(PSSpecifier *)spec {
 	if(enabled == kCFBooleanTrue) {
-		[_disabledItems removeObject:spec.identifier];
+		[_disabledItems removeObject:[[spec propertyForKey:@"fileType"] name]];
 	} else {
-		[_disabledItems addObject:spec.identifier];
+		[_disabledItems addObject:[[spec propertyForKey:@"fileType"] name]];
 	}
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] ?: [NSMutableDictionary dictionary];
 	[dict setObject:[_disabledItems allObjects] forKey:@"DisabledItems"];
@@ -348,7 +351,7 @@ static BOOL _legacy = NO;
 
 		int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
 		int index = _legacy ? 3 : 2;
-		for(NSString *fileClass in fileTypesDict) {
+		for(NSString *fileClass in [[SDFileType allCategories] allKeys]) {
 			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileClass
 									   target:self
 									      set:nil
@@ -357,7 +360,7 @@ static BOOL _legacy = NO;
 									     cell:c
 									     edit:nil];
 			[spec setProperty:fileClass forKey:@"class"];
-			[spec setProperty:[UIImage imageWithContentsOfFile:[[SDResources imageBundle] pathForResource:[@"Class-" stringByAppendingString:fileClass] ofType:@"png" inDirectory:@"Icons"]] forKey:@"iconImage"];
+			[spec setProperty:[UIImage imageWithContentsOfFile:[[SDResources imageBundle] pathForResource:[@"Category-" stringByAppendingString:fileClass] ofType:@"png" inDirectory:@"Icons"]] forKey:@"iconImage"];
 			[(NSMutableArray *)_specifiers insertObject:spec atIndex:index++];
 		}
 
@@ -393,10 +396,15 @@ static BOOL _legacy = NO;
 	if((self = [super initForContentSize:size])) {
 //		extraSpecs = [NSMutableArray array];
 //		[extraSpecs addObject:spec];
-		fileTypesDict = [[NSDictionary alloc] initWithContentsOfFile:[[SDResources supportBundle] pathForResource:@"FileTypes" ofType:@"plist"]];
+		[SDFileType loadAllFileTypes];
 
 	}
 	return self;
+}
+
+- (void)dealloc {
+	[SDFileType unloadAllFileTypes];
+	[super dealloc];
 }
 
 - (id)specifiers {

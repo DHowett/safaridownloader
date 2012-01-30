@@ -1,4 +1,5 @@
 #import "Resources.h"
+#import "SDFileType.h"
 
 @interface UIImage (iPhonePrivate)
 + (UIImage *)imageNamed:(NSString *)name inBundle:(NSBundle *)bundle;
@@ -25,8 +26,15 @@ static NSBundle *_imageBundle;
 	return [self imageNamed:@"Icons/folder.png"];
 }
 
-+ (UIImage *)iconForExtension:(NSString *)extension {
-	return [self imageNamed:[NSString stringWithFormat:@"Icons/%@.png", ([extension length] > 0 ? [extension lowercaseString] : @"unknown")]];
++ (UIImage *)iconForFileType:(SDFileType *)fileType {
+	NSString *primaryMIME = [fileType.primaryMIMEType stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+	UIImage *icon = [self imageNamed:[NSString stringWithFormat:@"Icons/%@.png", primaryMIME]];
+	if(!icon) {
+		NSString *genericType = [fileType.genericType stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+		icon = [self imageNamed:[NSString stringWithFormat:@"Icons/%@.png", genericType]];
+	}
+	return icon;
+
 }
 
 @end
