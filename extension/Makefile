@@ -7,6 +7,7 @@ TWEAK_NAME=Downloader
 Downloader_FILES = BaseCell.m DownloadCell.m DownloadOperation.m FileBrowser.m SafariDownload.m
 Downloader_FILES += Downloader.xm DownloadManager.mm ModalAlert.mm SDDownloadActionSheet.mm
 Downloader_FILES += SDDownloadRequest.mm
+Downloader_FILES += SDDownloadManagerNavigationController.mm
 Downloader_FILES += AuthenticationView.mm
 Downloader_FRAMEWORKS = UIKit CoreGraphics QuartzCore
 Downloader_PRIVATE_FRAMEWORKS = WebUI

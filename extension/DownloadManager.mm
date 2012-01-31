@@ -37,67 +37,6 @@
 - (int)panelState { return 1; }
 @end
 
-@implementation SDDownloadManagerNavigationController
-static id sharedNc = nil;
-+ (void)initialize  {
-  if (self == [SDDownloadManagerNavigationController class]) {
-    sharedNc = [[self alloc] initWithRootViewController:[SDDownloadManager sharedManager]];
-  }
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)inter {
-  return YES;
-}
-
-+ (id)sharedInstance { return sharedNc; }
-- (id)copyWithZone:(NSZone *)zone { return self; }
-- (id)retain { return self; }
-- (unsigned)retainCount { return UINT_MAX; }
-- (void)release { }
-- (id)autorelease { return self; }
-- (BOOL)allowsRotation { return YES; }
-- (BOOL)pausesPages { return NO; }
-- (int)panelType { return 44; }
-- (int)panelState { return 1; }
-- (BOOL)shouldShowButtonBar { return ([UIDevice instancesRespondToSelector:@selector(isWildcat)] && [[UIDevice currentDevice] isWildcat]) ? YES : NO; }
-- (BOOL)isDismissible { return _isDismissible; }
-- (BOOL)disablesStatusBarPress { return NO; }
-
-#undef MARK
-#define MARK    NSLog(@"%s", __PRETTY_FUNCTION__);
-
-- (void)close {
-  [[SDM$BrowserController sharedBrowserController] hideBrowserPanelType:SDPanelTypeDownloadManager];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  [[SDM$BrowserController sharedBrowserController] didShowBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
-}
-- (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
-  [[SDM$BrowserController sharedBrowserController] willShowBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
-}
-- (void)viewDidDisappear:(BOOL)animated {
-  [super viewDidDisappear:animated];
-  if ([[SDM$BrowserController sharedBrowserController] browserPanel] == self)
-    [[SDM$BrowserController sharedBrowserController] didHideBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
-}
-- (void)viewWillDisappear:(BOOL)animated {
-  [super viewWillDisappear:animated];
-  if([[SDM$BrowserController sharedBrowserController] browserPanel] == self)
-    [[SDM$BrowserController sharedBrowserController] closeBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
-}
-
-- (void)didHideBrowserPanel {
-  [[[[SDM$BrowserController sharedBrowserController] _modalViewController] view] performSelector:@selector(removeFromSuperview) withObject:nil afterDelay:0];
-}
-
-- (CGSize)contentSizeForViewInPopover {
-  return CGSizeMake(320.f, 480.f);
-}
-@end
-
 @implementation SDDownloadManager
 @synthesize 
 portraitDownloadButton = _portraitDownloadButton,
@@ -105,8 +44,7 @@ landscapeDownloadButton = _landscapeDownloadButton,
 userPrefs = _userPrefs,
 visible = _visible,
 loadingURL = _loadingURL,
-currentSelectedIndexPath = _currentSelectedIndexPath,
-currentRequest;
+currentSelectedIndexPath = _currentSelectedIndexPath;
 
 #pragma mark -
 + (id)uniqueFilenameForFilename:(NSString *)filename atPath:(NSString *)path {
@@ -146,8 +84,6 @@ static id sharedManager = nil;
 	[[NSNotificationCenter defaultCenter] addObserver:self 
 														  selector:@selector(saveData) 
 																name:UIApplicationWillTerminateNotification object:nil];
-	
-    _fbPanel = [[SDFileBrowserPanel alloc] init];
 	
 	[self updateUserPreferences];
 
@@ -212,7 +148,7 @@ static id sharedManager = nil;
   if(![UIDevice instancesRespondToSelector:@selector(isWildcat)] || ![[UIDevice currentDevice] isWildcat]) {
     UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" 
                                                                    style:UIBarButtonItemStyleDone 
-                                                                  target:[SDDownloadManagerNavigationController sharedInstance] 
+                                                                  target:[self navigationController]
                                                                   action:@selector(close)];
     self.navigationItem.leftBarButtonItem = doneButton;
     self.navigationItem.leftBarButtonItem.enabled = YES;
