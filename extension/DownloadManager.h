@@ -14,14 +14,13 @@
 #import "FileBrowser.h"
 #import "SDDownloadActionSheet.h"
 
+#import "SDDownloadPromptView.h"
+
 @interface WebView : NSObject 
 + (BOOL)canShowMIMEType:(NSString*)type;
 @end
 
 @class BrowserButtonBar;
-
-@interface SDFileBrowserPanel : NSObject <BrowserPanel>
-@end
 
 typedef enum
 {

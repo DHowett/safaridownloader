@@ -32,13 +32,6 @@
 - (void)applicationOpenURL:(id)url;
 @end
 
-@implementation SDFileBrowserPanel
-- (BOOL)allowsRotation { return NO; }
-- (BOOL)pausesPages { return NO; }
-- (int)panelType { return 45; }
-- (int)panelState { return 1; }
-@end
-
 @implementation SDDownloadManager
 @synthesize 
 portraitDownloadButton = _portraitDownloadButton,
