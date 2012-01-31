@@ -1,6 +1,6 @@
 #import "FileBrowser.h"
 #import "ModalAlert.h"
-#import "Resources.h" 
+#import "SDResources.h"
 #import <QuartzCore/QuartzCore.h>
 #import "DownloadManager.h"
 #import "UIKitExtra/UIKeyboard.h"

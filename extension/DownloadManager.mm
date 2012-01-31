@@ -12,7 +12,7 @@
 #import "DownloadCell.h"
 #import "DownloaderCommon.h"
 #import "ModalAlert.h"
-#import "Resources.h"
+#import "SDResources.h"
 
 #import "SDMCommonClasses.h"
 

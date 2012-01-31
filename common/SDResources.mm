@@ -1,4 +1,4 @@
-#import "Resources.h"
+#import "SDResources.h"
 #import "SDFileType.h"
 
 @interface UIImage (iPhonePrivate)

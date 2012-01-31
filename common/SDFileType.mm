@@ -1,5 +1,5 @@
 #import "SDFileType.h"
-#import "Resources.h"
+#import "SDResources.h"
 
 static NSMutableDictionary *_MIMEMapping;
 static NSMutableDictionary *_extensionMapping;
