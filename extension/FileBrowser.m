@@ -1,6 +1,7 @@
 #import "FileBrowser.h"
 #import "ModalAlert.h"
 #import "SDResources.h"
+#import "SDFileType.h"
 #import <QuartzCore/QuartzCore.h>
 #import "DownloadManager.h"
 #import "UIKitExtra/UIKeyboard.h"
@@ -47,7 +48,7 @@ static BOOL alertViewShown;
 	self.fullpath = p;
 	self.isDir = dir;
 	self.icon = dir ? [SDResources iconForFolder] : 
-						   [SDResources iconForExtension:[n pathExtension]];
+			  [SDResources iconForFileType:[SDFileType fileTypeForExtension:[n pathExtension]]];
   }
   return self;
 }
