@@ -32,7 +32,7 @@ typedef enum
   SDActionTypeDownloadAs = 4,
 } SDActionType;
 
-@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate, SDDownloadActionSheetDelegate> {
+@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate, SDDownloadActionSheetDelegate, SDDownloadPromptViewDelegate> {
   UITableView*			  _tableView;
   NSMutableSet*		  _mimeTypes;
   NSMutableSet*		  _extensions;
@@ -69,12 +69,13 @@ typedef enum
             withMimeType:(NSString *)mimeType;
 
 - (NSString*)fileNameForURL:(NSURL*)url;
-- (SDActionType) webView:(WebView *)webView 
+- (BOOL) webView:(WebView *)webView 
             decideAction:(NSDictionary*)action
               forRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType 
                  inFrame:(WebFrame *)frame
-            withListener:(id<WebPolicyDecisionListener>)listener;
+            withListener:(id<WebPolicyDecisionListener>)listener
+		 context:(id)context;
 
 - (BOOL)addDownloadWithInfo:(NSDictionary*)info browser:(BOOL)b;
 - (BOOL)addDownloadWithURL:(NSURL*)url browser:(BOOL)b;

@@ -14,13 +14,15 @@
 #import "ModalAlert.h"
 #import "SDResources.h"
 
+#import "SDMVersioning.h"
 #import "SDMCommonClasses.h"
+#import "SDDownloadPromptView.h"
+#import "SDFileType.h"
 
 #import <SandCastle/SandCastle.h>
 
 #define DL_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloading.plist"
 #define LOC_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloaded.plist"
-#define kDownloadSheet 993349
 
 @interface UIDevice (Wildcat)
 - (BOOL)isWildcat;
@@ -199,27 +201,37 @@ static id sharedManager = nil;
 }
 #pragma mark -/*}}}*/
 #pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
-static SDActionType _actionType = SDActionTypeNone;
 
 // WebPolicyDelegate SDSafariDownloader Addition
-- (SDActionType) webView:(WebView *)webView 
+- (BOOL) webView:(WebView *)webView 
             decideAction:(NSDictionary*)action
               forRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType 
                  inFrame:(WebFrame *)frame
-            withListener:(id<WebPolicyDecisionListener>)listener {  
+            withListener:(id<WebPolicyDecisionListener>)listener
+                 context:(id)context {
   NSString *url = [[request URL] absoluteString];
   
   if (![url hasPrefix:@"http://"] && 
       ![url hasPrefix:@"https://"] && 
       ![url hasPrefix:@"ftp://"]) {
     NSLog(@"not a valid url, continue.");
-    return SDActionTypeNone;
+    return YES;
   }
   
-  if ([self supportedRequest:request 
-                withMimeType:mimeType]) {
-    
+  if (SDDownloadRequest *oldRequest = [SDDownloadRequest pendingRequestForContext:context]) {
+    if([oldRequest matchesURLRequest:request]) {
+      if(mimeType) {
+        // We only do this for mimeType because it is the final request we will receive.
+        [oldRequest detachFromContext];
+      }
+      return YES;
+    }
+    // The request has changed, so the old request is no longer necessary.
+    [oldRequest detachFromContext];
+  }
+
+  if ([self supportedRequest:request withMimeType:mimeType]) {
     NSLog(@"WE SUPPORT THE REQUEST: %@", request);
     
     NSString *filename = [self fileNameForURL:[request URL]];
@@ -227,169 +239,74 @@ static SDActionType _actionType = SDActionTypeNone;
       filename = [[request URL] absoluteString];
     }
     
-    NSString *other = nil;
-    if(mimeType) 
-      other = [objc_getClass("WebView") canShowMIMEType:mimeType] ? @"View" : nil;
-    else 
-      other = @"View";
-    
-    [SDModalAlert showDownloadActionSheetWithTitle:@"What would you like to do?"
-                                         message:filename
-                                        mimetype:mimeType
-                                    cancelButton:@"Cancel"
-                                     destructive:@"Download"
-                                           other:other
-                                             tag:kDownloadSheet
-                                        delegate:self];
-    
-    if (_actionType == SDActionTypeView) {
-      return SDActionTypeView;
-    }
-    else if (_actionType == SDActionTypeDownload || 
-             _actionType == SDActionTypeDownloadAs) {
-      [listener ignore];
-      [frame stopLoading];
-      BOOL downloadAdded = NO;
-      BOOL saveAs = (_actionType == SDActionTypeDownloadAs);
-      if (mimeType != nil)
-        downloadAdded = [self addDownloadWithRequest:request 
-                                         andMimeType:mimeType
-                                             browser:saveAs];
-      else
-        downloadAdded = [self addDownloadWithRequest:request
-                                             browser:saveAs];
-      return _actionType;
-    } 
-    else {
-      [listener ignore];
-      [frame stopLoading];
-      return SDActionTypeCancel;
-    }
+    SDDownloadRequest *downloadRequest = [[SDDownloadRequest alloc] initWithURLRequest:request filename:filename mimeType:mimeType webFrame:frame context:context];
+    [downloadRequest attachToContext];
+
+    if(mimeType)
+      downloadRequest.supportsViewing = [WebView canShowMIMEType:mimeType];
+
+    [[SDM$BrowserController sharedBrowserController] showBrowserPanelType:SDPanelTypeDownloadPrompt];
+    [downloadRequest release];
+    return NO;
   }
   else {
     NSLog(@"Request %@ unsupported", request);
-    return SDActionTypeNone;
+    return YES;
   }
-  return SDActionTypeNone;
+  return YES;
+}
+
+#pragma mark - SDDownloadPromptViewDelegate
+
+- (void)downloadPromptView:(SDDownloadPromptView *)promptView didCompleteWithAction:(SDActionType)action {
+  SDDownloadRequest *req = [promptView.downloadRequest retain];
+  switch(action) {
+    case SDActionTypeView:
+      [req.webFrame loadRequest:req.urlRequest];
+      break;
+    case SDActionTypeDownload:
+    case SDActionTypeDownloadAs:
+      if (req.mimeType != nil)
+        [self addDownloadWithRequest:req.urlRequest andMimeType:req.mimeType browser:action==SDActionTypeDownloadAs];
+      else
+        [self addDownloadWithRequest:req.urlRequest browser:action==SDActionTypeDownloadAs];
+      [req detachFromContext];
+      break;
+    default:
+    case SDActionTypeNone:
+      [req detachFromContext];
+      break;
+  }
+  [req release];
 }
 
 #pragma mark -/*}}}*/
 #pragma mark Filetype Support Management/*{{{*/
 
 - (void)updateFileTypes {
-  NSMutableDictionary *globalFileTypes = 
-  [NSMutableDictionary dictionaryWithContentsOfFile:[[SDResources supportBundle] pathForResource:@"FileTypes" 
-                                                                             ofType:@"plist"]];
-  NSArray *disabledItems = [_userPrefs objectForKey:@"DisabledItems"];
-  NSDictionary *customTypes = [_userPrefs objectForKey:@"CustomItems"];
-  if (customTypes) 
-    [globalFileTypes setValue:customTypes forKey:@"CustomItems"];
-  
-  if (_mimeTypes) [_mimeTypes release];
-  if (_extensions) [_extensions release];
-  if (_classMappings) [_classMappings release];
-  _mimeTypes = [[NSMutableSet alloc] init];
-  _extensions = [[NSMutableSet alloc] init];
-  _classMappings = [[NSMutableDictionary alloc] init];
-  
-  BOOL disabled = [[_userPrefs objectForKey:@"Disabled"] boolValue];
-  if (disabled) return;
-  
-  BOOL useExtensions = [[_userPrefs objectForKey:@"UseExtensions"] boolValue];
-  
-  for (NSString *fileClassName in globalFileTypes) {
-    NSDictionary *fileClass = [globalFileTypes objectForKey:fileClassName];
-    for (NSString *fileTypeName in fileClass) {
-      if ([disabledItems containsObject:fileTypeName]) {
-        NSLog(@"Skipping %@...", fileTypeName);
-        continue;
-      }
-      
-      NSDictionary *fileType = [fileClass objectForKey:fileTypeName];
-      NSArray *mimes = [fileType objectForKey:@"Mimetypes"];
-      [_mimeTypes addObjectsFromArray:mimes];
-      for (NSString *i in mimes) [_classMappings setObject:fileClassName forKey:i];
-      if (useExtensions || [[fileType objectForKey:@"ForceExtension"] boolValue] || [fileClassName isEqualToString:@"CustomItems"]) {
-        NSArray *exts = [fileType objectForKey:@"Extensions"];
-        [_extensions addObjectsFromArray:exts];
-        for(NSString *i in exts) [_classMappings setObject:fileClassName forKey:i];
-      }
-    }
-  }
-  //NSLog(@"%@", _mimeTypes);
-  
   return;
+  NSDictionary *customTypes = [_userPrefs objectForKey:@"CustomItems"];
 }
 
-- (NSString *)iconPathForClassOfType:(NSString *)name {
-  NSString *iconPath = nil;
-  if (!name || [name length] == 0) return nil;
-  NSString *t = [_classMappings objectForKey:name];
-  NSLog(@"Class is %@", t);
-  if (t != nil) iconPath = 
-    [[SDResources imageBundle] pathForResource:[@"Class-" stringByAppendingString:t] 
-                             ofType:@"png" inDirectory:@"Icons"];
-  return iconPath;
-}
-
-- (NSString *)iconPathForName:(NSString *)name {
-  NSString *iconPath = nil;
-  if(name && [name length] > 0) {
-    iconPath = [[SDResources imageBundle] pathForResource:name 
-                                        ofType:@"png" 
-                                   inDirectory:@"Icons"];
-    NSLog(@"name is %@", name);
-  }
-  return iconPath;
-}
-
-- (NSString *)iconPathForMIME:(NSString *)mime {
-  NSString *iconPath = nil;
-  if (mime && [mime length] > 0) {
-    NSString *sanitaryMime = [mime stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-    NSString *mimeClass = [[mime componentsSeparatedByString:@"/"] objectAtIndex:0];
-    iconPath = [[SDResources imageBundle] pathForResource:sanitaryMime
-                                        ofType:@"png" 
-                                   inDirectory:@"Icons"];
-    if (!iconPath) {
-      iconPath = [[SDResources imageBundle] pathForResource:mimeClass
-                                          ofType:@"png" 
-                                     inDirectory:@"Icons"];
-    }
-    NSLog(@"Sanitized mime type is %@ mime class is %@", sanitaryMime, mimeClass);
-  }
-  return iconPath;
-}
-
-- (UIImage*)iconForExtension:(NSString *)extension 
-				  orMimeType:(NSString *)mimeType {
-  NSString *mimeIconPath = [self iconPathForMIME:mimeType];
-  NSString *extIconPath = [self iconPathForName:extension];
-  NSString *iconPath = nil;
-  if(mimeIconPath != nil) iconPath = mimeIconPath;
-  if(extIconPath != nil) iconPath = extIconPath;
-  if(!iconPath) iconPath = [self iconPathForClassOfType:extension]; // Class-xxx lookup fallthrough
-  if(!iconPath) iconPath = [self iconPathForClassOfType:mimeType]; // Class-xxx lookup fallthrough
-  if(!iconPath) iconPath = [[SDResources imageBundle] pathForResource:@"unknown" 
-                                                               ofType:@"png" inDirectory:@"Icons"];
-  return [UIImage imageWithContentsOfFile:iconPath];
-}
-
-- (BOOL)supportedRequest:(NSURLRequest *)request
-            withMimeType:(NSString *)mimeType {
-  
-  if (mimeType != nil && [_mimeTypes containsObject:mimeType]) {
-    NSLog(@"mimeType: %@ supported!", mimeType);
-    return YES;
-  }
-  else {
+- (BOOL)supportedRequest:(NSURLRequest *)request withMimeType:(NSString *)mimeType {
+  if([[_userPrefs objectForKey:@"Disabled"] boolValue]) return NO;
+  SDFileType *fileType = nil;
+  NSLog(@"mimetype is %@", mimeType);
+  if (mimeType != nil)
+    fileType = [SDFileType fileTypeForMIMEType:mimeType];
+  if (!fileType) {
     NSString* extension = [[[request URL] absoluteString] pathExtension];
-    if ([_extensions containsObject:extension]) {
-      NSLog(@"extensions contain %@, supported!", extension);
-      return YES;
+    if (extension) {
+      SDFileType *tempFileType = [SDFileType fileTypeForExtension:extension];
+      if (tempFileType && (tempFileType.forceExtensionUse || [[_userPrefs objectForKey:@"UseExtensions"] boolValue]))
+        fileType = tempFileType;
     }
   }
-  return NO;
+  if (fileType) {
+    if ([[_userPrefs objectForKey:@"DisabledItems"] containsObject:fileType.name])
+      return NO;
+  }
+  return fileType != nil;
 }
 
 #pragma mark -/*}}}*/
@@ -411,21 +328,6 @@ static SDActionType _actionType = SDActionTypeNone;
 	[[objc_getClass("SandCastle") sharedInstance] copyItemAtPath:tempDL toPath:DL_ARCHIVE_PATH];
   }
 }
-
-#pragma mark -
-
-//- (void)disableRotations {
-//  Class BrowserController = objc_getClass("BrowserController");
-//  _oldPanel = [[[BrowserController sharedBrowserController] browserPanel] retain];
-//  [[BrowserController sharedBrowserController] _setBrowserPanel:_fbPanel]; 
-//}
-//
-//- (void)enableRotations {
-//  Class BrowserController = objc_getClass("BrowserController");
-//  [[BrowserController sharedBrowserController] _setBrowserPanel:_oldPanel];
-//  [_oldPanel release];
-//  _oldPanel = nil;
-//}
 
 #pragma mark -
 
@@ -853,7 +755,7 @@ static SDActionType _actionType = SDActionTypeNone;
   // Set up the cell...
   cell.finished = finished;
   cell.failed = download.failed;
-  cell.icon = [self iconForExtension:[download.filename pathExtension] orMimeType:download.mimetype];
+  cell.icon = [SDResources iconForFileType:[SDFileType fileTypeForExtension:[download.filename pathExtension] orMIMEType:download.mimetype]];
   cell.nameLabel = download.filename;
   cell.sizeLabel = download.sizeString;
   if(!finished && !download.failed) {
@@ -956,26 +858,6 @@ NSLog(@"downloadActionSheet:%@ deleteDownload:%@", actionSheet, download);
 - (void)downloadActionSheetWillDismiss:(SDDownloadActionSheet *)actionSheet {
   [(UITableView *)self.view deselectRowAtIndexPath:self.currentSelectedIndexPath animated:YES];
   self.currentSelectedIndexPath = nil;
-}
-
-- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-  actionSheet.hidden = YES; 
-}
-
-- (void)actionSheet:(UIActionSheet *)actionSheet 
-clickedButtonAtIndex:(NSInteger)buttonIndex {
-  if (actionSheet.tag == kDownloadSheet) {
-	NSString* title = [actionSheet buttonTitleAtIndex:buttonIndex];
-	if([title isEqualToString:@"Cancel"])
-	  _actionType = SDActionTypeCancel;
-	else if([title isEqualToString:@"View"]) 
-	  _actionType = SDActionTypeView;
-	else if ([title isEqualToString:@"Download"])
-	  _actionType = SDActionTypeDownload;
-	else if ([title isEqualToString:@"Download To..."])
-	  _actionType = SDActionTypeDownloadAs;
-	actionSheet.hidden = YES;
-  }
 }
 
 - (void)updateBadges {
