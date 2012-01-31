@@ -198,6 +198,29 @@
 		);
 		Category = "Documents";
 	};
+	vCard = {
+		Extensions = (
+			vcf,
+		);
+		Mimetypes = (
+			"text/vcard",
+		);
+		GenericType = "x-office/address-book";
+		Category = "Documents";
+	};
+	iCalendar = {
+		Extensions = (
+			ical,
+			ics,
+			ifb,
+			icalendar,
+		);
+		Mimetypes = (
+			"text/calendar",
+		);
+		GenericType = "x-office/calendar";
+		Category = "Documents";
+	};
 	"XML document" = {
 		Mimetypes = (
 			"application/xml",
