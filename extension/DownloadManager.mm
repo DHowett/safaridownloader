@@ -87,8 +87,6 @@ static id sharedManager = nil;
 														  selector:@selector(saveData) 
 																name:UIApplicationWillTerminateNotification object:nil];
 	
-	[self updateUserPreferences];
-
 	NSNumber* maxdownobj = [_userPrefs objectForKey:@"MaxConcurrentDownloads"];
 	NSInteger maxdown = (maxdownobj!=nil) ? [maxdownobj intValue] : 5;
 	

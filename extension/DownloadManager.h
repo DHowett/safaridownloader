@@ -34,9 +34,6 @@ typedef enum
 
 @interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate, SDDownloadActionSheetDelegate, SDDownloadPromptViewDelegate> {
   UITableView*			  _tableView;
-  NSMutableSet*		  _mimeTypes;
-  NSMutableSet*		  _extensions;
-  NSMutableDictionary* _classMappings;
   NSMutableArray*		  _currentDownloads;
   NSMutableArray*		  _finishedDownloads;
   NSOperationQueue*	  _downloadQueue;
@@ -63,8 +60,6 @@ typedef enum
 + (id)sharedManager;
 - (void)updateUserPreferences;
 - (void)updateFileTypes;
-- (NSString *)iconPathForName:(NSString *)name;
-- (UIImage *)iconForExtension:(NSString *)extension orMimeType:(NSString *)mimeType;
 - (BOOL)supportedRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType;
 
