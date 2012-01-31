@@ -11,6 +11,7 @@
 @property (nonatomic, retain) NSString *filename;
 @property (nonatomic, retain) NSString *mimeType;
 @property (nonatomic, retain) WebFrame *webFrame;
+@property (nonatomic, assign) BOOL supportsViewing;
 + (SDDownloadRequest *)pendingRequestForContext:(id)context;
 - (id)initWithURLRequest:(NSURLRequest *)request filename:(NSString *)filename mimeType:(NSString *)mimeType webFrame:(WebFrame *)webFrame context:(id)context;
 - (void)attachToContext;
