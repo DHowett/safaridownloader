@@ -15,6 +15,9 @@
 @property (nonatomic, readonly) NSString *primaryMIMEType;
 + (void)loadAllFileTypes;
 + (void)unloadAllFileTypes;
+#ifndef SDFILETYPE_NO_CUSTOM
++ (void)reloadCustomFileTypes;
+#endif
 + (SDFileType *)fileTypeForMIMEType:(NSString *)MIMEType;
 + (SDFileType *)fileTypeForExtension:(NSString *)extension;
 + (SDFileType *)fileTypeForExtension:(NSString *)extension orMIMEType:(NSString *)MIMEType;
