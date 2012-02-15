@@ -11,6 +11,7 @@ static bool _wildCat = NO;
 static bool _fourPointOh = NO;
 
 #import "SDFileType.h"
+#import "SDUserSettings.h"
 
 /* {{{ Private and Additional Categories */
 @interface UIActionSheet (SDMPrivate)
@@ -32,9 +33,10 @@ void _reloadPreferences(void);
 #pragma mark General Hooks/*{{{*/
 %hook Application
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
-	%orig;
 	[SDFileType loadAllFileTypes];
+	[SDDownloadManager sharedManager]; // Initialize the Download Manager.
 	_reloadPreferences();
+	%orig;
 }
 
 - (void)applicationResume:(void *)event {
@@ -67,7 +69,7 @@ void _reloadPreferences(void);
 %end
 
 void _reloadPreferences() {
-	[[SDDownloadManager sharedManager] updateUserPreferences];
+	[[SDUserSettings sharedInstance] reloadSettings];
 }
 
 static void ReloadPrefsNotification (CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
