@@ -154,6 +154,6 @@ static NSMutableDictionary *_customExtensionMapping;
 }
 
 - (NSString *)primaryMIMEType {
-	return [_MIMETypes objectAtIndex:0];
+	return _MIMETypes.count == 0 ? nil : [_MIMETypes objectAtIndex:0];
 }
 @end

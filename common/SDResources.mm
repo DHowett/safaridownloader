@@ -28,10 +28,13 @@ static NSBundle *_imageBundle;
 
 + (UIImage *)iconForFileType:(SDFileType *)fileType {
 	NSString *primaryMIME = [fileType.primaryMIMEType stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-	UIImage *icon = [self imageNamed:[NSString stringWithFormat:@"Icons/%@.png", primaryMIME]];
+	UIImage *icon = primaryMIME ? [self imageNamed:[NSString stringWithFormat:@"Icons/%@.png", primaryMIME]] : nil;
 	if(!icon) {
 		NSString *genericType = [fileType.genericType stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
 		icon = [self imageNamed:[NSString stringWithFormat:@"Icons/%@.png", genericType]];
+	}
+	if(!icon) {
+		icon = [self imageNamed:@"Icons/unknown.png"];
 	}
 	return icon;
 
