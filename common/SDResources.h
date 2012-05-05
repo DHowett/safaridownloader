@@ -1,4 +1,5 @@
 #import "../extension/DownloaderCommon.h"
+#define SDLocalizedString(key) NSLocalizedStringWithDefaultValue((key), nil, [SDResources supportBundle], (key), @"")
 @class SDFileType;
 @interface SDResources : NSObject
 + (NSBundle *)supportBundle;
