@@ -124,7 +124,8 @@
     @protocol NSURLDownloadDelegate
     @discussion The NSURLDownloadDelegate delegate is used to report the progress of the download.
 */
-@interface NSObject (NSURLDownloadDelegate)
+@protocol NSURLDownloadDelegate <NSObject>
+@optional
 
 /*!
     @method downloadDidBegin:

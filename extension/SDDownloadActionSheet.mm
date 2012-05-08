@@ -2,7 +2,7 @@
 #import "SDDownloadActionSheet.h"
 #import <SandCastle/SandCastle.h>
 
-#import "UIKitExtra/UIDocumentInteractionController.h"
+#import <UIKit/UIDocumentInteractionController.h>
 
 const int kSDDownloadActionSheetTag = 903403;
 
