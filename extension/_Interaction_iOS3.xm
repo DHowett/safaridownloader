@@ -1,6 +1,6 @@
 #import "SDMVersioning.h"
 #import "SDMCommonClasses.h"
-#import "DownloadManager.h"
+#import "SDDownloadManager.h"
 
 #import "UIKitExtra/UIWebDocumentView.h"
 #import "UIKitExtra/UIWebViewWebViewDelegate.h"

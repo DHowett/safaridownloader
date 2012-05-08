@@ -3,7 +3,7 @@
 #import "SDResources.h"
 #import "SDFileType.h"
 #import <QuartzCore/QuartzCore.h>
-#import "DownloadManager.h"
+#import "SDDownloadManager.h"
 #import "UIKitExtra/UIKeyboard.h"
 
 #import "Safari/BrowserController.h"

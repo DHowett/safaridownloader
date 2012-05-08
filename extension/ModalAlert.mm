@@ -8,7 +8,7 @@
 
 #import "DHHookCommon.h"
 #import "ModalAlert.h"
-#import "DownloadManager.h"
+#import "SDDownloadManager.h"
 #import "Safari/BrowserController.h"
 #import "Safari/TabDocument.h"
 #import "Safari/TabController.h"

@@ -3,6 +3,8 @@
 #import "SDMCommonClasses.h"
 #import "DownloadManager.h"
 #import "SDDownloadPromptView.h"
+#import "SDDownloadManager.h"
+#import "SDDownloadPromptView.h"
 Class SDM$BrowserController;
 Class SDM$SandCastle;
 bool SDM$WildCat = false;

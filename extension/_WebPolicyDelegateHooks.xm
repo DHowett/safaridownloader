@@ -1,7 +1,7 @@
 #import <substrate.h>
 #import "SDMCommonClasses.h"
 #import "DownloaderCommon.h"
-#import "DownloadManager.h"
+#import "SDDownloadManager.h"
 
 //#import "Safari/BrowserController.h"
 //#import "Safari/PageLoad.h"

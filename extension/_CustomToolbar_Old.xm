@@ -1,7 +1,7 @@
 #import <objc/runtime.h>
 #import "Safari/BrowserController.h"
 #import "Safari/Application.h"
-#import "DownloadManager.h"
+#import "SDDownloadManager.h"
 #import "UIKitExtra/UIToolbarButton.h"
 
 #import "SDMVersioning.h"

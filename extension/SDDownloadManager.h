@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SafariDownload.h"
 #import "Safari/BrowserButtonBar.h"
 #import "WebPolicyDelegate.h"
 #import "UIKitExtra/UIToolbarButton.h"
@@ -21,44 +20,29 @@
 @end
 
 @class BrowserButtonBar;
+@class SDDownloadModel;
 
 typedef enum
 {
-  SDActionTypeNone = 0,
-  SDActionTypeView = 1,
-  SDActionTypeDownload = 2,
-  SDActionTypeCancel = 3,
-  SDActionTypeDownloadAs = 4,
+	SDActionTypeNone = 0,
+	SDActionTypeView = 1,
+	SDActionTypeDownload = 2,
+	SDActionTypeCancel = 3,
+	SDActionTypeDownloadAs = 4,
 } SDActionType;
 
 @interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate, SDDownloadActionSheetDelegate, SDDownloadPromptViewDelegate> {
-  UITableView*			  _tableView;
-  NSMutableArray*		  _currentDownloads;
-  NSMutableArray*		  _finishedDownloads;
-  NSOperationQueue*	  _downloadQueue;
-  UIToolbarButton*	  _portraitDownloadButton;
-  UIToolbarButton*	  _landscapeDownloadButton;
-  NSDictionary			  *_userPrefs;
-  BOOL					  _visible;
-  NSURL					  *_loadingURL;
-  NSIndexPath *_currentSelectedIndexPath;
+	NSOperationQueue *_downloadQueue;
+	BOOL _visible;
+	SDDownloadModel *_model;
+	NSObject<SDSafariDownloadDelegate> *_downloadObserver;
 }
-
-@property (nonatomic, assign) UIToolbarButton*  portraitDownloadButton;
-@property (nonatomic, assign) UIToolbarButton*  landscapeDownloadButton;
-
-@property (nonatomic, retain) NSDictionary*	userPrefs;
-
-@property (nonatomic, assign, getter=isVisible) BOOL visible;
-@property (nonatomic, retain) NSURL *loadingURL;
-
-@property (nonatomic, retain) NSIndexPath *currentSelectedIndexPath;
+@property (nonatomic, readonly, retain) SDDownloadModel *dataModel;
+@property (nonatomic, assign) NSObject<SDSafariDownloadDelegate> *downloadObserver;
 
 + (id)uniqueFilenameForFilename:(NSString *)filename atPath:(NSString *)path;
 
 + (id)sharedManager;
-- (void)updateUserPreferences;
-- (void)updateFileTypes;
 - (BOOL)supportedRequest:(NSURLRequest *)request 
             withMimeType:(NSString *)mimeType;
 
@@ -71,15 +55,14 @@ typedef enum
             withListener:(id<WebPolicyDecisionListener>)listener
 		 context:(id)context;
 
-- (BOOL)addDownloadWithInfo:(NSDictionary*)info browser:(BOOL)b;
-- (BOOL)addDownloadWithURL:(NSURL*)url browser:(BOOL)b;
-- (BOOL)addDownloadWithRequest:(NSURLRequest*)url browser:(BOOL)b;
+//- (BOOL)addDownloadWithInfo:(NSDictionary*)info browser:(BOOL)b;
+//- (BOOL)addDownloadWithURL:(NSURL*)url browser:(BOOL)b;
+//- (BOOL)addDownloadWithRequest:(NSURLRequest*)url browser:(BOOL)b;
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType browser:(BOOL)b;
 - (BOOL)addDownload:(SDSafariDownload *)download browser:(BOOL)b;
 - (BOOL)cancelDownload:(SDSafariDownload *)download;
 - (BOOL)cancelDownloadWithURL:(NSURL *)url;
-- (IBAction)cancelAllDownloads;
+- (void)cancelAllDownloads;
 
-- (void)updateBadges;
 - (int)downloadsRunning;
 @end

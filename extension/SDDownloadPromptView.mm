@@ -2,7 +2,7 @@
 
 #import "SDDownloadPromptView.h"
 #import "SDMCommonClasses.h"
-#import "DownloadManager.h"
+#import "SDDownloadManager.h"
 #import "SDRoundedButton.h"
 
 #import "SDResources.h"
