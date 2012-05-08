@@ -7,20 +7,6 @@
 #import "Safari/BrowserController.h"
 #import "UIKitExtra/UIToolbarButton.h"
 
-%hook UIView
-%new(@@:)
-- (id)sdButtonItem { return objc_getAssociatedObject(self, @"xxx"); }
-%new(v@:@)
-- (void)setSdButtonItem:(id)item { objc_setAssociatedObject(self, @"xxx", item, OBJC_ASSOCIATION_ASSIGN); }
-%end
-%hook UIBarButtonItem
-- (void)_updateView {
-	%orig;
-	NSLog(@"setting on update view...");
-	[MSHookIvar<UIView *>(self, "_view") setSdButtonItem:self];
-}
-%end
-
 %hook SpacedBarButtonItem
 - (id)init {
 	if((self = %orig) != nil) {
@@ -65,37 +51,9 @@ const NSString *const kSDMAssociatedDownloadButtonKey = @"kSDMAssociatedDownload
 	return [orig autorelease];
 }
 
+// Make this non-operational.
 - (void)_updateFixedSpacing {
 	return;
-	%orig;
-	SpacedBarButtonItem *_backItem = MSHookIvar<SpacedBarButtonItem *>(self, "_backItem");
-	SpacedBarButtonItem *_forwardItem = MSHookIvar<SpacedBarButtonItem *>(self, "_forwardItem");
-	SpacedBarButtonItem *_actionItem = MSHookIvar<SpacedBarButtonItem *>(self, "_actionItem");
-	SpacedBarButtonItem *_bookmarksItem = MSHookIvar<SpacedBarButtonItem *>(self, "_bookmarksItem");
-	SpacedBarButtonItem *_tabExposeItem = MSHookIvar<SpacedBarButtonItem *>(self, "_tabExposeItem");
-	UIBarButtonItem *_downloadButtonItem = objc_getAssociatedObject(self, kSDMAssociatedDownloadButtonKey);
-	NSArray *buttons = [NSArray arrayWithObjects:_backItem, _forwardItem, _actionItem, _bookmarksItem, _downloadButtonItem, _tabExposeItem, nil];
-	for(SpacedBarButtonItem *i in buttons) {
-		UIView *buttonImageView = MSHookIvar<UIView *>(i, "_view");
-		NSLog(@"setting on view %@", buttonImageView);
-		[buttonImageView setSdButtonItem:i];
-	}
-	return;
-
-	CGFloat maxWidth = [self bounds].size.width;
-	CGFloat cellWidth = maxWidth / buttons.count;
-	CGFloat lastRightSlack = 0.f;
-
-	for(SpacedBarButtonItem *i in buttons) {
-		//UIView *buttonImageView = MSHookIvar<UIView *>(i, "_view");
-		//CGFloat remainingWidth = cellWidth - buttonImageView.bounds.size.width;
-		//NSLog(@"remaining width is %f of cell %f and image %f", remainingWidth, cellWidth, buttonImageView.bounds.size.width);
-		//NSLog(@"preceding space has to be %f (last righthand slack is %f)", remainingWidth/2.f + lastRightSlack, lastRightSlack);
-		//[[i precedingFixedSpace] setWidth:remainingWidth/2.f + lastRightSlack];
-		[[i precedingFixedSpace] setWidth:0];
-		//lastRightSlack = remainingWidth/2.f;
-		//NSLog(@"Width of space for %@ is %f", i, [[i precedingFixedSpace] width]);
-	}
 }
 %end
 
