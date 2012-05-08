@@ -95,7 +95,6 @@ icon = _icon;
   [nameLabel release];
   [sizeLabel release];
   [progressLabel release];
-  [progressView release];
   [completionLabel release];
   [super dealloc];
 }
