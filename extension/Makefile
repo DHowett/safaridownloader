@@ -15,6 +15,7 @@ Downloader_FILES += _CustomToolbar_iOS5.xm _Interaction_iOS5.xm
 Downloader_FILES += SDDownloadManager.mm ModalAlert.mm SDDownloadActionSheet.mm
 Downloader_FILES += SDDownloadModel.mm
 Downloader_FILES += SDDownloadManagerNavigationController.mm
+Downloader_FILES += SDDownloadListViewController.mm
 Downloader_FILES += SDDownloadPromptView.mm SDRoundedButton.mm SDDownloadRequest.mm
 Downloader_FILES += AuthenticationView.mm
 Downloader_FRAMEWORKS = UIKit CoreGraphics QuartzCore

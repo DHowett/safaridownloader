@@ -5,6 +5,7 @@
 #import "SDDownloadPromptView.h"
 
 #import "SDDownloadManagerNavigationController.h"
+#import "SDDownloadListViewController.h"
 
 #import "Safari/BrowserController.h"
 #import "Safari/RotatablePopoverController.h"
@@ -30,7 +31,8 @@
 - (id)_panelForPanelType:(int)type {
 	%log;
 	if(type == SDPanelTypeDownloadManager) {
-		return [[SDDownloadManagerNavigationController alloc] initWithRootViewController:[SDDownloadManager sharedManager]];
+		UIViewController *rootViewController = [[[SDDownloadListViewController alloc] init] autorelease];
+		return [[[SDDownloadManagerNavigationController alloc] initWithRootViewController:rootViewController] autorelease];
 	} else if(type == SDPanelTypeAuthentication) {
 		return [SDDownloadOperation authView];
 	} else if(type == SDPanelTypeDownloadPrompt) {
