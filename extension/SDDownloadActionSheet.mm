@@ -31,10 +31,10 @@ static NSMutableDictionary *_launchActions;
 		_sdDelegate = delegate;
 		self.tag = kSDDownloadActionSheetTag;
 		_download = download;
-		if(_download.failed) [self addButtonWithTitle:@"Retry"];
+		if(_download.status == SDDownloadStatusFailed) [self addButtonWithTitle:@"Retry"];
 		else {
 			_documentInteractionController = [[objc_getClass("UIDocumentInteractionController") interactionControllerWithURL:
-						[NSURL fileURLWithPath:[_download.savePath stringByAppendingPathComponent:_download.filename]]] retain];
+						[NSURL fileURLWithPath:[_download.path stringByAppendingPathComponent:_download.filename]]] retain];
 			if(_documentInteractionController) {
 				int buttonIndex = 0;
 				_applications = [[_documentInteractionController _applications:YES] retain];
@@ -80,7 +80,7 @@ static NSMutableDictionary *_launchActions;
 			NSString *action = [_launchActions objectForKey:button];
 			if(action) {
 				Class Application = objc_getClass("Application");
-				NSString *path = [_download.savePath stringByAppendingPathComponent:_download.filename];
+				NSString *path = [_download.path stringByAppendingPathComponent:_download.filename];
 				path = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 				[[Application sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", action, path]]];
 			}

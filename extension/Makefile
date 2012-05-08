@@ -4,8 +4,9 @@ all package install clean sim::
 else
 
 
-TWEAK_NAME=Downloader
-Downloader_FILES  = BaseCell.m DownloadCell.m DownloadOperation.m FileBrowser.m SafariDownload.m
+TWEAK_NAME = Downloader
+Downloader_FILES  = BaseCell.m DownloadCell.m FileBrowser.m
+Downloader_FILES += SDConcurrentOperation.mm SDSafariDownload.mm
 
 Downloader_FILES += Downloader.xm _WebPolicyDelegateHooks.xm _BrowserPanelHooks.xm
 Downloader_FILES += _CustomToolbar_Old.xm _Interaction_iOS3.xm

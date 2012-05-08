@@ -1,4 +1,4 @@
-#include "SafariDownload.h"
+#include "SDSafariDownload.h"
 
 extern const int kSDDownloadActionSheetTag;
 
