@@ -65,10 +65,9 @@
 	NSString *keyName = nil;
 	NSMutableArray *array = [self _arrayForListType:list keyName:&keyName];
 	NSLog(@"Adding download %@ to list %@ key %@", download, array, keyName);
-	NSInteger count = array.count;
-	[self willChange:NSKeyValueChangeInsertion valuesAtIndexes:[NSIndexSet indexSetWithIndex:count] forKey:keyName];
-	[array addObject:download];
-	[self didChange:NSKeyValueChangeInsertion valuesAtIndexes:[NSIndexSet indexSetWithIndex:count] forKey:keyName];
+	[self willChange:NSKeyValueChangeInsertion valuesAtIndexes:[NSIndexSet indexSetWithIndex:0] forKey:keyName];
+	[array insertObject:download atIndex:0];
+	[self didChange:NSKeyValueChangeInsertion valuesAtIndexes:[NSIndexSet indexSetWithIndex:0] forKey:keyName];
 	[self saveData];
 }
 
