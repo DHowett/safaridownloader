@@ -9,7 +9,6 @@
 #import "Safari/BrowserController.h"
 #import "SDDownloadManager.h"
 #import "SDSafariDownload.h"
-#import "DownloadCell.h"
 #import "DownloaderCommon.h"
 #import "ModalAlert.h"
 #import "SDResources.h"

@@ -6,7 +6,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "SDDownloadManager.h"
 #import "SDDownloadListViewController.h"
-#import "DownloadCell.h"
+#import "SDDownloadCell.h"
 #import "DownloaderCommon.h"
 #import "ModalAlert.h"
 #import "SDResources.h"
@@ -30,7 +30,6 @@
 - (NSString *)_formatSize:(double)size;
 - (void)_updateRightButton;
 - (SDDownloadCell*)_cellForDownload:(SDSafariDownload*)download;
-- (void)_updateCell:(SDDownloadCell *)cell forDownload:(SDSafariDownload *)download;
 @end
 @implementation SDDownloadListViewController
 @synthesize currentSelectedIndexPath = _currentSelectedIndexPath;
@@ -146,7 +145,7 @@
 		SDSafariDownload *download = [_dataModel.runningDownloads objectAtIndex:indexPath.row];
 		if(download.status != SDDownloadStatusRunning) continue;
 
-		[self _updateProgressForDownload:download inCell:[self.tableView cellForRowAtIndexPath:indexPath]];
+		[[self.tableView cellForRowAtIndexPath:indexPath] updateProgress];
 	}
 }
 
@@ -191,25 +190,17 @@
 	[self _updateRightButton];
 }
 
-- (NSString *)_formatSize:(double)size {
-	if(size < 1024.) return [NSString stringWithFormat:@"%.1lf B", size];
-	size /= 1024.;
-	if(size < 1024.) return [NSString stringWithFormat:@"%.1lf KB", size];
-	size /= 1024.;
-	return [NSString stringWithFormat:@"%.1lf MB", size];
-}
-
 /* {{{ Download Observer */
 - (void)downloadDidChangeStatus:(SDSafariDownload *)download {
 	SDDownloadCell *cell = [self _cellForDownload:download];
 	if(!cell) return;
-	[self _updateCell:cell forDownload:download];
+	[cell updateDisplay];
 }
 
 - (void)downloadDidReceiveData:(SDSafariDownload *)download {
 	SDDownloadCell *cell = [self _cellForDownload:download];
 	if(!cell) return;
-	[self _updateCell:cell forDownload:download];
+	[cell updateDisplay];
 }
 /* }}} */
 
@@ -261,15 +252,10 @@
 	
 	SDDownloadCell *cell = (SDDownloadCell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 	if (cell == nil) {
-		cell = [[[SDDownloadCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+		cell = [[[SDDownloadCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
 	}
 	
-	// Set up the cell...
-	cell.finished = finished;
-	//cell.icon = [SDResources iconForFileType:[SDFileType fileTypeForExtension:[download.filename pathExtension] orMIMEType:download.mimetype]];
-	cell.icon = [SDResources iconForFileType:[SDFileType fileTypeForExtension:[download.filename pathExtension] orMIMEType:nil]];
-	cell.nameLabel = download.filename;
-	cell.sizeLabel = [self _formatSize:download.totalBytes];
+	cell.download = download;
 
 	if(!finished && download.status != SDDownloadStatusFailed) {
 		cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -277,39 +263,13 @@
 		cell.selectionStyle = UITableViewCellSelectionStyleBlue;
 	}
 
-	[self _updateCell:cell forDownload:download];
+	[cell updateDisplay];
 	return cell;
 }
 
-- (void)_updateProgressForDownload:(SDSafariDownload *)download inCell:(SDDownloadCell *)cell {
-	float speed = ((double)download.downloadedBytes - (double)download.startedFromByte) / (-1*[download.startDate timeIntervalSinceNow]);
-	cell.progressView.progress = (double)download.downloadedBytes / (double)download.totalBytes;
-	cell.progressLabel = [NSString stringWithFormat:@"Downloading @ %@/sec", [self _formatSize:speed]];
-}
-
-- (void)_updateCell:(SDDownloadCell *)cell forDownload:(SDSafariDownload *)download {
-	BOOL finished = download.status == SDDownloadStatusCompleted;
-	cell.failed = download.status == SDDownloadStatusFailed;
-	if(!finished && download.status != SDDownloadStatusFailed) {
-		if(download.status == SDDownloadStatusRunning) {
-			[self _updateProgressForDownload:download inCell:cell];
-		} else {
-			cell.progressLabel = SDLocalizedString(@"Waiting...");
-		}
-		cell.progressView.progress = (double)download.downloadedBytes / (double)download.totalBytes;
-	} else {
-		if (download.status == SDDownloadStatusFailed) {
-			cell.progressLabel = SDLocalizedString(@"Download Failed");
-		}
-		else {
-			cell.progressLabel = [download.path stringByAbbreviatingWithTildeInPath];
-		}
-	}
-}
-
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-	if(indexPath.section == 0) return 74;
-	else return 58;
+	if(indexPath.section == 0) return 68;
+	else return 56;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {

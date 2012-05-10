@@ -5,7 +5,7 @@ else
 
 
 TWEAK_NAME = Downloader
-Downloader_FILES  = BaseCell.m DownloadCell.m FileBrowser.m
+Downloader_FILES  = SDDownloadCell.mm FileBrowser.m
 Downloader_FILES += SDConcurrentOperation.mm SDSafariDownload.mm
 Downloader_FILES += SDUtils.mm
 
