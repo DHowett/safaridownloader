@@ -11,7 +11,6 @@
 
 - (BOOL)isExecuting { return _executing; }
 - (BOOL)isFinished { return _finished; }
-- (BOOL)isCancelled { return _cancelled; }
 
 - (void)setExecuting:(BOOL)executing {
 	[self willChangeValueForKey:@"isExecuting"];
@@ -25,14 +24,8 @@
 	[self didChangeValueForKey:@"isFinished"];
 }
 
-- (void)setCancelled:(BOOL)cancelled {
-	[self willChangeValueForKey:@"isCancelled"];
-	_cancelled = cancelled;
-	[self didChangeValueForKey:@"isCancelled"];
-}
-
 - (void)start {
-	if(self.cancelled) {
+	if([self isCancelled]) {
 		self.finished = YES;
 		return;
 	}

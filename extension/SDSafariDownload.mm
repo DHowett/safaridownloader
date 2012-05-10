@@ -240,14 +240,6 @@
 	return YES;
 }
 
-- (void)cancel {
-	[self.downloader cancel];
-	[self _deleteData];
-	self.status = SDDownloadStatusCancelled;
-	self.cancelled = YES;
-	self.finished = YES;
-}
-
 - (void)main {
 	NSLog(@"Attempting to begin download.");
 	if([self _begin] == NO) {
@@ -260,7 +252,12 @@
 	NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
 	do {
 		[runLoop runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
-	} while(!self.finished);
+	} while(!self.finished && ![self isCancelled]);
+	if([self isCancelled]) {
+		[self.downloader cancel];
+		[self _deleteData];
+		self.status = SDDownloadStatusCancelled;
+	}
 	[self complete];
 	// TODO: Kill heartbeat timer.
 }
