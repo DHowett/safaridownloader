@@ -22,16 +22,7 @@
 @class BrowserButtonBar;
 @class SDDownloadModel;
 
-typedef enum
-{
-	SDActionTypeNone = 0,
-	SDActionTypeView = 1,
-	SDActionTypeDownload = 2,
-	SDActionTypeCancel = 3,
-	SDActionTypeDownloadAs = 4,
-} SDActionType;
-
-@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate, SDDownloadActionSheetDelegate, SDDownloadPromptViewDelegate> {
+@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UIAlertViewDelegate, SDDownloadPromptViewDelegate> {
 	NSOperationQueue *_downloadQueue;
 	BOOL _visible;
 	SDDownloadModel *_model;
@@ -61,6 +52,7 @@ typedef enum
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType browser:(BOOL)b;
 - (BOOL)addDownload:(SDSafariDownload *)download browser:(BOOL)b;
 - (BOOL)cancelDownload:(SDSafariDownload *)download;
+- (void)deleteDownload:(SDSafariDownload *)download;
 - (BOOL)cancelDownloadWithURL:(NSURL *)url;
 - (void)cancelAllDownloads;
 

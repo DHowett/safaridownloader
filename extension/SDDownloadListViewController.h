@@ -6,8 +6,13 @@
 
 #import <UIKit/UIKit.h>
 
+#import "SDDownloadActionSheet.h"
+#import "SDSafariDownload.h"
+
 @class SDDownloadModel;
-@interface SDDownloadListViewController : UITableViewController {
+@protocol SDDownloadActionSheetDelegate;
+
+@interface SDDownloadListViewController : UITableViewController <UIActionSheetDelegate, SDDownloadActionSheetDelegate, SDSafariDownloadDelegate> {
 	NSIndexPath *_currentSelectedIndexPath;
 	SDDownloadModel *_dataModel;
 	NSTimer *_updateTimer;

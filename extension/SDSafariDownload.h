@@ -106,9 +106,10 @@ typedef enum {
 @end
 
 @protocol SDSafariDownloadDelegate
+@optional
 - (void)downloadDidChangeStatus:(SDSafariDownload *)download;
-- (void)downloadDidProvideFilename:(SDSafariDownload *)download;
 - (void)downloadDidReceiveData:(SDSafariDownload *)download;
+- (void)downloadDidProvideFilename:(SDSafariDownload *)download;
 - (NSString *)uniqueFilenameForDownload:(SDSafariDownload *)download withSuggestion:(NSString *)suggestedFilename;
 
 /*

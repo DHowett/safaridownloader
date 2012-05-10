@@ -27,7 +27,6 @@
 @end
 
 @interface SDDownloadListViewController ()
-- (NSString *)_formatSize:(double)size;
 - (void)_updateRightButton;
 - (SDDownloadCell*)_cellForDownload:(SDSafariDownload*)download;
 @end
@@ -145,7 +144,7 @@
 		SDSafariDownload *download = [_dataModel.runningDownloads objectAtIndex:indexPath.row];
 		if(download.status != SDDownloadStatusRunning) continue;
 
-		[[self.tableView cellForRowAtIndexPath:indexPath] updateProgress];
+		[(SDDownloadCell *)[self.tableView cellForRowAtIndexPath:indexPath] updateProgress];
 	}
 }
 

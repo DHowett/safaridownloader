@@ -9,6 +9,7 @@
 	UIImageView *_iconImageView;
 }
 @property (nonatomic, retain) SDSafariDownload *download;
+- (id)initWithReuseIdentifier:(NSString *)reuseIdentifier;
 - (void)updateDisplay;
 - (void)updateProgress;
 @end

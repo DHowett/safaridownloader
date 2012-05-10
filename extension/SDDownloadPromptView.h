@@ -7,7 +7,7 @@
 @class SDDownloadPromptView;
 
 @protocol SDDownloadPromptViewDelegate <NSObject>
-- (void)downloadPromptView:(SDDownloadPromptView *)downloadPromptView didCompleteWithAction:(int)action;
+- (void)downloadPromptView:(SDDownloadPromptView *)downloadPromptView didCompleteWithAction:(SDActionType)action;
 @end
 
 @class SDRoundedButton;
