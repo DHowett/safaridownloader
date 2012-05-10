@@ -240,7 +240,7 @@
 	return YES;
 }
 
-- (void)cancelDownload {
+- (void)cancel {
 	[self.downloader cancel];
 	[self _deleteData];
 	self.status = SDDownloadStatusCancelled;

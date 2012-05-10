@@ -53,7 +53,6 @@
 - (BOOL)addDownload:(SDSafariDownload *)download browser:(BOOL)b;
 - (BOOL)cancelDownload:(SDSafariDownload *)download;
 - (void)deleteDownload:(SDSafariDownload *)download;
-- (BOOL)cancelDownloadWithURL:(NSURL *)url;
 - (void)cancelAllDownloads;
 
 - (int)downloadsRunning;

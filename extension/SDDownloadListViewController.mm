@@ -84,16 +84,9 @@
 }
 
 - (void)alertView:(UIAlertView *)alert clickedButtonAtIndex:(NSInteger)buttonIndex {
-	/*
 	if (buttonIndex == 1) {
-		if (_currentDownloads.count > 0) {
-			[_downloadQueue cancelAllOperations];
-			[_currentDownloads removeAllObjects];
-		[self saveData];
-			[_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-		}
+		[[SDDownloadManager sharedManager] cancelAllDownloads];
 	} 
-	*/
 }
 
 - (SDDownloadCell*)_cellForDownload:(SDSafariDownload*)download {

@@ -285,33 +285,11 @@ static id sharedManager = nil;
 // everything eventually goes through this method
 - (BOOL)cancelDownload:(SDSafariDownload *)download {
 	if (download != nil) {
-		[download cancelDownload];
-
-		// TODO: [ui willCancelDownload:download]
-		
+		[download cancel];
 		[_model removeDownload:download fromList:SDDownloadModelRunningList];
-		
-		/*
-		if (_currentDownloads.count == 0) {
-			[_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] 
-					 withRowAnimation:UITableViewRowAnimationFade];
-		} 
-		else {
-			[_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:0]]
-												withRowAnimation:UITableViewRowAnimationFade];
-		}
-		*/
-		
 		[self updateBadges];
 	}
 	return NO;
-}
-
-- (BOOL)cancelDownloadWithURL:(NSURL *)url
-{
-	if ([self cancelDownload:[self downloadWithURL:url]])
-		return YES;
-	return NO; 
 }
 
 - (void)deleteDownload:(SDSafariDownload*)download {
@@ -321,41 +299,10 @@ static id sharedManager = nil;
 	[download release];
 }
 
-/*
 - (void)cancelAllDownloads {
-	UIAlertView* alert = nil;
-	if (_currentDownloads.count > 0) {
-		alert = [[UIAlertView alloc] initWithTitle:@"Cancel All Downloads?"
-						message:nil
-						delegate:self
-						cancelButtonTitle:@"No"
-						otherButtonTitles:@"Yes", nil];
-	}
-	else {
-		alert = [[UIAlertView alloc] initWithTitle:@"Nothing to Cancel"
-						 message:nil
-						delegate:self
-						cancelButtonTitle:@"OK"
-						otherButtonTitles:nil];
-	}
-	
-	[alert show];
-	[alert release];
+	[_downloadQueue cancelAllOperations];
+	[_model emptyList:SDDownloadModelRunningList];
 }
-*/
-
-/*
-- (void)alertView:(UIAlertView *)alert clickedButtonAtIndex:(NSInteger)buttonIndex {
-	if (buttonIndex == 1) {
-		if (_currentDownloads.count > 0) {
-			[_downloadQueue cancelAllOperations];
-			[_currentDownloads removeAllObjects];
-		[self saveData];
-			[_tableView deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-		}
-	} 
-}
-*/
 
 #pragma mark -/*}}}*/
 #pragma mark SDSafariDownloadDelegate Methods/*{{{*/
