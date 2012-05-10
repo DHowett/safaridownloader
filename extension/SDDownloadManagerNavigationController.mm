@@ -12,8 +12,8 @@
 #import "Safari/BrowserController.h"
 
 @implementation SDDownloadManagerNavigationController
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)inter {
-	return YES; 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation {
+	return SDM$WildCat ? YES : (orientation != UIInterfaceOrientationPortraitUpsideDown);
 }
 
 - (BOOL)allowsRotation { return YES; }

@@ -53,8 +53,8 @@
 	[[SDDownloadManager sharedManager] setDownloadObserver:nil];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)inter {
-	return YES;
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation {
+	return SDM$WildCat ? YES : (orientation != UIInterfaceOrientationPortraitUpsideDown);
 }
 
 - (void)dealloc {
@@ -293,7 +293,7 @@ titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
 	if (editingStyle == UITableViewCellEditingStyleDelete) {
 		if(indexPath.section == 0) {
-			id download = [_dataModel.runningDownloads objectAtIndex:indexPath.row];//[_currentDownloads objectAtIndex:indexPath.row];
+			id download = [_dataModel.runningDownloads objectAtIndex:indexPath.row];
 			[[SDDownloadManager sharedManager] cancelDownload:download];
 		} else {
 			[_dataModel removeDownload:[_dataModel.finishedDownloads objectAtIndex:indexPath.row] fromList:SDDownloadModelFinishedList];
@@ -318,17 +318,6 @@ titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (void)downloadActionSheet:(SDDownloadActionSheet *)actionSheet deleteDownload:(SDSafariDownload *)download {
 	[[SDDownloadManager sharedManager] deleteDownload:download];
-/*
-	NSString *path = [NSString stringWithFormat:@"%@/%@", download.path, download.filename];
-	int row = [_finishedDownloads indexOfObject:download];
-	int section = (_currentDownloads.count > 0) ? 1 : 0;
-
-	[_finishedDownloads removeObjectAtIndex:row];
-	[_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] 
-										withRowAnimation:UITableViewRowAnimationFade];
-
-	[[objc_getClass("SandCastle") sharedInstance] removeItemAtResolvedPath:path];
-	*/
 }
 
 - (void)downloadActionSheetWillDismiss:(SDDownloadActionSheet *)actionSheet {
