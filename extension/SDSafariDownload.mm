@@ -39,6 +39,7 @@ static NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	URLRequest = _URLRequest, URLResponse = _URLResponse,
 	resumeData = _resumeData, requiresAuthentication = _requiresAuthentication,
 	authenticationCredential = _authenticationCredential,
+	mimeType = _mimeType,
 	downloader = _downloader, delegate = _delegate;
 
 - (id)init {
@@ -58,6 +59,7 @@ static NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	[_resumeData release];
 	[_authenticationCredential release];
 	[_downloader release];
+	[_mimeType release];
 	[super dealloc];
 }
 
@@ -72,6 +74,7 @@ static NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	[encoder encodeInt64:self.downloadedBytes forKey:@"downloadedBytes"];
 	[encoder encodeObject:self.URLRequest forKey:@"URLRequest"];
 	[encoder encodeObject:self.resumeData forKey:@"resumeData"];
+	[encoder encodeObject:self.mimeType forKey:@"mimeType"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
@@ -87,6 +90,7 @@ static NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	self.downloadedBytes = [decoder decodeInt64ForKey:@"downloadedBytes"];
 	self.URLRequest = [decoder decodeObjectForKey:@"URLRequest"];
 	self.resumeData = [decoder decodeObjectForKey:@"resumeData"];
+	self.mimeType = [decoder decodeObjectForKey:@"mimeType"];
 	return self;
 }
 

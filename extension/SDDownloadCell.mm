@@ -128,7 +128,7 @@
 - (void)updateDisplay {
 	_nameLabel.text = _download.filename;
 	_sizeLabel.text = [SDUtils formatSize:_download.totalBytes];
-	_iconImageView.image = [SDResources iconForFileType:[SDFileType fileTypeForExtension:[_download.filename pathExtension]]];
+	_iconImageView.image = [SDResources iconForFileType:[SDFileType fileTypeForExtension:[_download.filename pathExtension] orMIMEType:_download.mimeType]];
 
 	[self _updateLabelColors];
 	switch(_download.status) {

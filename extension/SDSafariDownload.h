@@ -57,6 +57,7 @@ typedef enum {
 	// Of interest to Outsiders
 	SDDownloadStatus _status; // Serialize.
 	NSString *_filename; // Serialize.
+	NSString *_mimeType; // Serialize.
 	NSString *_path; // Serialize.
 	NSString *_temporaryPath; // Serialize.
 	NSDate *_startDate; // Serialize.
@@ -78,6 +79,7 @@ typedef enum {
 
 @property (nonatomic, readonly, assign) SDDownloadStatus status;
 @property (nonatomic, retain) NSString *filename;
+@property (nonatomic, retain) NSString *mimeType;
 @property (nonatomic, retain) NSString *path;
 @property (nonatomic, readonly, retain) NSString *temporaryPath;
 @property (nonatomic, readonly, retain) NSDate *startDate;

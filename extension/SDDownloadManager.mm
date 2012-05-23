@@ -272,12 +272,10 @@ static id sharedManager = nil;
 
 	NSString *filename = [self fileNameForURL:[request URL]];
 	
-	/*
-	//download.mimeType = mimeType;
-	*/
 	SDSafariDownload *download = [[SDSafariDownload alloc] init];
 	download.URLRequest = request;
 	download.filename = filename;
+	download.mimeType = mimeType;
 	download.delegate = self;
 	return [self addDownload:download browser:browser];
 }
