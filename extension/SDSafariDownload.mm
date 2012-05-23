@@ -66,17 +66,17 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
 	[super encodeWithCoder:encoder];
-	[encoder encodeInt:self.status forKey:@"status"];
-	[encoder encodeObject:self.filename forKey:@"filename"];
-	[encoder encodeObject:self.path forKey:@"path"];
-	[encoder encodeObject:self.temporaryPath forKey:@"temporaryPath"];
-	[encoder encodeObject:self.startDate forKey:@"startDate"];
-	[encoder encodeInt64:self.totalBytes forKey:@"totalBytes"];
-	[encoder encodeInt64:self.downloadedBytes forKey:@"downloadedBytes"];
-	[encoder encodeObject:self.URLRequest forKey:@"URLRequest"];
-	[encoder encodeObject:self.resumeData forKey:@"resumeData"];
-	[encoder encodeObject:self.mimeType forKey:@"mimeType"];
-	[encoder encodeBool:self.useSuggestedFilename forKey:@"useSuggestedFilename"];
+	[encoder encodeInt:_status forKey:@"status"];
+	[encoder encodeObject:_filename forKey:@"filename"];
+	[encoder encodeObject:_path forKey:@"path"];
+	[encoder encodeObject:_temporaryPath forKey:@"temporaryPath"];
+	[encoder encodeObject:_startDate forKey:@"startDate"];
+	[encoder encodeInt64:_totalBytes forKey:@"totalBytes"];
+	[encoder encodeInt64:_downloadedBytes forKey:@"downloadedBytes"];
+	[encoder encodeObject:_URLRequest forKey:@"URLRequest"];
+	[encoder encodeObject:_resumeData forKey:@"resumeData"];
+	[encoder encodeObject:_mimeType forKey:@"mimeType"];
+	[encoder encodeBool:_useSuggestedFilename forKey:@"useSuggestedFilename"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
@@ -121,11 +121,11 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 }
 
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename {
-	if(_useSuggestedFilename && self.filename) return;
+	if(_useSuggestedFilename && _filename) return;
 	if(_startedFromByte > 0) return; // Do not rename resumed files.
 	self.filename = [_delegate uniqueFilenameForDownload:self withSuggestion:filename];
-	self.temporaryPath = [self _temporaryPathForFilename:self.filename];
-	[download setDestination:self.temporaryPath allowOverwrite:NO];
+	self.temporaryPath = [self _temporaryPathForFilename:_filename];
+	[download setDestination:_temporaryPath allowOverwrite:NO];
 	[_delegate downloadDidProvideFilename:self];
 }
 
@@ -149,7 +149,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	if([response isKindOfClass:[NSHTTPURLResponse class]]) {
 		NSDictionary *headerFields = [(NSHTTPURLResponse *)response allHeaderFields];
 		NSString *eTag = [headerFields objectForKey:@"Etag"];
-		NSURL *url = self.URLRequest.URL;
+		NSURL *url = _URLRequest.URL;
 		NSLog(@"URL: %@, eTAG: %@", url, eTag);
 		if(url && eTag) {
 			self.resumeData = [NSMutableDictionary dictionary];
@@ -158,24 +158,17 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 				[_resumeData setObject:[headerFields objectForKey:@"Last-Modified"] forKey:@"NSURLDownloadServerModificationDate"];
 			}
 			[_resumeData setObject:[url absoluteString] forKey:@"NSURLDownloadURL"];
-			[_resumeData setObject:[NSNumber numberWithUnsignedInt:0] forKey:@"NSURLDownloadBytesReceived"];
 		}
-		NSLog(@"Download saved resume data %@", self.resumeData);
+		NSLog(@"Download saved resume data %@", _resumeData);
 	}
 	self.totalBytes = [response expectedContentLength];
-	self.startedFromByte = 0;
+	_startedFromByte = 0;
 	self.URLResponse = response;
 }
 
 - (void)download:(NSURLDownload *)download didReceiveDataOfLength:(NSUInteger)length {
-	NSLog(@"Download received %u bytes", length);
-	self.downloadedBytes += length;
-	NSLog(@"I've now downloaded %llu bytes.", self.downloadedBytes);
+	_downloadedBytes += length;
 	// TODO: Throttle?
-	[self.resumeData setObject:[NSNumber numberWithUnsignedLongLong:self.downloadedBytes] forKey:@"NSURLDownloadBytesReceived"];
-	[[_delegate class] cancelPreviousPerformRequestsWithTarget:_delegate selector:@selector(downloadDidReceiveData:) object:self];
-	[_delegate performSelector:@selector(downloadDidReceiveData:) withObject:self afterDelay:0];
-	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0]];
 }
 
 - (BOOL)download:(NSURLDownload *)download shouldDecodeSourceDataOfMIMEType:(NSString *)encodingType {
@@ -248,14 +241,15 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 }
 
 - (BOOL)_resume {
-	if(!self.resumeData) return nil;
+	if(!_resumeData) return nil;
 	self.temporaryPath = [self _temporaryPathForFilename:self.filename];
 
 	// Truncate the file to the last resume data snapshot.
-	truncate([self.temporaryPath UTF8String], [[self.resumeData objectForKey:@"NSURLDownloadBytesReceived"] unsignedLongLongValue]);
+	[_resumeData setObject:[NSNumber numberWithUnsignedLongLong:_downloadedBytes] forKey:@"NSURLDownloadBytesReceived"];
+	truncate([_temporaryPath UTF8String], _downloadedBytes);
 	
-	NSData *resumeDataSerialization = [NSPropertyListSerialization dataFromPropertyList:self.resumeData format:NSPropertyListXMLFormat_v1_0 errorDescription:NULL];
-	self.downloader = [[[NSURLDownload alloc] initWithResumeData:resumeDataSerialization delegate:self path:self.temporaryPath] autorelease];
+	NSData *resumeDataSerialization = [NSPropertyListSerialization dataFromPropertyList:_resumeData format:NSPropertyListXMLFormat_v1_0 errorDescription:NULL];
+	self.downloader = [[[NSURLDownload alloc] initWithResumeData:resumeDataSerialization delegate:self path:_temporaryPath] autorelease];
 	if(!self.downloader) {
 		self.resumeData = nil;
 		return NO;
@@ -272,13 +266,13 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	self.downloader = [[[NSURLDownload alloc] initWithRequest:self.URLRequest delegate:self] autorelease];
 	if(!self.downloader) return NO;
 	self.downloader.deletesFileUponFailure = NO;
-	if(self.filename && _useSuggestedFilename) {
+	if(_filename && _useSuggestedFilename) {
 		self.temporaryPath = [self _temporaryPathForFilename:self.filename];
 		[_downloader setDestination:self.temporaryPath allowOverwrite:NO];
 	}
 
 	self.totalBytes = 0;
-	self.downloadedBytes = 0;
+	_downloadedBytes = 0;
 
 	return YES;
 }
@@ -294,7 +288,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	}
 	NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
 	do {
-		[runLoop runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
+		[runLoop runUntilDate:[NSDate dateWithTimeIntervalSinceNow:.01]];
 	} while(!self.finished && ![self isCancelled]);
 	if([self isCancelled]) {
 		[self.downloader cancel];
