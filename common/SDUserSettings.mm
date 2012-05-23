@@ -29,6 +29,12 @@ static SDUserSettings *_sharedSettings;
 	return [b integerValue];
 }
 
+- (float)floatForKey:(NSString *)key default:(float)defaultValue {
+	NSNumber *b = [_settings objectForKey:key];
+	if(!b) return defaultValue;
+	return [b floatValue];
+}
+
 - (NSArray *)arrayForKey:(NSString *)key {
 	return [_settings objectForKey:key];
 }
