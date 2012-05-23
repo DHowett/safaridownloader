@@ -9,6 +9,8 @@
 #import "SDMCommonClasses.h"
 #import <SandCastle/SandCastle.h>
 
+static NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
+
 @interface SDSafariDownload ()
 @property (nonatomic, assign, readwrite) SDDownloadStatus status;
 //@property (nonatomic, retain) NSString *filename;
@@ -94,11 +96,11 @@
 }
 
 - (NSString *)_temporaryPathForFilename:(NSString *)filename {
-	return [NSString stringWithFormat:@"/tmp/.partial/%@", filename];
+	return [kSDSafariDownloadTemporaryDirectory stringByAppendingPathComponent:filename];
 }
 
 - (void)_createTemporaryDirectory {
-	[[NSFileManager defaultManager] createDirectoryAtPath:[self.temporaryPath stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:NULL];
+	[[NSFileManager defaultManager] createDirectoryAtPath:kSDSafariDownloadTemporaryDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
 }
 
 /* {{{ NSURLDownloadDelegate */
@@ -242,13 +244,13 @@
 
 - (void)main {
 	NSLog(@"Attempting to begin download.");
+	[self _createTemporaryDirectory];
 	if([self _begin] == NO) {
 		NSLog(@"Begin failed");
 		[self complete];
 		// TODO: Notify Owner that we Failed.
 		return;
 	}
-	[self _createTemporaryDirectory];
 	NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
 	do {
 		[runLoop runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
