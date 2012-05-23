@@ -21,6 +21,7 @@
 
 - (void)loadData {
 	NSString *path = @"/tmp/.sdm.plist";
+	[[SDM$SandCastle sharedInstance] removeItemAtResolvedPath:path];
 	[[SDM$SandCastle sharedInstance] copyItemAtPath:DL_ARCHIVE_PATH toPath:path];
 	NSDictionary *loaded = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
 	if(loaded) {
@@ -37,6 +38,7 @@
 								_finishedDownloads, @"finished", nil]];
 	if(data) {
 		[data writeToFile:path atomically:YES];
+		[[SDM$SandCastle sharedInstance] removeItemAtResolvedPath:DL_ARCHIVE_PATH];
 		[[SDM$SandCastle sharedInstance] copyItemAtPath:path toPath:DL_ARCHIVE_PATH];
 	}
 }
