@@ -131,7 +131,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
 - (void)downloadDidBegin:(NSURLDownload *)download {
 	self.startDate = [NSDate date];
-	self.status = SDDownloadStatusRunning;
+	self.status = SDDownloadStatusWaiting;
 #warning progress heartbeat timer.
 }
 
@@ -164,6 +164,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	self.totalBytes = [response expectedContentLength];
 	_startedFromByte = 0;
 	self.URLResponse = response;
+	self.status = SDDownloadStatusRunning;
 }
 
 - (void)download:(NSURLDownload *)download didReceiveDataOfLength:(NSUInteger)length {
@@ -177,10 +178,9 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
 - (void)download:(NSURLDownload *)download willResumeWithResponse:(NSURLResponse *)response fromByte:(long long)startingByte {
 	// We already know the size, so we do not need to recalculate it.
-	self.startDate = [NSDate date];
 	self.URLResponse = response;
 	self.startedFromByte = startingByte;
-#warning do we get 'begin' here?
+	self.status = SDDownloadStatusRunning;
 }
 
 - (NSURLRequest *)download:(NSURLDownload *)download willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse {
