@@ -3,8 +3,7 @@
 
 typedef enum {
 	SDPanelTypeDownloadManager = 150,
-	SDPanelTypeAuthentication = 151,
-	SDPanelTypeDownloadPrompt = 152
+	SDPanelTypeDownloadPrompt = 151
 } SDPanelTypes;
 
 typedef enum

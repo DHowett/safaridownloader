@@ -33,8 +33,6 @@
 	if(type == SDPanelTypeDownloadManager) {
 		UIViewController *rootViewController = [[[SDDownloadListViewController alloc] init] autorelease];
 		return [[[SDDownloadManagerNavigationController alloc] initWithRootViewController:rootViewController] autorelease];
-	} else if(type == SDPanelTypeAuthentication) {
-		return [SDDownloadOperation authView];
 	} else if(type == SDPanelTypeDownloadPrompt) {
 		SDDownloadRequest *req = [SDDownloadRequest pendingRequestForContext:[[self tabController] activeTabDocument]];
 		if(!req)
@@ -149,16 +147,6 @@
 }
 %end
 
-- (BOOL)showBrowserPanelType:(int)arg1 {
-	%log;
-	if(arg1 == SDPanelTypeAuthentication && [[self browserPanel] panelType] == SDPanelTypeDownloadManager) {
-		[self hideBrowserPanelType:SDPanelTypeDownloadManager];
-		NSLog(@"showing authview, hide download list plz");
-	}
-	BOOL x = %orig;
-	NSLog(@"------- showBrowserPanelType: %d", arg1);
-	return x;
-}
 - (BOOL)hideBrowserPanelType:(int)arg1 {
 	%log;
 	if(arg1 == SDPanelTypeDownloadManager) {
