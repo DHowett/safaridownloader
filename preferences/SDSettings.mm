@@ -387,26 +387,7 @@ static BOOL _legacy = NO;
 }
 @end
 
-@implementation SDSettingsController
-+ (void)load {
-	_legacy = ![UIDevice instancesRespondToSelector:@selector(isWildcat)];
-}
-
-- (id)initForContentSize:(CGSize)size {
-	if((self = [super initForContentSize:size])) {
-//		extraSpecs = [NSMutableArray array];
-//		[extraSpecs addObject:spec];
-		[SDFileType loadAllFileTypes];
-
-	}
-	return self;
-}
-
-- (void)dealloc {
-	[SDFileType unloadAllFileTypes];
-	[super dealloc];
-}
-
+@implementation SDListController
 - (id)specifiers {
 	NSString *plist = [self.specifier propertyForKey:@"plist"] ?: @"SafariDownloader";
 	if(_specifiers == nil) {
@@ -421,6 +402,25 @@ static BOOL _legacy = NO;
 	return _specifiers;
 }
 
+@end
+
+@implementation SDSettingsController
++ (void)load {
+	_legacy = ![UIDevice instancesRespondToSelector:@selector(isWildcat)];
+}
+
+// I realize that an instance controlling global state is a bad idea. I'm truly sorry. :(
+- (id)initForContentSize:(CGSize)size {
+	if((self = [super initForContentSize:size])) {
+		[SDFileType loadAllFileTypes];
+	}
+	return self;
+}
+
+- (void)dealloc {
+	[SDFileType unloadAllFileTypes];
+	[super dealloc];
+}
 @end
 
 // vim:ft=objc

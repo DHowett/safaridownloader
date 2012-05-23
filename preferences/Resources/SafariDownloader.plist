@@ -38,7 +38,7 @@
 	    <key>cell</key>
 	    <string>PSLinkCell</string>
 	    <key>detail</key>
-	    <string>SDSettingsController</string>
+	    <string>SDListController</string>
 	    <key>label</key>
 	    <string>Auto-Retry Settings</string>
 	    <key>plist</key>

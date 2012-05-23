@@ -4,8 +4,10 @@
 #import <Preferences/PSSetupListController.h>
 #import <Preferences/PSSetupController.h>
 
-@interface SDSettingsController : PSListController {
-}
-- (id)initForContentSize:(CGSize)size;
+@interface SDListController : PSListController
 - (id)specifiers;
+@end
+
+@interface SDSettingsController : SDListController
+- (id)initForContentSize:(CGSize)size;
 @end
