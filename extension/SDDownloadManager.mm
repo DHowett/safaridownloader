@@ -329,6 +329,11 @@ static id sharedManager = nil;
 	[_model saveData];
 }
 
+- (void)downloadDidProvideSize:(SDSafariDownload *)download {
+	[_downloadObserver downloadDidProvideSize:download];
+	[_model saveData];
+}
+
 - (NSString *)uniqueFilenameForDownload:(SDSafariDownload *)download withSuggestion:(NSString *)suggestedFilename {
 	return [[self class] uniqueFilenameForFilename:suggestedFilename atPath:download.path];
 }

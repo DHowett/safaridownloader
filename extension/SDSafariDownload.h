@@ -115,6 +115,7 @@ extern NSString * const kSDSafariDownloadTemporaryDirectory;
 - (void)downloadDidChangeStatus:(SDSafariDownload *)download;
 - (void)downloadDidReceiveData:(SDSafariDownload *)download;
 - (void)downloadDidProvideFilename:(SDSafariDownload *)download;
+- (void)downloadDidProvideSize:(SDSafariDownload *)download;
 - (NSString *)uniqueFilenameForDownload:(SDSafariDownload *)download withSuggestion:(NSString *)suggestedFilename;
 - (BOOL)downloadShouldRetry:(SDSafariDownload *)download;
 - (float)retryDelayForDownload:(SDSafariDownload *)download;

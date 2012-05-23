@@ -100,6 +100,11 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	[_delegate downloadDidChangeStatus:self];
 }
 
+- (void)setTotalBytes:(unsigned long long)totalBytes {
+	_totalBytes = totalBytes;
+	[_delegate downloadDidProvideSize:self];
+}
+
 - (NSString *)_temporaryPathForFilename:(NSString *)filename {
 	return [kSDSafariDownloadTemporaryDirectory stringByAppendingPathComponent:filename];
 }
