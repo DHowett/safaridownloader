@@ -123,10 +123,10 @@ extern NSString * const kSDSafariDownloadTemporaryDirectory;
 - (NSString *)uniqueFilenameForDownload:(SDSafariDownload *)download withSuggestion:(NSString *)suggestedFilename;
 - (BOOL)downloadShouldRetry:(SDSafariDownload *)download;
 - (float)retryDelayForDownload:(SDSafariDownload *)download;
+- (void)download:(SDSafariDownload *)download didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
 /*
 - (void)downloadDidBegin:(SDSafariDownload*)download;
-- (void)downloadDidReceiveAuthenticationChallenge:(SDSafariDownload*)download;
 - (void)downloadDidProvideFilename:(SDSafariDownload*)download;
 - (void)downloadDidFinish:(SDSafariDownload*)download;
 - (void)downloadDidUpdate:(SDSafariDownload*)download;

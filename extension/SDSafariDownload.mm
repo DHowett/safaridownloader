@@ -141,7 +141,8 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
 /* {{{ NSURLDownloadDelegate */
 - (void)download:(NSURLDownload *)download didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-
+	self.status = SDDownloadStatusAuthenticationWaiting;
+	[_delegate download:self didReceiveAuthenticationChallenge:challenge];
 }
 
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename {

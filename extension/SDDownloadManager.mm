@@ -366,8 +366,12 @@ static id sharedManager = nil;
 	//[_downloadObserver downloadDidReceiveData:download];
 }
 
-- (void)download:(SDSafariDownload *)download didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+- (void)_handleAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+	[[SDM$BrowserController sharedBrowserController] _addAuthenticationChallenge:challenge displayNow:YES];
+}
 
+- (void)download:(SDSafariDownload *)download didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+	[self performSelectorOnMainThread:@selector(_handleAuthenticationChallenge:) withObject:challenge waitUntilDone:NO];
 }
 
 #pragma mark -/*}}}*/

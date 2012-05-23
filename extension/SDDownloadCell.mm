@@ -144,6 +144,9 @@
 		case SDDownloadStatusCancelled:
 			_statusLabel.text = SDLocalizedString(@"Cancelled");
 			break;
+		case SDDownloadStatusAuthenticationWaiting:
+			_statusLabel.text = SDLocalizedString(@"Awaiting Authentication...");
+			break;
 		case SDDownloadStatusRunning:
 			break;
 		default:
