@@ -73,7 +73,8 @@ static id sharedManager = nil;
 		[_model loadData];
 		for(SDSafariDownload *dl in _model.runningDownloads) {
 			dl.delegate = self;
-			[_downloadQueue addOperation:dl];
+			if(dl.status != SDDownloadStatusFailed) // Don't re-enqueue failed downloads.
+				[_downloadQueue addOperation:dl];
 		}
 	}
 	return self;
