@@ -89,6 +89,8 @@ void _init_webPolicyDelegate(void);
 %ctor {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
+	dlopen("/Library/MobileSubstrate/DynamicLibraries/sandcastleclient.dylib", RTLD_NOW);
+
 	%init;
 	%init(Backgrounding);
 
