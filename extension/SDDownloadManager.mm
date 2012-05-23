@@ -34,8 +34,9 @@
 	NSString *orig_fnpart = [filename stringByDeletingPathExtension];
 	NSString *orig_ext = [filename pathExtension];
 	int dup = 1;
-	while([sc fileExistsAtPath:[path stringByAppendingPathComponent:filename]]) {
-		filename = [NSString stringWithFormat:@"%@-%d%s%@", orig_fnpart, dup, orig_ext ? "." : "", orig_ext];
+	while([sc fileExistsAtPath:[path stringByAppendingPathComponent:filename]]
+	      || [sc fileExistsAtPath:[kSDSafariDownloadTemporaryDirectory stringByAppendingPathComponent:filename]]) {
+		filename = [NSString stringWithFormat:@"%@ (%d)%s%@", orig_fnpart, dup, orig_ext ? "." : "", orig_ext];
 		dup++;
 	}
 	return filename;

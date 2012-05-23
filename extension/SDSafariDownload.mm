@@ -9,7 +9,7 @@
 #import "SDMCommonClasses.h"
 #import <SandCastle/SandCastle.h>
 
-static NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
+NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
 @interface SDSafariDownload ()
 @property (nonatomic, assign, readwrite) SDDownloadStatus status;

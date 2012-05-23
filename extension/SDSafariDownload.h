@@ -22,6 +22,8 @@ typedef enum {
 	SDDownloadStatusRetrying
 } SDDownloadStatus;
 
+extern NSString * const kSDSafariDownloadTemporaryDirectory;
+
 @protocol SDSafariDownloadDelegate;
 
 /*
