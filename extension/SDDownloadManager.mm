@@ -308,7 +308,9 @@ static id sharedManager = nil;
 - (void)downloadDidChangeStatus:(SDSafariDownload *)download {
 	NSLog(@"Got status for download! %d", download.status);
 	if(download.status == SDDownloadStatusCompleted)
-		[_model moveDownload:download toList:SDDownloadModelFinishedList];
+		[_model moveDownload:download toList:SDDownloadModelFinishedList]; // Implicit save.
+	else
+		[_model saveData];
 	[_downloadObserver downloadDidChangeStatus:download];
 	//[_model downloadUpdated:download];
 	// waiting, authenticationwaiting, running, paused, completed, cancelled, failed
@@ -319,10 +321,11 @@ static id sharedManager = nil;
       // cancelled: remove completely?
 	 // failed: drop everything and run away.
 }
+
 - (void)downloadDidProvideFilename:(SDSafariDownload *)download {
 	NSLog(@"Got filename for download! %@", download.filename);
-	// yeah it looks like the UI updates HERE too.
-	//[_model downloadUpdated:download];
+	[_downloadObserver downloadDidProvideFilename:download];
+	[_model saveData];
 }
 
 - (NSString *)uniqueFilenameForDownload:(SDSafariDownload *)download withSuggestion:(NSString *)suggestedFilename {
