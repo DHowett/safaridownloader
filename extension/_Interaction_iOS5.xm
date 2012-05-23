@@ -1,27 +1,53 @@
 #import "UIKitExtra/UIWebDocumentView.h"
 #import "UIKitExtra/UIWebViewWebViewDelegate.h"
+#import "UIWebElementAction.h"
 
 #import "SDMVersioning.h"
 #import "SDMCommonClasses.h"
-/* {{{ struct interaction on 5.0+ */
-struct _interaction_ios5 {
-	NSTimer *timer;
-	CGPoint location;
-	BOOL isBlocked;
-	BOOL isCancelled;
-	BOOL isOnWebThread;
-	BOOL isDisplayingHighlight;
-	BOOL attemptedClick;
-	CGPoint lastPanTranslation;
-	DOMNode *element;
-	id delegate;
-	UIActionSheet *interactionSheet;
-	NSArray *elementActions;
-	BOOL allowsImageSheet;
-	BOOL allowsDataDetectorsSheet;
-	BOOL allowsLinkSheet;
-	BOOL acceptsFirstResponder;
-} _interaction;
-/* }}} */
+#import "SDResources.h"
+#import "SDDownloadManager.h"
+
+@interface DOMNode: NSObject
+- (DOMNode *)parentNode;
+- (NSURL *)absoluteImageURL;
+@end
+
+%hook BrowserController
+- (NSMutableArray *)_actionsForElement:(DOMNode *)domElement withTargetURL:(NSURL *)url suggestedActions:(NSArray *)suggestedActions {
+	NSMutableArray *actions = %orig;
+	DOMNode *anchorNode = domElement;
+	while(anchorNode && ![anchorNode isKindOfClass:%c(DOMHTMLAnchorElement)]) {
+		anchorNode = [anchorNode parentNode];
+	}
+
+	if(anchorNode) {
+		domElement = anchorNode;
+	}
+
+	NSMutableArray *downloadActions = [NSMutableArray array];
+	if(url) {
+		NSString *scheme = [url scheme];
+		if([scheme hasPrefix:@"http"]
+		|| [scheme isEqualToString:@"ftp"]) {
+			[downloadActions addObject:[%c(UIWebElementAction) customElementActionWithTitle:SDLocalizedString(@"Download Target") actionHandler:^{
+				NSURLRequest *request = [NSURLRequest requestWithURL:url];
+				[[SDDownloadManager sharedManager] addDownloadWithRequest:request andMimeType:nil browser:YES];
+			}]];
+		}
+	}
+	if([domElement isKindOfClass:%c(DOMHTMLImageElement)]) {
+		[downloadActions addObject:[%c(UIWebElementAction) customElementActionWithTitle:SDLocalizedString(@"Download Image") actionHandler:^{
+			NSURL *url = [domElement absoluteImageURL];
+			NSURLRequest *request = [NSURLRequest requestWithURL:url];
+			[[SDDownloadManager sharedManager] addDownloadWithRequest:request andMimeType:nil browser:YES];
+		}]];
+	}
+
+	[actions insertObjects:downloadActions atIndexes:[NSIndexSet indexSetWithIndexesInRange:(NSRange){0, downloadActions.count}]];
+	return actions;
+}
+%end
+
 void _init_interaction() {
+	%init;
 }
