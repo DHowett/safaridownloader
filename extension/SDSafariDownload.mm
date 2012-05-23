@@ -250,6 +250,10 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 - (BOOL)_resume {
 	if(!self.resumeData) return nil;
 	self.temporaryPath = [self _temporaryPathForFilename:self.filename];
+
+	// Truncate the file to the last resume data snapshot.
+	truncate([self.temporaryPath UTF8String], [[self.resumeData objectForKey:@"NSURLDownloadBytesReceived"] unsignedLongLongValue]);
+	
 	NSData *resumeDataSerialization = [NSPropertyListSerialization dataFromPropertyList:self.resumeData format:NSPropertyListXMLFormat_v1_0 errorDescription:NULL];
 	self.downloader = [[[NSURLDownload alloc] initWithResumeData:resumeDataSerialization delegate:self path:self.temporaryPath] autorelease];
 	if(!self.downloader) {
