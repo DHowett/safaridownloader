@@ -40,7 +40,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	URLRequest = _URLRequest, URLResponse = _URLResponse,
 	resumeData = _resumeData, requiresAuthentication = _requiresAuthentication,
 	authenticationCredential = _authenticationCredential,
-	mimeType = _mimeType,
+	useSuggestedFilename = _useSuggestedFilename, mimeType = _mimeType,
 	downloader = _downloader, delegate = _delegate;
 
 - (id)init {
@@ -76,6 +76,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	[encoder encodeObject:self.URLRequest forKey:@"URLRequest"];
 	[encoder encodeObject:self.resumeData forKey:@"resumeData"];
 	[encoder encodeObject:self.mimeType forKey:@"mimeType"];
+	[encoder encodeBool:self.useSuggestedFilename forKey:@"useSuggestedFilename"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
@@ -92,6 +93,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	self.URLRequest = [decoder decodeObjectForKey:@"URLRequest"];
 	self.resumeData = [decoder decodeObjectForKey:@"resumeData"];
 	self.mimeType = [decoder decodeObjectForKey:@"mimeType"];
+	self.useSuggestedFilename = [decoder decodeBoolForKey:@"useSuggestedFilename"];
 	return self;
 }
 
@@ -119,15 +121,11 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 }
 
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename {
-	if(self.filename) return;
+	if(_useSuggestedFilename && self.filename) return;
 	if(_startedFromByte > 0) return; // Do not rename resumed files.
-	self.temporaryPath = [self _temporaryPathForFilename:filename];
+	self.filename = [_delegate uniqueFilenameForDownload:self withSuggestion:filename];
+	self.temporaryPath = [self _temporaryPathForFilename:self.filename];
 	[download setDestination:self.temporaryPath allowOverwrite:NO];
-	if(_delegate) {
-		self.filename = [_delegate uniqueFilenameForDownload:self withSuggestion:filename];
-	} else {
-		self.filename = @"";
-	}
 	[_delegate downloadDidProvideFilename:self];
 }
 
@@ -270,7 +268,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	self.downloader = [[[NSURLDownload alloc] initWithRequest:self.URLRequest delegate:self] autorelease];
 	if(!self.downloader) return NO;
 	self.downloader.deletesFileUponFailure = NO;
-	if(self.filename) {
+	if(self.filename && _useSuggestedFilename) {
 		self.temporaryPath = [self _temporaryPathForFilename:self.filename];
 		[_downloader setDestination:self.temporaryPath allowOverwrite:NO];
 	}

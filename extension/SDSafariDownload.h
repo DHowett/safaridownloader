@@ -59,6 +59,7 @@ extern NSString * const kSDSafariDownloadTemporaryDirectory;
 {
 	// Of interest to Outsiders
 	SDDownloadStatus _status; // Serialize.
+	BOOL _useSuggestedFilename; // Serialize.
 	NSString *_filename; // Serialize.
 	NSString *_mimeType; // Serialize.
 	NSString *_path; // Serialize.
@@ -81,6 +82,7 @@ extern NSString * const kSDSafariDownloadTemporaryDirectory;
 }
 
 @property (nonatomic, readonly, assign) SDDownloadStatus status;
+@property (nonatomic, assign) BOOL useSuggestedFilename;
 @property (nonatomic, retain) NSString *filename;
 @property (nonatomic, retain) NSString *mimeType;
 @property (nonatomic, retain) NSString *path;
