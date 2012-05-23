@@ -119,6 +119,7 @@ static id sharedManager = nil;
 #pragma mark -/*}}}*/
 #pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
 
+static const NSString *const kSDMAssociatedIgnoreRequestKey = @"kSDMAssociatedIgnoreRequestKey";
 // WebPolicyDelegate SDSafariDownloader Addition
 - (BOOL) webView:(WebView *)webView 
     decideAction:(NSDictionary*)action
@@ -129,6 +130,23 @@ static id sharedManager = nil;
 	 context:(id)context {
 	NSString *url = [[request URL] absoluteString];
 	NSString *scheme = [[request URL] scheme];
+
+	NSNumber *navigationTypeObject = [action objectForKey:WebActionNavigationTypeKey];
+	if(navigationTypeObject) {
+		int navigationType = [navigationTypeObject intValue];
+		// Don't prompt to download later if this is a navigation/loading action.
+		if(navigationType == WebNavigationTypeBackForward
+		|| navigationType == WebNavigationTypeReload) {
+			objc_setAssociatedObject(context, kSDMAssociatedIgnoreRequestKey, [NSNumber numberWithBool:YES], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+		}
+		return YES;
+	}
+
+	if([objc_getAssociatedObject(context, kSDMAssociatedIgnoreRequestKey) boolValue]) {
+		objc_setAssociatedObject(context, kSDMAssociatedIgnoreRequestKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+		return YES;
+	}
+
 	
 	if (![scheme hasPrefix:@"http"] && 
 			![scheme hasPrefix:@"ftp"]) {
