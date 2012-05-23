@@ -25,7 +25,7 @@ decidePolicyForNewWindowAction:(NSDictionary *)action
 	} else {
 		NSLog(@"WDW: handled");
 		[decisionListener ignore];
-		[self stopLoading];
+		[self _setLoading:NO withError:nil];
 	}
 	NSLog(@"#####################################################");
 }
@@ -47,7 +47,7 @@ decidePolicyForNavigationAction:(NSDictionary *)action
 	} else {
 		NSLog(@"NAV: handled");
 		[decisionListener ignore];
-		[self stopLoading];
+		[self _setLoading:NO withError:nil];
 	}
 	NSLog(@"#####################################################");
 }
@@ -69,7 +69,7 @@ decidePolicyForMIMEType:(NSString *)type
 	} else {
 		NSLog(@"MIME: handled");
 		[decisionListener ignore];
-		[self stopLoading];
+		[self _setLoading:NO withError:nil];
 	}
 	NSLog(@"#####################################################");
 }
