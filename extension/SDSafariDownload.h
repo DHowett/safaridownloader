@@ -18,7 +18,8 @@ typedef enum {
 	SDDownloadStatusPaused,
 	SDDownloadStatusCompleted,
 	SDDownloadStatusCancelled,
-	SDDownloadStatusFailed
+	SDDownloadStatusFailed,
+	SDDownloadStatusRetrying
 } SDDownloadStatus;
 
 @protocol SDSafariDownloadDelegate;
@@ -113,6 +114,8 @@ typedef enum {
 - (void)downloadDidReceiveData:(SDSafariDownload *)download;
 - (void)downloadDidProvideFilename:(SDSafariDownload *)download;
 - (NSString *)uniqueFilenameForDownload:(SDSafariDownload *)download withSuggestion:(NSString *)suggestedFilename;
+- (BOOL)downloadShouldRetry:(SDSafariDownload *)download;
+- (float)retryDelayForDownload:(SDSafariDownload *)download;
 
 /*
 - (void)downloadDidBegin:(SDSafariDownload*)download;

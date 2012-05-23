@@ -329,6 +329,15 @@ static id sharedManager = nil;
 	return [[self class] uniqueFilenameForFilename:suggestedFilename atPath:download.path];
 }
 
+- (BOOL)downloadShouldRetry:(SDSafariDownload *)download {
+	return !([[SDUserSettings sharedInstance] boolForKey:@"AutoRetryDisabled" default:NO])
+	       && (unsigned int)[[SDUserSettings sharedInstance] integerForKey:@"AutoRetryCount" default:3] > download.retryCount;	
+}
+
+- (float)retryDelayForDownload:(SDSafariDownload *)download {
+	return [[SDUserSettings sharedInstance] floatForKey:@"AutoRetryInterval" default:1.f];
+}
+
 - (void)downloadDidReceiveData:(SDSafariDownload *)download {
 	//[_downloadObserver downloadDidReceiveData:download];
 }

@@ -28,6 +28,7 @@ static NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 @property (nonatomic, assign, readwrite) BOOL requiresAuthentication;
 @property (nonatomic, retain, readwrite) NSURLCredential *authenticationCredential;
 @property (nonatomic, retain, readwrite) NSURLDownload *downloader;
+- (BOOL)_begin;
 @end
 
 @implementation SDSafariDownload
@@ -193,9 +194,38 @@ static NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error {
 	NSLog(@"Failed with error: %@", error);
-	self.finished = YES;
-	self.status = SDDownloadStatusFailed;
-#warning oh shit.
+	NSInteger errorCode = error.code;
+
+	if((errorCode != NSURLErrorCancelled
+	   && errorCode != NSURLErrorBadURL
+	   && errorCode != NSURLErrorUnsupportedURL
+	   && errorCode != NSURLErrorDataLengthExceedsMaximum
+	   && errorCode != NSURLErrorHTTPTooManyRedirects
+	   && errorCode != NSURLErrorNotConnectedToInternet
+	   && errorCode != NSURLErrorUserCancelledAuthentication
+	   && errorCode != NSURLErrorUserAuthenticationRequired
+	   && errorCode != NSURLErrorZeroByteResource
+	   && errorCode != NSURLErrorNoPermissionsToReadFile
+	   && errorCode != NSURLErrorCannotCreateFile
+	   && errorCode != NSURLErrorCannotOpenFile
+	   && errorCode != NSURLErrorCannotWriteToFile
+	   && errorCode != NSURLErrorCannotCloseFile
+	   && errorCode != NSURLErrorCannotRemoveFile
+	   && errorCode != NSURLErrorCannotMoveFile)
+	   && [_delegate downloadShouldRetry:self]) {
+		_retryCount++;
+		self.status = SDDownloadStatusRetrying;
+
+		float wait = [_delegate retryDelayForDownload:self];
+		if(wait > 0.f) {
+			// Literally just block the thread until it's our turn.
+			usleep((int)(wait * 1000000));
+		}
+		[self _begin];
+	} else {
+		self.status = SDDownloadStatusFailed;
+		self.finished = YES;
+	}
 }
 
 - (void)downloadDidFinish:(NSURLDownload *)download {
@@ -203,8 +233,8 @@ static NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	[[SDM$SandCastle sharedInstance] createDirectoryAtResolvedPath:self.path];
 	[[SDM$SandCastle sharedInstance] moveTemporaryFile:self.temporaryPath toResolvedPath:finalDestination4];
 	self.resumeData = nil;
-	self.finished = YES;
 	self.status = SDDownloadStatusCompleted;
+	self.finished = YES;
 }
 /* }}} */
 

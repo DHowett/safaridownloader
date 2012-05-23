@@ -65,7 +65,7 @@
 		_progressLabel.textColor = [UIColor whiteColor];
 	} else {
 		_nameLabel.textColor = [UIColor blackColor];
-		if(_download && _download.status == SDDownloadStatusFailed) {
+		if(_download && (_download.status == SDDownloadStatusFailed || _download.status == SDDownloadStatusRetrying)) {
 			_statusLabel.textColor = [UIColor colorWithRed:0.78f green:0.0f blue:0.0f alpha:1.0f];
 		} else {
 			_statusLabel.textColor = [UIColor grayColor];
@@ -132,8 +132,11 @@
 
 	[self _updateLabelColors];
 	switch(_download.status) {
+		case SDDownloadStatusRetrying:
+			_statusLabel.text = SDLocalizedString(@"Retrying...");
+			break;
 		case SDDownloadStatusFailed:
-			_statusLabel.text = SDLocalizedString(@"Failed - Tap to Retry");
+			_statusLabel.text = SDLocalizedString(@"Failed");
 			break;
 		case SDDownloadStatusCompleted:
 			_statusLabel.text = [_download.path stringByAbbreviatingWithTildeInPath];
@@ -160,7 +163,9 @@
 		_progressView.progress = (double)_download.downloadedBytes / (double)_download.totalBytes;
 	}
 	_progressLabel.text = [NSString stringWithFormat:@"%u%%", (unsigned int)(_progressView.progress*100.f)];
-	if(_download.status != SDDownloadStatusCompleted && _download.status != SDDownloadStatusFailed) {
+	if(_download.status != SDDownloadStatusCompleted
+	   && _download.status != SDDownloadStatusFailed
+	   && _download.status != SDDownloadStatusRetrying) {
 		_statusLabel.text = [NSString stringWithFormat:SDLocalizedString(@"Downloading @ %@/s"), [SDUtils formatSize:speed]];
 		[self setNeedsLayout];
 	}
