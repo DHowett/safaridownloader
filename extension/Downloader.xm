@@ -1,3 +1,4 @@
+#import "Safari/BrowserController.h"
 #import "DownloaderCommon.h"
 #import "SDMVersioning.h"
 #import "SDMCommonClasses.h"
@@ -70,6 +71,44 @@ void _reloadPreferences(void);
 }
 %end
 
+%group OldAuthenticationHooks
+%hook AuthenticationView
+- (void)setChallenge:(NSURLAuthenticationChallenge *)challenge {
+	NSURLAuthenticationChallenge *overrideChallenge = objc_getAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedOverrideAuthenticationChallenge);
+	if(overrideChallenge)
+		challenge = overrideChallenge;
+
+	%orig();
+}
+%end
+
+%hook BrowserController
+- (void)logInFromAuthenticationView:(id)authenticationView withCredential:(NSURLCredential *)credential {
+	NSURLAuthenticationChallenge *overrideChallenge = objc_getAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedOverrideAuthenticationChallenge);
+	if(!overrideChallenge) {
+		%orig;
+		return;
+	}
+
+	[[overrideChallenge sender] useCredential:credential forAuthenticationChallenge:overrideChallenge];
+	objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedOverrideAuthenticationChallenge, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	[self hideBrowserPanelType:5];
+}
+
+- (void)cancelFromAuthenticationView:(id)authenticationView {
+	NSURLAuthenticationChallenge *overrideChallenge = objc_getAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedOverrideAuthenticationChallenge);
+	if(!overrideChallenge) {
+		%orig;
+		return;
+	}
+
+	[[overrideChallenge sender] cancelAuthenticationChallenge:overrideChallenge];
+	objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedOverrideAuthenticationChallenge, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	[self _setShowingCurrentPanel:NO];
+}
+%end
+%end
+
 void _reloadPreferences() {
 	[[SDUserSettings sharedInstance] reloadSettings];
 }
@@ -93,6 +132,9 @@ void _init_webPolicyDelegate(void);
 
 	%init;
 	%init(Backgrounding);
+	if(%c(AuthenticationView) != nil) {
+		%init(OldAuthenticationHooks);
+	}
 
 	SDM$BrowserController = %c(BrowserController);
 	SDM$SandCastle = %c(SandCastle);

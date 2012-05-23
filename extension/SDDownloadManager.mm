@@ -25,8 +25,11 @@
 
 #define LOC_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloaded.plist"
 
+static const NSString *const kSDMAssociatedIgnoreRequestKey = @"kSDMAssociatedIgnoreRequestKey";
+NSString * const kSDMAssociatedOverrideAuthenticationChallenge = @"kSDMAssociatedOverrideAuthenticationChallenge";
+
 @implementation SDDownloadManager
-@synthesize dataModel = _model, downloadObserver = _downloadObserver;
+@synthesize dataModel = _model, downloadObserver = _downloadObserver, authenticationManager = _authenticationManager;
 
 #pragma mark -
 + (id)uniqueFilenameForFilename:(NSString *)filename atPath:(NSString *)path {
@@ -88,6 +91,7 @@ static id sharedManager = nil;
 
 - (void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[_authenticationManager release];
 	[super dealloc];
 }
 
@@ -119,7 +123,6 @@ static id sharedManager = nil;
 #pragma mark -/*}}}*/
 #pragma mark WebKit WebPolicyDelegate Methods/*{{{*/
 
-static const NSString *const kSDMAssociatedIgnoreRequestKey = @"kSDMAssociatedIgnoreRequestKey";
 // WebPolicyDelegate SDSafariDownloader Addition
 - (BOOL) webView:(WebView *)webView 
     decideAction:(NSDictionary*)action
@@ -385,8 +388,33 @@ static const NSString *const kSDMAssociatedIgnoreRequestKey = @"kSDMAssociatedIg
 }
 
 - (void)_handleAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-	[[SDM$BrowserController sharedBrowserController] _addAuthenticationChallenge:challenge displayNow:YES];
+	if([SDM$BrowserController instancesRespondToSelector:@selector(_addAuthenticationChallenge:displayNow:)]) {
+		// New method.
+		[[SDM$BrowserController sharedBrowserController] _addAuthenticationChallenge:challenge displayNow:YES];
+	} else if(objc_getClass("WebUIAuthenticationManager") != Nil) {
+		// Old method.
+		if(!self.authenticationManager) {
+			self.authenticationManager = [[objc_getClass("WebUIAuthenticationManager") alloc] init];
+		}
+		[self.authenticationManager setDelegate:self];
+		[self.authenticationManager addAuthenticationChallenge:challenge displayPanel:YES];
+	} else {
+		// Oldest method.
+		objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedOverrideAuthenticationChallenge, challenge, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+		[[SDM$BrowserController sharedBrowserController] showBrowserPanelType:5];
+
+	}
 }
+
+/* WebUIAuthenticationManager Delegate {{{ */
+- (void)cancelFromAuthenticationManager:(WebUIAuthenticationManager *)authenticationManager forChallenge:(NSURLAuthenticationChallenge *)challenge {
+	[[challenge sender] cancelAuthenticationChallenge:challenge];
+}
+
+- (void)logInFromAuthenticationManager:(WebUIAuthenticationManager *)authenticationManager withCredential:(NSURLCredential *)credential forChallenge:(NSURLAuthenticationChallenge *)challenge {
+	[[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
+}
+/* }}} */
 
 - (void)download:(SDSafariDownload *)download didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 	[self performSelectorOnMainThread:@selector(_handleAuthenticationChallenge:) withObject:challenge waitUntilDone:NO];

@@ -18,7 +18,6 @@ Downloader_FILES += SDDownloadModel.mm
 Downloader_FILES += SDDownloadManagerNavigationController.mm
 Downloader_FILES += SDDownloadListViewController.mm
 Downloader_FILES += SDDownloadPromptView.mm SDRoundedButton.mm SDDownloadRequest.mm
-Downloader_FILES += AuthenticationView.mm
 Downloader_FRAMEWORKS = UIKit CoreGraphics QuartzCore
 Downloader_PRIVATE_FRAMEWORKS = WebUI WebKit
 Downloader_CFLAGS = -I$(THEOS_PROJECT_DIR) -I$(THEOS_PROJECT_DIR)/common -mthumb

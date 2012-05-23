@@ -10,8 +10,8 @@
 _EXTERN Class SDM$BrowserController;
 _EXTERN Class SDM$SandCastle;
 
-// Exported from AuthenticationView.xm
-_EXTERN Class SDM$MyAuthenticationView;
-
 // Exported from Downloader*.xm
 _EXTERN bool SDM$WildCat;
+
+// Exported from SDDownloadManager.mm
+_EXTERN NSString * const kSDMAssociatedOverrideAuthenticationChallenge;

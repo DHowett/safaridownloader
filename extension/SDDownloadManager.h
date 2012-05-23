@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <WebUI/WebUIAuthenticationManager.h>
 #import "Safari/BrowserButtonBar.h"
 #import "WebPolicyDelegate.h"
 #import "UIKitExtra/UIToolbarButton.h"
@@ -27,9 +28,11 @@
 	BOOL _visible;
 	SDDownloadModel *_model;
 	NSObject<SDSafariDownloadDelegate> *_downloadObserver;
+	id _authenticationManager;
 }
 @property (nonatomic, readonly, retain) SDDownloadModel *dataModel;
 @property (nonatomic, assign) NSObject<SDSafariDownloadDelegate> *downloadObserver;
+@property (nonatomic, retain) WebUIAuthenticationManager *authenticationManager;
 
 + (id)uniqueFilenameForFilename:(NSString *)filename atPath:(NSString *)path;
 
