@@ -52,6 +52,7 @@
 - (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType browser:(BOOL)b;
 - (BOOL)addDownload:(SDSafariDownload *)download browser:(BOOL)b;
 - (BOOL)cancelDownload:(SDSafariDownload *)download;
+- (void)retryDownload:(SDSafariDownload *)download;
 - (void)deleteDownload:(SDSafariDownload *)download;
 - (void)cancelAllDownloads;
 

@@ -49,6 +49,30 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	} return self;
 }
 
+- (id)initWithDownload:(SDSafariDownload *)download {
+	if((self = [self init]) != nil) {
+		_status = download.status;
+		_useSuggestedFilename = download.useSuggestedFilename;
+		self.filename = download.filename;
+		self.mimeType = download.mimeType;
+		self.path = download.path;
+		self.temporaryPath = download.temporaryPath;
+		self.startDate = download.startDate;
+		_totalBytes = download.totalBytes;
+		_downloadedBytes = download.downloadedBytes;
+		_retryCount = download.retryCount;
+		self.lastError = download.lastError;
+		_startedFromByte = download.startedFromByte;
+		self.URLRequest = download.URLRequest;
+		self.URLResponse = download.URLResponse;
+		self.resumeData = download.resumeData;
+		_requiresAuthentication = download.requiresAuthentication;
+		self.authenticationCredential = download.authenticationCredential;
+
+		self.delegate = download.delegate; // Important.
+	} return self;
+}
+
 - (void)dealloc {
 	[_filename release];
 	[_path release];
@@ -241,13 +265,19 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 }
 
 - (BOOL)_resume {
-	if(!_resumeData) return nil;
+	if(!_resumeData) return NO;
 	self.temporaryPath = [self _temporaryPathForFilename:self.filename];
+	if(access([_temporaryPath UTF8String], F_OK) != 0) {
+		// Temporary file is dead, jim.
+		self.resumeData = nil;
+		return NO;
+	}
 
 	// Truncate the file to the last resume data snapshot.
 	[_resumeData setObject:[NSNumber numberWithUnsignedLongLong:_downloadedBytes] forKey:@"NSURLDownloadBytesReceived"];
 	truncate([_temporaryPath UTF8String], _downloadedBytes);
-	
+	self.startedFromByte = _downloadedBytes;
+
 	NSData *resumeDataSerialization = [NSPropertyListSerialization dataFromPropertyList:_resumeData format:NSPropertyListXMLFormat_v1_0 errorDescription:NULL];
 	self.downloader = [[[NSURLDownload alloc] initWithResumeData:resumeDataSerialization delegate:self path:_temporaryPath] autorelease];
 	if(!self.downloader) {
@@ -260,6 +290,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 }
 
 - (BOOL)_begin {
+	self.status = SDDownloadStatusWaiting;
 	if([self _resume]) return YES;
 
 	[self _deleteData];

@@ -94,7 +94,7 @@
 	CGPoint nameOffset = {CGRectGetMaxX(iconFrame) + 4, (bounds.origin.y + floorf((iconSize.height-filenameSize.height)/2.f))};
 	CGRect nameFrame = (CGRect){nameOffset, {bounds.size.width-(nameOffset.x-bounds.origin.x), filenameSize.height}};
 	CGFloat statusLineY = MAX(bottomOfImage, CGRectGetMaxY(nameFrame)) + 2.f;
-	if(_download.status != SDDownloadStatusCompleted) {
+	if(_download.status != SDDownloadStatusCompleted && _download.status != SDDownloadStatusFailed) {
 		_progressLabel.hidden = NO;
 		CGSize progressSize = _progressLabel.frame.size;
 		_progressLabel.frame = (CGRect){{bounds.origin.y + bounds.size.width - progressSize.width, MAX(bottomOfImage, CGRectGetMaxY(nameFrame)) - progressSize.height}, progressSize};
@@ -163,9 +163,7 @@
 		_progressView.progress = (double)_download.downloadedBytes / (double)_download.totalBytes;
 	}
 	_progressLabel.text = [NSString stringWithFormat:@"%u%%", (unsigned int)(_progressView.progress*100.f)];
-	if(_download.status != SDDownloadStatusCompleted
-	   && _download.status != SDDownloadStatusFailed
-	   && _download.status != SDDownloadStatusRetrying) {
+	if(_download.status == SDDownloadStatusRunning) {
 		_statusLabel.text = [NSString stringWithFormat:SDLocalizedString(@"Downloading @ %@/s"), [SDUtils formatSize:speed]];
 		[self setNeedsLayout];
 	}

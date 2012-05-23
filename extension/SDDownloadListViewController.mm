@@ -255,7 +255,7 @@
 	
 	cell.download = download;
 
-	if(!finished && download.status != SDDownloadStatusFailed) {
+	if(!finished) {
 		cell.selectionStyle = UITableViewCellSelectionStyleNone;
 	} else {
 		cell.selectionStyle = UITableViewCellSelectionStyleBlue;
@@ -309,17 +309,7 @@ titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
 /*}}}*/
 
 - (void)downloadActionSheet:(SDDownloadActionSheet *)actionSheet retryDownload:(SDSafariDownload *)download {
-	/*
-	int row = [_finishedDownloads indexOfObject:download];
-	int section = (_currentDownloads.count > 0) ? 1 : 0;
-	[download retain];
-	[_finishedDownloads removeObjectAtIndex:row];
-	[_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:row inSection:section]] 
-										withRowAnimation:UITableViewRowAnimationFade];
-	download.failed = NO;
-	download.useSuggest = NO;
-	[self addDownload:download browser:NO];
-	*/
+	[[SDDownloadManager sharedManager] retryDownload:download];
 }
 
 - (void)downloadActionSheet:(SDDownloadActionSheet *)actionSheet deleteDownload:(SDSafariDownload *)download {

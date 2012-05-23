@@ -102,6 +102,8 @@ extern NSString * const kSDSafariDownloadTemporaryDirectory;
 
 @property (nonatomic, assign) NSObject<SDSafariDownloadDelegate> *delegate;
 
+- (id)initWithDownload:(SDSafariDownload *)download;
+
 /*
 - (id)initWithRequest:(NSURLRequest*)urlRequest name:(NSString *)name delegate:(id)del useSuggested:(BOOL)use;
 - (void)downloadFailedWithError:(NSError *)err;

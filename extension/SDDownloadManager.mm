@@ -292,6 +292,14 @@ static id sharedManager = nil;
 	return NO;
 }
 
+- (void)retryDownload:(SDSafariDownload *)download {
+	SDSafariDownload *newDownload = [[[SDSafariDownload alloc] initWithDownload:download] autorelease];
+	download.useSuggestedFilename = YES;
+	[_model removeDownload:download fromList:SDDownloadModelFinishedList];
+	[_downloadQueue addOperation:newDownload];
+	[_model addDownload:newDownload toList:SDDownloadModelRunningList];
+}
+
 - (void)deleteDownload:(SDSafariDownload*)download {
 	[download retain];
 	[_model removeDownload:download fromList:SDDownloadModelFinishedList];
@@ -309,10 +317,16 @@ static id sharedManager = nil;
 
 - (void)downloadDidChangeStatus:(SDSafariDownload *)download {
 	NSLog(@"Got status for download! %d", download.status);
-	if(download.status == SDDownloadStatusCompleted)
+	if(download.status == SDDownloadStatusCompleted
+	   || download.status == SDDownloadStatusFailed) {
 		[_model moveDownload:download toList:SDDownloadModelFinishedList]; // Implicit save.
-	else
+	} else if([_model.finishedDownloads indexOfObjectIdenticalTo:download] != NSNotFound
+		&& (download.status == SDDownloadStatusFailed
+		|| download.status == SDDownloadStatusCompleted)) { // If it's in the finished list, but transitioning to a non-finished state.
+		[_model moveDownload:download toList:SDDownloadModelRunningList]; // Implicit save.
+	} else {
 		[_model saveData];
+	}
 	[_downloadObserver downloadDidChangeStatus:download];
 	//[_model downloadUpdated:download];
 	// waiting, authenticationwaiting, running, paused, completed, cancelled, failed
