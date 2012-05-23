@@ -293,7 +293,7 @@ static id sharedManager = nil;
 - (void)deleteDownload:(SDSafariDownload*)download {
 	[download retain];
 	[_model removeDownload:download fromList:SDDownloadModelFinishedList];
-	[[objc_getClass("SandCastle") sharedInstance] removeItemAtResolvedPath:download.path];
+	[[objc_getClass("SandCastle") sharedInstance] removeItemAtResolvedPath:[download.path stringByAppendingPathComponent:download.filename]];
 	[download release];
 }
 
