@@ -99,12 +99,7 @@ static id sharedManager = nil;
 	if(range.location != NSNotFound)
 		filename = [filename substringToIndex:range.location];
 
-	if(filename.length == 0
-		|| [[filename pathExtension] isEqualToString:@"php"]
-		|| [[filename pathExtension] isEqualToString:@"asp"]
-		|| [[filename pathExtension] isEqualToString:@"aspx"]
-		|| [[filename pathExtension] isEqualToString:@"html"])
-		return nil;
+	if(filename.length == 0) return nil;
 
 	return filename;
 }
