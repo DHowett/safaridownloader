@@ -131,7 +131,7 @@
 %group Firmware_lt_50
 %new(v@:@)
 - (void)_presentModalViewControllerFromDownloadsButton:(id)x {
-	[self _presentModalViewController:x fromButton:[[SDDownloadManager sharedManager] portraitDownloadButton]];
+	[self _presentModalViewController:x fromButton:objc_getAssociatedObject(self, kSDMAssociatedPortraitDownloadButton)];
 }
 %end
 
@@ -143,21 +143,19 @@
 }
 %end
 
-/*
-%group iPadHooks
+%group iPadHooks_Firmware_lt_50
 - (void)_presentModalViewControllerFromActionButton:(id)x {
-  [self _presentModalViewController:x fromButton:_actionButton];
+	[self _presentModalViewController:x fromButton:objc_getAssociatedObject(self, kSDMAssociatedActionButton)];
 }
 
 - (void)_presentModalViewControllerFromBookmarksButton:(id)x {
-  [self _presentModalViewController:x fromButton:_bookmarksButton];
+	[self _presentModalViewController:x fromButton:objc_getAssociatedObject(self, kSDMAssociatedBookmarksButton)];
 }
 
 - (void)popupAlert:(UIActionSheet *)alert {
-  [alert presentFromRect:[_actionButton frame] inView:[self buttonBar] direction:1 allowInteractionWithViews:[NSArray arrayWithObjects:[self buttonBar], nil] backgroundStyle:0 animated:YES];
+	[alert presentFromRect:[objc_getAssociatedObject(self, kSDMAssociatedActionButton) frame] inView:[self buttonBar] direction:1 allowInteractionWithViews:[NSArray arrayWithObjects:[self buttonBar], nil] backgroundStyle:0 animated:YES];
 }
 %end
-*/
 
 - (BOOL)hideBrowserPanelType:(int)arg1 {
 	%log;
@@ -212,7 +210,9 @@ void _init_browserPanel() {
 	}
 
 	if(SDM$WildCat) {
-		//%init(iPadHooks);
+		if(SDMSystemVersionLT(_SDM_iOS_5_0)) {
+			%init(iPadHooks_Firmware_lt_50);
+		}
 	}
 }
 

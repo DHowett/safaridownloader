@@ -7,11 +7,19 @@
 #import "SDDownloadManager.h"
 #import "UIKitExtra/UIToolbarButton.h"
 
-static UIToolbarButton *_actionButton;
-static UIToolbarButton *_bookmarksButton;
+NSString * const kSDMAssociatedPortraitDownloadButton = @"kSDMAssociatedPortraitDownloadButton";
+NSString * const kSDMAssociatedActionButton = @"kSDMAssociatedActionButton";
+NSString * const kSDMAssociatedBookmarksButton = @"kSDMAssociatedBookmarksButton";
 
 @interface BrowserController (SDMAdditions)
 - (void)toggleDownloadManagerFromButtonBar;
+@end
+
+@interface BrowserButtonBar (Private)
+- (NSArray *)buttonItems;
+- (void)setButtonItems:(NSArray *)buttonItems;
+- (void)registerButtonGroup:(int)group withButtons:(int *)buttons withCount:(int)count;
+- (void)showButtonGroup:(int)group withDuration:(NSTimeInterval)duration;
 @end
 
 static NSString *portraitIconFilename(void) {
@@ -112,18 +120,16 @@ static void initCustomToolbar(void) {
 		maxX = curX + buttonBoxWidth;
 		float curWidth = button.frame.size.width;
 		float curHeight = button.frame.size.height;
-		float newXOrigin = maxX - (buttonBoxWidth / 2.0) - (curWidth / 2.0);
+		float newXOrigin = floorf(maxX - (buttonBoxWidth / 2.0) - (curWidth / 2.0));
 		[button setFrame:CGRectMake(newXOrigin, YOrigin, curWidth, curHeight)];
 
 		int tag = button.tag;
 		if(tag == 61)
-			[[SDDownloadManager sharedManager] setPortraitDownloadButton:button];
-		else if(tag == 62)
-			[[SDDownloadManager sharedManager] setLandscapeDownloadButton:button];
+			objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedPortraitDownloadButton, button, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 		else if(tag == 1)
-			_bookmarksButton = button;
+			objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedBookmarksButton, button, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 		else if(tag == 15)
-			_actionButton = button;
+			objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedActionButton, button, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
 		curButton++;
 	}

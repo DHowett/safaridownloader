@@ -16,6 +16,11 @@ _EXTERN bool SDM$WildCat;
 // Exported from SDDownloadManager.mm
 _EXTERN NSString * const kSDMAssociatedOverrideAuthenticationChallenge;
 
+// Exported from _CustomToolbar_Old.xm
+_EXTERN NSString * const kSDMAssociatedPortraitDownloadButton;
+_EXTERN NSString * const kSDMAssociatedActionButton;
+_EXTERN NSString * const kSDMAssociatedBookmarksButton;
+
 typedef enum {
 	SDPanelTypeDownloadManager = 150,
 	SDPanelTypeDownloadPrompt = 151
