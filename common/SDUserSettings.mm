@@ -6,9 +6,13 @@ const NSString * const kSDUserSettingsReloadedNotification = @"kSDUserSettingsRe
 
 @implementation SDUserSettings
 static SDUserSettings *_sharedSettings;
-
 + (id)sharedInstance {
 	return _sharedSettings ?: _sharedSettings = [[self alloc] init];
+}
+
+static NSString *_preferencesPath;
++ (NSString *)preferencesPath {
+	return _preferencesPath ?: _preferencesPath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/net.howett.safaridownloader.plist"] retain];
 }
 
 - (id)copyWithZone:(NSZone *)zone { return self; }
@@ -41,7 +45,7 @@ static SDUserSettings *_sharedSettings;
 
 - (void)reloadSettings {
 	if(_settings) [_settings release];
-	_settings = [[NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] retain];
+	_settings = [[NSDictionary dictionaryWithContentsOfFile:[[self class] preferencesPath]] retain];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kSDUserSettingsReloadedNotification object:self];
 }
 

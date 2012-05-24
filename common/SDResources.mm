@@ -1,6 +1,8 @@
 #import "SDResources.h"
 #import "SDFileType.h"
 
+#define SUPPORT_BUNDLE_PATH @"/Library/Application Support/Safari Downloader"
+
 @interface UIImage (iPhonePrivate)
 + (UIImage *)imageNamed:(NSString *)name inBundle:(NSBundle *)bundle;
 @end

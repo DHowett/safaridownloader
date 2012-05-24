@@ -4,6 +4,11 @@
 #import "common/SDResources.h"
 #import "common/SDFileType.h"
 
+static NSString *_preferencesPath;
+static NSString *preferencesPath() {
+	return _preferencesPath ?: _preferencesPath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/net.howett.safaridownloader.plist"] retain];
+}
+
 static id fileClassController = nil;
 
 static BOOL _legacy = NO;
@@ -99,7 +104,7 @@ static BOOL _legacy = NO;
 }
 
 - (void)updatePreferencesFile {
-	NSMutableDictionary *prefsDict = [NSMutableDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE];
+	NSMutableDictionary *prefsDict = [NSMutableDictionary dictionaryWithContentsOfFile:preferencesPath()];
 	NSMutableDictionary *customItems = [prefsDict objectForKey:@"CustomItems"] ?: [NSMutableDictionary dictionary];
 
 	_name = [self getTextFromSpecifier:_nameSpec];
@@ -125,7 +130,7 @@ static BOOL _legacy = NO;
 	}
 
 	[prefsDict setValue:customItems forKey:@"CustomItems"];
-	[prefsDict writeToFile:PREFERENCES_FILE atomically:NO];
+	[prefsDict writeToFile:preferencesPath() atomically:NO];
 	[fileClassController reloadSpecifiers];
 }
 
@@ -140,7 +145,7 @@ static BOOL _legacy = NO;
 	} else {
 		_isNewType = NO;
 		_originalName = [_name copy];
-		_customEntry = [[[[NSMutableDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] objectForKey:@"CustomItems"] objectForKey:_name] retain];
+		_customEntry = [[[[NSMutableDictionary dictionaryWithContentsOfFile:preferencesPath()] objectForKey:@"CustomItems"] objectForKey:_name] retain];
 		_extensions = [[_customEntry objectForKey:@"Extensions"] retain];
 		_mimetypes = [[_customEntry objectForKey:@"Mimetypes"] retain];
 	}
@@ -256,7 +261,7 @@ static BOOL _legacy = NO;
 @implementation SDSettingsFileTypeListController
 - (id)initForContentSize:(CGSize)size {
 	if((self = [super initForContentSize:size])) {
-		NSArray *disabledItemsArray = [[NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] objectForKey:@"DisabledItems"] ?: [NSArray array];
+		NSArray *disabledItemsArray = [[NSDictionary dictionaryWithContentsOfFile:preferencesPath()] objectForKey:@"DisabledItems"] ?: [NSArray array];
 		_disabledItems = [[NSMutableSet alloc] initWithArray:disabledItemsArray];
 	}
 	return self;
@@ -306,9 +311,9 @@ static BOOL _legacy = NO;
 	} else {
 		[_disabledItems addObject:[[spec propertyForKey:@"fileType"] name]];
 	}
-	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] ?: [NSMutableDictionary dictionary];
+	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:preferencesPath()] ?: [NSMutableDictionary dictionary];
 	[dict setObject:[_disabledItems allObjects] forKey:@"DisabledItems"];
-	[dict writeToFile:PREFERENCES_FILE atomically:NO];
+	[dict writeToFile:preferencesPath() atomically:NO];
 }
 @end
 
@@ -347,7 +352,7 @@ static BOOL _legacy = NO;
 		}
 		[(NSMutableArray*)_specifiers removeObjectsInArray:removals];
 
-		NSArray *customTypes = [[[NSDictionary dictionaryWithContentsOfFile:PREFERENCES_FILE] objectForKey:@"CustomItems"] allKeys] ?: [NSArray array];
+		NSArray *customTypes = [[[NSDictionary dictionaryWithContentsOfFile:preferencesPath()] objectForKey:@"CustomItems"] allKeys] ?: [NSArray array];
 
 		int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
 		int index = _legacy ? 3 : 2;

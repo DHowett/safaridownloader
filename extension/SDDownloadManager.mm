@@ -23,8 +23,6 @@
 
 #import <SandCastle/SandCastle.h>
 
-#define LOC_ARCHIVE_PATH @"/var/mobile/Library/SDSafariDownloaded.plist"
-
 static const NSString *const kSDMAssociatedIgnoreRequestKey = @"kSDMAssociatedIgnoreRequestKey";
 NSString * const kSDMAssociatedOverrideAuthenticationChallenge = @"kSDMAssociatedOverrideAuthenticationChallenge";
 
@@ -277,7 +275,7 @@ static id sharedManager = nil;
 	}
 	else {
 		[self fileBrowser:nil 
-			didSelectPath:@"/var/mobile/Media/Downloads" 
+		    didSelectPath:[NSHomeDirectory() stringByAppendingPathComponent:@"Media/Downloads"]
 				forFile:download.filename 
 			withContext:download];
 	}

@@ -4,14 +4,20 @@
 #import "SDMCommonClasses.h"
 #import "SDSafariDownload.h"
 
-#define DL_ARCHIVE_PATH @"/var/mobile/Library/Caches/net.howett.safaridownloader.plist"
-
 @interface SDDownloadModel ()
 - (NSMutableArray *)_arrayForListType:(SDDownloadModelList)list keyName:(NSString **)keyNamePtr;
 @end
 
 @implementation SDDownloadModel
 @synthesize runningDownloads = _runningDownloads, finishedDownloads = _finishedDownloads;
+static NSString *_archivePath;
++ (NSString *)archivePath {
+	if(_archivePath) return _archivePath;
+	NSURL *cacheURL = [[[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] objectAtIndex:0];
+	_archivePath = [[[cacheURL path] stringByAppendingPathComponent:@"net.howett.safaridownloader.plist"] retain];
+	return _archivePath;
+}
+
 - (id)init {
 	if((self = [super init]) != nil) {
 		_runningDownloads = [[NSMutableArray alloc] init];
@@ -22,7 +28,7 @@
 - (void)loadData {
 	NSString *path = @"/tmp/.sdm.plist";
 	[[SDM$SandCastle sharedInstance] removeItemAtResolvedPath:path];
-	[[SDM$SandCastle sharedInstance] copyItemAtPath:DL_ARCHIVE_PATH toPath:path];
+	[[SDM$SandCastle sharedInstance] copyItemAtPath:[[self class] archivePath] toPath:path];
 	NSDictionary *loaded = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
 	if(loaded) {
 		[_runningDownloads addObjectsFromArray:[loaded objectForKey:@"running"]];
@@ -38,8 +44,8 @@
 								_finishedDownloads, @"finished", nil]];
 	if(data) {
 		[data writeToFile:path atomically:YES];
-		[[SDM$SandCastle sharedInstance] removeItemAtResolvedPath:DL_ARCHIVE_PATH];
-		[[SDM$SandCastle sharedInstance] copyItemAtPath:path toPath:DL_ARCHIVE_PATH];
+		[[SDM$SandCastle sharedInstance] removeItemAtResolvedPath:[[self class] archivePath]];
+		[[SDM$SandCastle sharedInstance] copyItemAtPath:path toPath:[[self class] archivePath]];
 	}
 }
 
