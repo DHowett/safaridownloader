@@ -1,7 +1,7 @@
+#import "SDMCommon.h"
 #import "SDDownloadModel.h"
 
 #import <SandCastle/SandCastle.h>
-#import "SDMCommonClasses.h"
 #import "SDSafariDownload.h"
 
 @interface SDDownloadModel ()

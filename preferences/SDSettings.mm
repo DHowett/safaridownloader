@@ -1,6 +1,6 @@
+#import "extension/SDMCommon.h"
 #import "SDSettings.h"
 #import <objc/runtime.h>
-#import "extension/DownloaderCommon.h"
 #import "common/SDResources.h"
 #import "common/SDFileType.h"
 

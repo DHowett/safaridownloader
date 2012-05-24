@@ -6,15 +6,14 @@
 //  Copyright 2009 Brancipater Software. All rights reserved.
 //
 #import <QuartzCore/QuartzCore.h>
+#import "SDMCommon.h"
+#import "SDMVersioning.h"
 #import "Safari/BrowserController.h"
 #import "SDDownloadManager.h"
 #import "SDSafariDownload.h"
-#import "DownloaderCommon.h"
 #import "ModalAlert.h"
 #import "SDResources.h"
 
-#import "SDMVersioning.h"
-#import "SDMCommonClasses.h"
 #import "SDDownloadPromptView.h"
 #import "SDFileType.h"
 #import "SDUserSettings.h"

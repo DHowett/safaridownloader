@@ -4,15 +4,14 @@
  * Dustin Howett 2012-01-30
  */
 #import <QuartzCore/QuartzCore.h>
+#import "SDMCommon.h"
+#import "SDMVersioning.h"
 #import "SDDownloadManager.h"
 #import "SDDownloadListViewController.h"
 #import "SDDownloadCell.h"
-#import "DownloaderCommon.h"
 #import "ModalAlert.h"
 #import "SDResources.h"
 
-#import "SDMVersioning.h"
-#import "SDMCommonClasses.h"
 #import "SDDownloadPromptView.h"
 #import "SDFileType.h"
 

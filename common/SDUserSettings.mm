@@ -1,6 +1,5 @@
+#import "../extension/SDMCommon.h"
 #import "SDUserSettings.h"
-
-#import "../extension/DownloaderCommon.h"
 
 const NSString * const kSDUserSettingsReloadedNotification = @"kSDUserSettingsReloadedNotification";
 

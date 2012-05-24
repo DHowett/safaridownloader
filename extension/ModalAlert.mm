@@ -6,14 +6,14 @@
 //  Copyright 2009 Brancipater Software. All rights reserved.
 //
 
-#import "DHHookCommon.h"
+#import <substrate.h>
+#import "SDMCommon.h"
 #import "ModalAlert.h"
 #import "SDDownloadManager.h"
 #import "Safari/BrowserController.h"
 #import "Safari/TabDocument.h"
 #import "Safari/TabController.h"
 #import <QuartzCore/QuartzCore.h>
-#import "SDMCommonClasses.h"
 
 @interface SDModalAlert (priv)
 UIAlertView* activeAlert;

@@ -1,7 +1,7 @@
 #import <QuartzCore/QuartzCore.h>
 
+#import "SDMCommon.h"
 #import "SDDownloadPromptView.h"
-#import "SDMCommonClasses.h"
 #import "SDDownloadManager.h"
 #import "SDRoundedButton.h"
 

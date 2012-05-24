@@ -1,20 +1,17 @@
-#import "Safari/BrowserController.h"
-#import "DownloaderCommon.h"
+#import "SDMCommon.h"
 #import "SDMVersioning.h"
-#import "SDMCommonClasses.h"
-#import "DownloadManager.h"
-#import "SDDownloadPromptView.h"
-#import "SDDownloadManager.h"
-#import "SDDownloadPromptView.h"
-Class SDM$BrowserController;
-Class SDM$SandCastle;
-bool SDM$WildCat = false;
+#import "Safari/BrowserController.h"
 
 static bool _wildCat = NO;
 static bool _fourPointOh = NO;
 
 #import "SDFileType.h"
 #import "SDUserSettings.h"
+
+Class SDM$BrowserController;
+Class SDM$SandCastle;
+bool SDM$WildCat = false;
+uint8_t SDM$EmbeddedUDID[20] __attribute__((section("__DATA,__polymorph_udid")));
 
 /* {{{ Private and Additional Categories */
 @interface UIActionSheet (SDMPrivate)

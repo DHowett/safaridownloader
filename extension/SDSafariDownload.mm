@@ -5,8 +5,8 @@
  * Dustin L. Howett
  * 2012-02-01
  */
+#import "SDMCommon.h"
 #import "SDSafariDownload.h"
-#import "SDMCommonClasses.h"
 #import <SandCastle/SandCastle.h>
 
 NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";

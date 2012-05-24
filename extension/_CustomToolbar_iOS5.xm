@@ -1,7 +1,7 @@
 #import "Safari/RotatablePopoverController.h"
 
 #import <objc/runtime.h>
-#import "SDMCommonClasses.h"
+#import "SDMCommon.h"
 #import "SDResources.h"
 
 #import "Safari/BrowserController.h"

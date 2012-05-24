@@ -4,10 +4,9 @@
  * Dustin Howett 2012-01-30
  */
 
-#import "SDDownloadManagerNavigationController.h"
+#import "SDMCommon.h"
 #import "SDMVersioning.h"
-#import "SDMCommonClasses.h"
-#import "DownloaderCommon.h"
+#import "SDDownloadManagerNavigationController.h"
 
 #import "Safari/BrowserController.h"
 

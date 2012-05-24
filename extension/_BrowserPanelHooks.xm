@@ -1,7 +1,6 @@
+#import "SDMCommon.h"
 #import "SDMVersioning.h"
-#import "SDMCommonClasses.h"
 #import "SDDownloadManager.h"
-#import "DownloaderCommon.h"
 #import "SDDownloadPromptView.h"
 
 #import "SDDownloadManagerNavigationController.h"

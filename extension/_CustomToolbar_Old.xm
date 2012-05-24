@@ -1,11 +1,11 @@
 #import <objc/runtime.h>
+#import "SDMCommon.h"
+#import "SDMVersioning.h"
+
 #import "Safari/BrowserController.h"
 #import "Safari/Application.h"
 #import "SDDownloadManager.h"
 #import "UIKitExtra/UIToolbarButton.h"
-
-#import "SDMVersioning.h"
-#import "SDMCommonClasses.h"
 
 static UIToolbarButton *_actionButton;
 static UIToolbarButton *_bookmarksButton;

@@ -1,4 +1,4 @@
-#import "DownloaderCommon.h"
+#import "SDMCommon.h"
 
 #import "SDDownloadRequest.h"
 
