@@ -157,6 +157,15 @@
 }
 %end
 
+- (BOOL)showBrowserPanelType:(int)arg1 {
+	%log;
+	if(arg1 == 5 && [[self browserPanel] panelType] == SDPanelTypeDownloadManager) {
+		[self hideBrowserPanelType:SDPanelTypeDownloadManager];
+	}
+	BOOL x = %orig;
+	return x;
+}
+
 - (BOOL)hideBrowserPanelType:(int)arg1 {
 	%log;
 	if(arg1 == SDPanelTypeDownloadManager) {
