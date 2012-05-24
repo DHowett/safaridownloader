@@ -1,3 +1,3 @@
-@interface SDUtils
+@interface SDUtils : NSObject
 + (NSString *)formatSize:(double)size;
 @end
