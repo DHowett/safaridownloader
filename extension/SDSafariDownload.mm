@@ -8,6 +8,7 @@
 #import "SDMCommon.h"
 #import "SDSafariDownload.h"
 #import <SandCastle/SandCastle.h>
+#import <sys/stat.h>
 
 NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
@@ -274,9 +275,12 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 		return NO;
 	}
 
+	struct stat statbuf;
+	stat([_temporaryPath UTF8String], &statbuf);
+	_downloadedBytes = statbuf.st_size;
+
 	// Truncate the file to the last resume data snapshot.
 	[_resumeData setObject:[NSNumber numberWithUnsignedLongLong:_downloadedBytes] forKey:@"NSURLDownloadBytesReceived"];
-	truncate([_temporaryPath UTF8String], _downloadedBytes);
 	self.startedFromByte = _downloadedBytes;
 
 	NSData *resumeDataSerialization = [NSPropertyListSerialization dataFromPropertyList:_resumeData format:NSPropertyListXMLFormat_v1_0 errorDescription:NULL];
