@@ -2,10 +2,10 @@
 #import "SDResources.h"
 @implementation SDUtils
 + (NSString *)formatSize:(double)size {
-	if(size < 1024.) return [NSString stringWithFormat:SDLocalizedString(@"%.1lf B"), size];
+	if(size < 1024.) return [NSString stringWithFormat:SDLocalizedString(@"SIZE_BYTES"), size];
 	size /= 1024.;
-	if(size < 1024.) return [NSString stringWithFormat:SDLocalizedString(@"%.1lf KB"), size];
+	if(size < 1024.) return [NSString stringWithFormat:SDLocalizedString(@"SIZE_KILOBYTES"), size];
 	size /= 1024.;
-	return [NSString stringWithFormat:SDLocalizedString(@"%.1lf MB"), size];
+	return [NSString stringWithFormat:SDLocalizedString(@"SIZE_MEGABYTES"), size];
 }
 @end

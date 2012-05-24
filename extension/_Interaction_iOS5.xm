@@ -30,14 +30,14 @@
 		NSString *scheme = [url scheme];
 		if([scheme hasPrefix:@"http"]
 		|| [scheme isEqualToString:@"ftp"]) {
-			[downloadActions addObject:[%c(UIWebElementAction) customElementActionWithTitle:SDLocalizedString(@"Download Target") actionHandler:^{
+			[downloadActions addObject:[%c(UIWebElementAction) customElementActionWithTitle:SDLocalizedString(@"DOWNLOAD_TARGET") actionHandler:^{
 				NSURLRequest *request = [NSURLRequest requestWithURL:url];
 				[[SDDownloadManager sharedManager] addDownloadWithRequest:request andMimeType:nil browser:YES];
 			}]];
 		}
 	}
 	if([domElement isKindOfClass:%c(DOMHTMLImageElement)]) {
-		[downloadActions addObject:[%c(UIWebElementAction) customElementActionWithTitle:SDLocalizedString(@"Download Image") actionHandler:^{
+		[downloadActions addObject:[%c(UIWebElementAction) customElementActionWithTitle:SDLocalizedString(@"DOWNLOAD_IMAGE") actionHandler:^{
 			NSURL *url = [domElement absoluteImageURL];
 			NSURLRequest *request = [NSURLRequest requestWithURL:url];
 			[[SDDownloadManager sharedManager] addDownloadWithRequest:request andMimeType:nil browser:YES];

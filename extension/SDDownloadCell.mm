@@ -143,24 +143,24 @@
 	[self _updateLabelColors];
 	switch(_download.status) {
 		case SDDownloadStatusRetrying:
-			_statusLabel.text = SDLocalizedString(@"Retrying...");
+			_statusLabel.text = SDLocalizedString(@"STATUS_RETRYING");
 			break;
 		case SDDownloadStatusFailed:
-			_statusLabel.text = SDLocalizedString(@"Failed - Tap to Retry");
+			_statusLabel.text = SDLocalizedString(@"STATUS_FAILED");
 			break;
 		case SDDownloadStatusCompleted:
 			_statusLabel.text = [_download.path stringByAbbreviatingWithTildeInPath];
 			break;
 		case SDDownloadStatusCancelled:
-			_statusLabel.text = SDLocalizedString(@"Cancelled");
+			_statusLabel.text = SDLocalizedString(@"STATUS_CANCELLED");
 			break;
 		case SDDownloadStatusAuthenticationWaiting:
-			_statusLabel.text = SDLocalizedString(@"Awaiting Authentication...");
+			_statusLabel.text = SDLocalizedString(@"STATUS_WAITING_AUTH");
 			break;
 		case SDDownloadStatusRunning:
 			break;
 		default:
-			_statusLabel.text = SDLocalizedString(@"Waiting...");
+			_statusLabel.text = SDLocalizedString(@"STATUS_WAITING");
 			break;
 	}
 
@@ -175,9 +175,9 @@
 	} else {
 		_progressView.progress = (double)_download.downloadedBytes / (double)_download.totalBytes;
 	}
-	_progressLabel.text = [NSString stringWithFormat:@"%u%%", (unsigned int)(_progressView.progress*100.f)];
+	_progressLabel.text = [NSString stringWithFormat:SDLocalizedString(@"PERCENTAGE"), (unsigned int)(_progressView.progress*100.f)];
 	if(_download.status == SDDownloadStatusRunning) {
-		_statusLabel.text = [NSString stringWithFormat:SDLocalizedString(@"Downloading @ %@/s"), [SDUtils formatSize:speed]];
+		_statusLabel.text = [NSString stringWithFormat:SDLocalizedString(@"STATUS_DOWNLOADING_SPEED"), [SDUtils formatSize:speed]];
 		[self setNeedsLayout];
 	}
 }

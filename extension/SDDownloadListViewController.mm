@@ -65,13 +65,13 @@
 - (void)cancelAllDownloads {
 	UIAlertView* alert = nil;
 	if(_dataModel.runningDownloads.count > 0) {
-		alert = [[UIAlertView alloc] initWithTitle:SDLocalizedString(@"Cancel All Downloads?")
+		alert = [[UIAlertView alloc] initWithTitle:SDLocalizedString(@"CANCEL_ALL_PROMPT")
 						   message:nil
 						  delegate:self
-					 cancelButtonTitle:SDLocalizedString(@"No")
-					 otherButtonTitles:SDLocalizedString(@"Yes"), nil];
+					 cancelButtonTitle:SDLocalizedString(@"NO")
+					 otherButtonTitles:SDLocalizedString(@"YES"), nil];
 	} else {
-		alert = [[UIAlertView alloc] initWithTitle:SDLocalizedString(@"Nothing to Cancel")
+		alert = [[UIAlertView alloc] initWithTitle:SDLocalizedString(@"NOTHING_TO_CANCEL")
 						   message:nil
 						  delegate:self
 					 cancelButtonTitle:SDLocalizedString(@"OK")
@@ -114,7 +114,7 @@
 	self.navigationItem.rightBarButtonItem.enabled = YES;
 	
 	if(!SDM$WildCat) {
-		UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:SDLocalizedString(@"Done")
+		UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:SDLocalizedString(@"DONE")
 									 style:UIBarButtonItemStyleDone 
 									target:[self navigationController]
 									action:@selector(close)];
@@ -156,7 +156,7 @@
 }
 
 - (id)title {
-	return @"Downloads";
+	return SDLocalizedString(@"DOWNLOADS_TITLE");
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -197,10 +197,10 @@
 
 - (void)_updateRightButton {
 	if(_dataModel.runningDownloads.count > 0) {
-		self.navigationItem.rightBarButtonItem.title = SDLocalizedString(@"Cancel All");
+		self.navigationItem.rightBarButtonItem.title = SDLocalizedString(@"CANCEL_ALL_SHORT");
 		self.navigationItem.rightBarButtonItem.action = @selector(cancelAllDownloads);
 	} else {
-		self.navigationItem.rightBarButtonItem.title = SDLocalizedString(@"Clear All");
+		self.navigationItem.rightBarButtonItem.title = SDLocalizedString(@"CLEAR_ALL_SHORT");
 		self.navigationItem.rightBarButtonItem.action = @selector(clearAllDownloads);
 	}
 }
@@ -284,9 +284,9 @@
 - (NSString *)tableView:(UITableView *)tableView 
 titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
 	if(indexPath.section == 0)
-		return SDLocalizedString(@"Cancel");
+		return SDLocalizedString(@"CANCEL");
 	else // local files
-		return SDLocalizedString(@"Clear");
+		return SDLocalizedString(@"CLEAR");
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {

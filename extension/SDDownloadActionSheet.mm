@@ -1,6 +1,7 @@
 #import <objc/runtime.h>
 #import "SDDownloadActionSheet.h"
 #import <SandCastle/SandCastle.h>
+#import "common/SDResources.h"
 
 #import <UIKit/UIDocumentInteractionController.h>
 
@@ -21,17 +22,17 @@ static NSMutableDictionary *_launchActions;
 	Class $SandCastle = objc_getClass("SandCastle");
 	_launchActions = [[NSMutableDictionary alloc] init];
 	if ([[$SandCastle sharedInstance] fileExistsAtPath:@"/Applications/iFile.app"]) {
-		[_launchActions setObject:@"ifile://" forKey:@"Open in iFile"];
+		[_launchActions setObject:@"ifile://" forKey:[NSString stringWithFormat:SDLocalizedString(@"OPEN_WITH_"), @"iFile"]];
 	}
 }
 
 - (id)initWithDownload:(SDSafariDownload *)download delegate:(id<SDDownloadActionSheetDelegate>)delegate {
-	self = [super initWithTitle:download.filename delegate:self cancelButtonTitle:nil destructiveButtonTitle:@"Delete" otherButtonTitles:nil];
+	self = [super initWithTitle:download.filename delegate:self cancelButtonTitle:nil destructiveButtonTitle:SDLocalizedString(@"DELETE") otherButtonTitles:nil];
 	if(self) {
 		_sdDelegate = delegate;
 		self.tag = kSDDownloadActionSheetTag;
 		_download = download;
-		if(_download.status == SDDownloadStatusFailed) [self addButtonWithTitle:@"Retry"];
+		if(_download.status == SDDownloadStatusFailed) [self addButtonWithTitle:SDLocalizedString(@"RETRY")];
 		else {
 			_documentInteractionController = [[objc_getClass("UIDocumentInteractionController") interactionControllerWithURL:
 						[NSURL fileURLWithPath:[_download.path stringByAppendingPathComponent:_download.filename]]] retain];
@@ -39,7 +40,7 @@ static NSMutableDictionary *_launchActions;
 				int buttonIndex = 0;
 				_applications = [[_documentInteractionController _applications:YES] retain];
 				for(LSApplicationProxy *app in _applications) {
-					UIButton *button = [self buttonAtIndex:[self addButtonWithTitle:[NSString stringWithFormat:@"Open in %@", [app localizedName]]]];
+					UIButton *button = [self buttonAtIndex:[self addButtonWithTitle:[NSString stringWithFormat:SDLocalizedString(@"OPEN_WITH_"), [app localizedName]]]];
 					button.tag = -1 * (50+buttonIndex);
 					NSLog(@"Added button with tag %d", button.tag);
 					buttonIndex++;
@@ -50,7 +51,7 @@ static NSMutableDictionary *_launchActions;
 				}
 			}
 		}
-		self.cancelButtonIndex = [self addButtonWithTitle:@"Cancel"];
+		self.cancelButtonIndex = [self addButtonWithTitle:SDLocalizedString(@"CANCEL")];
 	}
 	return self;
 }
@@ -70,9 +71,9 @@ static NSMutableDictionary *_launchActions;
 	if(index == self.cancelButtonIndex) return;
 
 	NSString *button = index >= 0 ? [self buttonTitleAtIndex:index] : nil;
-	if([button isEqualToString:@"Delete"]) {
+	if([button isEqualToString:SDLocalizedString(@"DELETE")]) {
 		[_sdDelegate downloadActionSheet:actionSheet deleteDownload:_download];
-	} else if([button isEqualToString:@"Retry"]) {
+	} else if([button isEqualToString:SDLocalizedString(@"RETRY")]) {
 		[_sdDelegate downloadActionSheet:actionSheet retryDownload:_download];
 	} else {
 		NSLog(@"button clicked with tag %d", index);

@@ -1,6 +1,7 @@
 #import "SDMCommon.h"
 #import "SDMVersioning.h"
 #import "SDDownloadManager.h"
+#import "common/SDResources.h"
 
 #import "UIKitExtra/UIWebDocumentView.h"
 #import "UIKitExtra/UIWebViewWebViewDelegate.h"
@@ -85,7 +86,7 @@ static NSURL *interactionURL = nil;
 static void showBrowserSheetHookInternals(UIWebDocumentView *self, UIActionSheet *sheet, DOMNode *&domElement) {
 	NSLog(@"DOM Element is %@", domElement);
 	NSMutableArray *buttons = [sheet buttons];
-	NSString *downloadThing = @"";
+	NSString *actionTitle = nil;
 	id myButton;
 
 	DOMNode *anchorNode = domElement;
@@ -104,11 +105,11 @@ static void showBrowserSheetHookInternals(UIWebDocumentView *self, UIActionSheet
 	if([domElement isKindOfClass:%c(DOMHTMLAnchorElement)]) {
 		NSLog(@"htmlanchorelement yay %@", domElement);
 		interactionURL = [[domElement absoluteLinkURL] copy];
-		downloadThing = @"Target";
+		actionTitle = SDLocalizedString(@"DOWNLOAD_TARGET");
 	} else if([domElement isKindOfClass:%c(DOMHTMLImageElement)]) {
 		NSLog(@"htmlimageelement yay %@", domElement);
 		interactionURL = [[domElement absoluteImageURL] copy];
-		downloadThing = @"Image";
+		actionTitle = SDLocalizedString(@"DOWNLOAD_IMAGE");
 	} else {
 		interactionURL = nil;
 	}
@@ -119,7 +120,7 @@ static void showBrowserSheetHookInternals(UIWebDocumentView *self, UIActionSheet
 		if([scheme isEqualToString:@"http"]
 		|| [scheme isEqualToString:@"https"]
 		|| [scheme isEqualToString:@"ftp"]) {
-			[sheet addButtonWithTitle:[NSString stringWithFormat:@"Download %@...", downloadThing]];
+			[sheet addButtonWithTitle:actionTitle];
 			myButton = [buttons lastObject];
 			[myButton retain];
 			[myButton setTag:1337];
