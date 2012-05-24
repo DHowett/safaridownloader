@@ -95,7 +95,11 @@
 	CGRect nameFrame = (CGRect){nameOffset, {bounds.size.width-(nameOffset.x-bounds.origin.x), filenameSize.height}};
 	CGFloat statusLineY = MAX(bottomOfImage, CGRectGetMaxY(nameFrame)) + 2.f;
 	if(_download.status != SDDownloadStatusCompleted && _download.status != SDDownloadStatusFailed) {
-		_progressLabel.hidden = NO;
+		if(_download.totalBytes == ULLONG_MAX) {
+			_progressLabel.hidden = YES;
+		} else {
+			_progressLabel.hidden = NO;
+		}
 		CGSize progressSize = _progressLabel.frame.size;
 		_progressLabel.frame = (CGRect){{bounds.origin.y + bounds.size.width - progressSize.width, MAX(bottomOfImage, CGRectGetMaxY(nameFrame)) - progressSize.height}, progressSize};
 		nameFrame.size.width -= (progressSize.width + 2.f);
@@ -112,8 +116,14 @@
 	nameFrame.size.width = MIN(nameFrame.size.width, filenameSize.width);
 	_nameLabel.frame = nameFrame;
 
-	CGSize sizeSize = _sizeLabel.frame.size;
-	_sizeLabel.frame = (CGRect){{CGRectGetMaxX(bounds) - sizeSize.width, statusLineY}, sizeSize};
+	CGSize sizeSize = CGSizeZero;
+	if(_download.totalBytes != ULLONG_MAX) {
+		_sizeLabel.hidden = NO;
+		sizeSize = _sizeLabel.frame.size;
+		_sizeLabel.frame = (CGRect){{CGRectGetMaxX(bounds) - sizeSize.width, statusLineY}, sizeSize};
+	} else {
+		_sizeLabel.hidden = YES;
+	}
 	CGSize statusSize = _statusLabel.frame.size;
 	_statusLabel.frame = (CGRect){{bounds.origin.y, statusLineY}, {MIN(statusSize.width, bounds.size.width - sizeSize.width - 4.f), statusSize.height}};
 }
@@ -160,7 +170,7 @@
 
 - (void)updateProgress {
 	float speed = ((double)_download.downloadedBytes - (double)_download.startedFromByte) / (-1*[_download.startDate timeIntervalSinceNow]);
-	if(_download.totalBytes == 0) {
+	if(_download.totalBytes == 0 || _download.totalBytes == ULLONG_MAX) {
 		_progressView.progress = 0.;
 	} else {
 		_progressView.progress = (double)_download.downloadedBytes / (double)_download.totalBytes;

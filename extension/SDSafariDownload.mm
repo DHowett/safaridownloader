@@ -187,7 +187,11 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 		}
 		NSLog(@"Download saved resume data %@", _resumeData);
 	}
-	self.totalBytes = [response expectedContentLength];
+	if([response expectedContentLength] == NSURLResponseUnknownLength) {
+		self.totalBytes = ULLONG_MAX;
+	} else {
+		self.totalBytes = [response expectedContentLength];
+	}
 	_startedFromByte = 0;
 	self.URLResponse = response;
 	self.status = SDDownloadStatusRunning;
