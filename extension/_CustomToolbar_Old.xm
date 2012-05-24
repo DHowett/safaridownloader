@@ -34,9 +34,7 @@ static NSString *landscapeIconFilename(void) {
 }
 
 static void initCustomToolbar(void) {
-	Class BrowserController = objc_getClass("BrowserController");
-	Class BrowserButtonBar = objc_getClass("BrowserButtonBar");
-	BrowserController *bcont = [BrowserController sharedBrowserController];
+	BrowserController *bcont = [SDM$BrowserController sharedBrowserController];
 	BrowserButtonBar *buttonBar = MSHookIvar<BrowserButtonBar *>(bcont, "_buttonBar");
 	CFMutableDictionaryRef _groups = MSHookIvar<CFMutableDictionaryRef>(buttonBar, "_groups");
 	int cg = MSHookIvar<int>(buttonBar, "_currentButtonGroup");
@@ -44,20 +42,20 @@ static void initCustomToolbar(void) {
 	
 	NSMutableArray *mutButtonItems = [_buttonItems mutableCopy];
 
-	id x = [BrowserButtonBar imageButtonItemWithName:portraitIconFilename()
+	id x = [%c(BrowserButtonBar) imageButtonItemWithName:portraitIconFilename()
 						     tag:61
 						  action:@selector(toggleDownloadManagerFromButtonBar)
-						  target:[NSValue valueWithNonretainedObject:[%c(BrowserController) sharedBrowserController]]];
+						  target:[NSValue valueWithNonretainedObject:[SDM$BrowserController sharedBrowserController]]];
 
 	[mutButtonItems addObject:x];
 	CFDictionaryRemoveValue(_groups, (void*)1);
 
 	if(!SDM$WildCat) {
 		// Landscape (non-iPad)
-		id y = [BrowserButtonBar imageButtonItemWithName:landscapeIconFilename()
+		id y = [%c(BrowserButtonBar) imageButtonItemWithName:landscapeIconFilename()
 							     tag:62
 							  action:@selector(toggleDownloadManagerFromButtonBar)
-							  target:[NSValue valueWithNonretainedObject:[%c(BrowserController) sharedBrowserController]]];
+							  target:[NSValue valueWithNonretainedObject:[SDM$BrowserController sharedBrowserController]]];
 		[mutButtonItems addObject:y];
 		CFDictionaryRemoveValue(_groups, (void*)2);
 	}
