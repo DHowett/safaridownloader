@@ -25,7 +25,7 @@
 		_progressLabel = [[UILabel alloc] initWithFrame:CGRectZero];
 		_progressLabel.font = [UIFont systemFontOfSize:12.f];
 
-		_progressView = [[UIProgressView alloc] initWithFrame:CGRectZero];
+		_progressView = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
 		_iconImageView = [[UIImageView alloc] initWithFrame:CGRectZero];
 
 		[self.contentView addSubview:_nameLabel];
@@ -105,7 +105,7 @@
 		nameFrame.size.width -= (progressSize.width + 2.f);
 
 		_progressView.hidden = NO;
-		_progressView.frame = (CGRect){{bounds.origin.x, statusLineY}, {bounds.size.width, 20.f}};
+		_progressView.frame = (CGRect){{bounds.origin.x, statusLineY}, {bounds.size.width, _progressView.frame.size.height}};
 		statusLineY = CGRectGetMaxY(_progressView.frame) + 2.f;
 	} else {
 		_progressLabel.hidden = YES;
