@@ -136,7 +136,7 @@
 			_statusLabel.text = SDLocalizedString(@"Retrying...");
 			break;
 		case SDDownloadStatusFailed:
-			_statusLabel.text = SDLocalizedString(@"Failed");
+			_statusLabel.text = SDLocalizedString(@"Failed - Tap to Retry");
 			break;
 		case SDDownloadStatusCompleted:
 			_statusLabel.text = [_download.path stringByAbbreviatingWithTildeInPath];
