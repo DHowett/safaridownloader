@@ -13,8 +13,8 @@
 static NSString *_archivePath;
 + (NSString *)archivePath {
 	if(_archivePath) return _archivePath;
-	NSURL *cacheURL = [[[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] objectAtIndex:0];
-	_archivePath = [[[cacheURL path] stringByAppendingPathComponent:@"net.howett.safaridownloader.plist"] retain];
+	NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+	_archivePath = [[cachePath stringByAppendingPathComponent:@"net.howett.safaridownloader.plist"] retain];
 	return _archivePath;
 }
 

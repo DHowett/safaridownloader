@@ -373,7 +373,7 @@ static id sharedManager = nil;
 	if([SDM$BrowserController instancesRespondToSelector:@selector(_addAuthenticationChallenge:displayNow:)]) {
 		// New method.
 		[[SDM$BrowserController sharedBrowserController] _addAuthenticationChallenge:challenge displayNow:YES];
-	} else if(objc_getClass("WebUIAuthenticationManager") != Nil) {
+	} else if([objc_getClass("WebUIAuthenticationManager") instancesRespondToSelector:@selector(addAuthenticationChallenge:displayPanel:)]) {
 		// Old method.
 		if(!self.authenticationManager) {
 			self.authenticationManager = [[objc_getClass("WebUIAuthenticationManager") alloc] init];

@@ -42,6 +42,16 @@
 	return %orig;
 }
 
+%group Firmware_ge_32
+%new(v@:)
+- (void)toggleDownloadManagerFromButtonBar {
+	if([[self browserPanel] panelType] == SDPanelTypeDownloadManager) {
+		[[self browserPanel] performSelector:@selector(close)];
+	} else {
+		[self showBrowserPanelType:SDPanelTypeDownloadManager];
+	}
+}
+
 - (void)_setShowingCurrentPanel:(BOOL)showing animate:(BOOL)animate {
 	%log;
 	id<BrowserPanel> panel = MSHookIvar<id>(self, "_browserPanel");
@@ -56,8 +66,35 @@
 			[(SDDownloadPromptView *)panel dismissWithCancel];
 		}
 	}
-	NSLog(@"DONE WITH -[BrowserController _setShowingCurrentPanel...]--");
 }
+%end
+
+%group Firmware_lt_32
+%new(v@:)
+- (void)toggleDownloadManagerFromButtonBar {
+	if([[self browserPanel] panelType] == SDPanelTypeDownloadManager) {
+		[self hideBrowserPanelType:SDPanelTypeDownloadManager];
+		[self _setShowingDownloads:NO animate:YES];
+	} else {
+		[self showBrowserPanelType:SDPanelTypeDownloadManager];
+		[self _setShowingDownloads:YES animate:YES];
+	}
+}
+
+- (void)_setShowingCurrentPanel:(BOOL)showing {
+	%log;
+	id<BrowserPanel> panel = MSHookIvar<id>(self, "_browserPanel");
+	%orig;
+	if([panel panelType] == SDPanelTypeDownloadPrompt) {
+		if(showing) {
+			[(SDDownloadPromptView *)panel setVisible:YES animated:YES];
+		} else {
+			[(SDDownloadPromptView *)panel dismissWithCancel];
+		}
+	}
+}
+
+%end
 
 %new(v@:ii)
 - (void)_setShowingDownloads:(BOOL)showing animate:(BOOL)animate {
@@ -121,30 +158,6 @@
 }
 %end
 */
-
-%group Firmware_ge_32
-%new(v@:)
-- (void)toggleDownloadManagerFromButtonBar {
-	if([[self browserPanel] panelType] == SDPanelTypeDownloadManager) {
-		[[self browserPanel] performSelector:@selector(close)];
-	} else {
-		[self showBrowserPanelType:SDPanelTypeDownloadManager];
-	}
-}
-%end
-
-%group Firmware_lt_32
-%new(v@:)
-- (void)toggleDownloadManagerFromButtonBar {
-	if([[self browserPanel] panelType] == SDPanelTypeDownloadManager) {
-		[self hideBrowserPanelType:SDPanelTypeDownloadManager];
-		[self _setShowingDownloads:NO animate:YES];
-	} else {
-		[self showBrowserPanelType:SDPanelTypeDownloadManager];
-		[self _setShowingDownloads:YES animate:YES];
-	}
-}
-%end
 
 - (BOOL)hideBrowserPanelType:(int)arg1 {
 	%log;
