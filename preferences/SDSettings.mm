@@ -280,7 +280,7 @@ static BOOL _legacy = NO;
 		NSString *fileClass = [self.specifier propertyForKey:@"class"];
 		int c = [PSTableCell cellTypeFromString:@"PSSwitchCell"];
 		NSArray *category = [[SDFileType allCategories] objectForKey:fileClass];
-		category = [category sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+		category = [category sortedArrayUsingDescriptors:[NSArray arrayWithObject:[[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES] autorelease]]];
 		for(SDFileType *fileType in category) {
 			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileType.name
 									   target:self
