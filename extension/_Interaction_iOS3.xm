@@ -72,8 +72,10 @@ static NSURL *interactionURL = nil;
 %hook UIWebDocumentView
 - (void)actionSheet:(UIActionSheet *)sheet clickedButtonAtIndex:(int)index {
 	if(index == 1336) {
-		if(interactionURL)
-			[[SDDownloadManager sharedManager] addDownloadWithURL:interactionURL browser:YES];
+		if(interactionURL) {
+			NSURLRequest *request = [NSURLRequest requestWithURL:interactionURL];
+			[[SDDownloadManager sharedManager] addDownloadWithRequest:request andMimeType:nil browser:YES];
+		}
 	}
 	%orig;
 	[interactionURL release];
