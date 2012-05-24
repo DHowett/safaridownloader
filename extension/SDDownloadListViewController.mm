@@ -188,13 +188,7 @@
 	[cell updateDisplay];
 }
 
-- (void)downloadDidProvideFilename:(SDSafariDownload *)download {
-	SDDownloadCell *cell = [self _cellForDownload:download];
-	if(!cell) return;
-	[cell updateDisplay];
-}
-
-- (void)downloadDidProvideSize:(SDSafariDownload *)download {
+- (void)downloadDidUpdateMetadata:(SDSafariDownload *)download {
 	SDDownloadCell *cell = [self _cellForDownload:download];
 	if(!cell) return;
 	[cell updateDisplay];

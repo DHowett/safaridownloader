@@ -129,7 +129,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
 - (void)setTotalBytes:(unsigned long long)totalBytes {
 	_totalBytes = totalBytes;
-	[_delegate downloadDidProvideSize:self];
+	[_delegate downloadDidUpdateMetadata:self];
 }
 
 - (NSString *)_temporaryPathForFilename:(NSString *)filename {
@@ -152,7 +152,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	self.filename = [_delegate uniqueFilenameForDownload:self withSuggestion:filename];
 	self.temporaryPath = [self _temporaryPathForFilename:_filename];
 	[download setDestination:_temporaryPath allowOverwrite:NO];
-	[_delegate downloadDidProvideFilename:self];
+	[_delegate downloadDidUpdateMetadata:self];
 }
 
 - (void)downloadDidBegin:(NSURLDownload *)download {
@@ -195,6 +195,10 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	_startedFromByte = 0;
 	self.URLResponse = response;
 	self.status = SDDownloadStatusRunning;
+	if(!_mimeType) {
+		self.mimeType = response.MIMEType;
+		[_delegate downloadDidUpdateMetadata:self];
+	}
 }
 
 - (void)download:(NSURLDownload *)download didReceiveDataOfLength:(NSUInteger)length {

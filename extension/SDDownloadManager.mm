@@ -347,14 +347,8 @@ static id sharedManager = nil;
 	 // failed: drop everything and run away.
 }
 
-- (void)downloadDidProvideFilename:(SDSafariDownload *)download {
-	NSLog(@"Got filename for download! %@", download.filename);
-	[_downloadObserver downloadDidProvideFilename:download];
-	[_model saveData];
-}
-
-- (void)downloadDidProvideSize:(SDSafariDownload *)download {
-	[_downloadObserver downloadDidProvideSize:download];
+- (void)downloadDidUpdateMetadata:(SDSafariDownload *)download {
+	[_downloadObserver downloadDidUpdateMetadata:download];
 	[_model saveData];
 }
 
