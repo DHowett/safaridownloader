@@ -59,10 +59,6 @@ static id sharedManager = nil;
 - (id)init {
 	if ((self = [super init])) {
 		[[NSNotificationCenter defaultCenter] addObserver:self 
-							 selector:@selector(saveData) 
-							     name:UIApplicationWillTerminateNotification object:nil];
-
-		[[NSNotificationCenter defaultCenter] addObserver:self 
 							 selector:@selector(preferencesReloadedNotification:) 
 							     name:kSDUserSettingsReloadedNotification object:nil];
 		

@@ -22,6 +22,7 @@ static NSString *_archivePath;
 	if((self = [super init]) != nil) {
 		_runningDownloads = [[NSMutableArray alloc] init];
 		_finishedDownloads = [[NSMutableArray alloc] init];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveData) name:UIApplicationWillTerminateNotification object:nil];
 	} return self;
 }
 
