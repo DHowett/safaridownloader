@@ -1,30 +1,38 @@
 /*
- * SDDownloadManagerNavigationController
+ * SDNavigationController
  * SDM
  * Dustin Howett 2012-01-30
  */
 
 #import "SDMCommon.h"
 #import "SDMVersioning.h"
-#import "SDDownloadManagerNavigationController.h"
+#import "SDNavigationController.h"
 
 #import "Safari/BrowserController.h"
 
-@implementation SDDownloadManagerNavigationController
+@protocol SDNavigationControllerSubPanel
+- (int)panelType;
+@end
+
+@implementation SDNavigationController
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation {
 	return SDM$WildCat ? YES : (orientation != UIInterfaceOrientationPortraitUpsideDown);
 }
 
+- (UIViewController<SDNavigationControllerSubPanel> *)rootViewController {
+	return [self.viewControllers objectAtIndex:0];
+}
+
 - (BOOL)allowsRotation { return YES; }
 - (BOOL)pausesPages { return NO; }
-- (int)panelType { return SDPanelTypeDownloadManager; }
+- (int)panelType { return [[self rootViewController] panelType]; }
 - (int)panelState { return 1; }
 - (BOOL)shouldShowButtonBar { return SDM$WildCat ? YES : NO; }
 - (BOOL)isDismissible { return NO; } // Maybe?
 - (BOOL)disablesStatusBarPress { return NO; }
 
 - (void)close {
-	[[SDM$BrowserController sharedBrowserController] hideBrowserPanelType:SDPanelTypeDownloadManager];
+	[[SDM$BrowserController sharedBrowserController] hideBrowserPanelType:[[self rootViewController] panelType]];
 }
 
 - (void)viewDidAppear:(BOOL)animated {

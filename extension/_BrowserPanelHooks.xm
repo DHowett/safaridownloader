@@ -3,7 +3,7 @@
 #import "SDDownloadManager.h"
 #import "SDDownloadPromptView.h"
 
-#import "SDDownloadManagerNavigationController.h"
+#import "SDNavigationController.h"
 #import "SDDownloadListViewController.h"
 
 #import "Safari/BrowserController.h"
@@ -31,7 +31,7 @@
 	%log;
 	if(type == SDPanelTypeDownloadManager) {
 		UIViewController *rootViewController = [[[SDDownloadListViewController alloc] init] autorelease];
-		return [[[SDDownloadManagerNavigationController alloc] initWithRootViewController:rootViewController] autorelease];
+		return [[[SDNavigationController alloc] initWithRootViewController:rootViewController] autorelease];
 	} else if(type == SDPanelTypeDownloadPrompt) {
 		SDDownloadRequest *req = [SDDownloadRequest pendingRequestForContext:[[self tabController] activeTabDocument]];
 		if(!req)

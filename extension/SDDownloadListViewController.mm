@@ -34,6 +34,10 @@
 
 #pragma mark -
 
+- (int)panelType {
+	return SDPanelTypeDownloadManager;
+}
+
 - (void)_attachToDownloadManager {
 	if(!_dataModel) {
 		_dataModel = [[SDDownloadManager sharedManager] dataModel];
