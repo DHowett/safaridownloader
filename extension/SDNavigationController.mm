@@ -62,6 +62,10 @@
 - (CGSize)contentSizeForViewInPopover {
 	return CGSizeMake(320.f, 480.f);
 }
+
+- (UIModalPresentationStyle)modalPresentationStyle {
+	return [[self rootViewController] modalPresentationStyle];
+}
 @end
 
 // vim:filetype=objc:ts=8:sw=8:noet

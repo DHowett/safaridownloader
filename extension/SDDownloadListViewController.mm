@@ -38,6 +38,10 @@
 	return SDPanelTypeDownloadManager;
 }
 
+- (UIModalPresentationStyle)modalPresentationStyle {
+	return UIModalPresentationFullScreen;
+}
+
 - (void)_attachToDownloadManager {
 	if(!_dataModel) {
 		_dataModel = [[SDDownloadManager sharedManager] dataModel];
