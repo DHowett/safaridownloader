@@ -12,7 +12,6 @@
 #import "ModalAlert.h"
 #import "SDResources.h"
 
-#import "SDDownloadPromptView.h"
 #import "SDFileType.h"
 
 #import "SDDownloadModel.h"

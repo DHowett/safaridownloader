@@ -14,7 +14,7 @@
 #import "FileBrowser.h"
 #import "SDDownloadActionSheet.h"
 
-#import "SDDownloadPromptView.h"
+#import "SDDownloadPromptViewController.h"
 
 @interface WebView : NSObject 
 + (BOOL)canShowMIMEType:(NSString*)type;
@@ -23,7 +23,7 @@
 @class BrowserButtonBar;
 @class SDDownloadModel;
 
-@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UIAlertViewDelegate, SDDownloadPromptViewDelegate> {
+@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UIAlertViewDelegate, SDDownloadPromptDelegate> {
 	NSOperationQueue *_downloadQueue;
 	BOOL _visible;
 	SDDownloadModel *_model;

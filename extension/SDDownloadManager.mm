@@ -14,7 +14,6 @@
 #import "ModalAlert.h"
 #import "SDResources.h"
 
-#import "SDDownloadPromptView.h"
 #import "SDFileType.h"
 #import "SDUserSettings.h"
 
@@ -181,10 +180,10 @@ static id sharedManager = nil;
 	return YES;
 }
 
-#pragma mark - SDDownloadPromptViewDelegate
+#pragma mark - SDDownloadPromptDelegate
 
-- (void)downloadPromptView:(SDDownloadPromptView *)promptView didCompleteWithAction:(SDActionType)action {
-	SDDownloadRequest *req = [promptView.downloadRequest retain];
+- (void)downloadPrompt:(NSObject<SDDownloadPrompt> *)downloadPrompt didCompleteWithAction:(SDActionType)action {
+	SDDownloadRequest *req = [downloadPrompt.downloadRequest retain];
 	switch(action) {
 		case SDActionTypeView:
 			[req.webFrame loadRequest:req.urlRequest];

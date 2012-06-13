@@ -1,10 +1,10 @@
 #import "SDMCommon.h"
 #import "SDMVersioning.h"
 #import "SDDownloadManager.h"
-#import "SDDownloadPromptView.h"
 
 #import "SDNavigationController.h"
 #import "SDDownloadListViewController.h"
+#import "SDDownloadPromptViewController.h"
 
 #import "Safari/BrowserController.h"
 #import "Safari/RotatablePopoverController.h"
@@ -37,7 +37,8 @@
 		if(!req)
 			req = [SDDownloadRequest pendingRequestForContext:MSHookIvar<id>([self tabController], "_destinationTabDocument")];
 		if(!req) return nil;
-		return [[[SDDownloadPromptView alloc] initWithDownloadRequest:req delegate:[SDDownloadManager sharedManager]] autorelease];
+		UIViewController *rootViewController = [[[SDDownloadPromptViewController alloc] initWithDownloadRequest:req delegate:[SDDownloadManager sharedManager]] autorelease];
+		return [[[SDNavigationController alloc] initWithRootViewController:rootViewController] autorelease];
 	}
 	return %orig;
 }
@@ -54,16 +55,17 @@
 
 - (void)_setShowingCurrentPanel:(BOOL)showing animate:(BOOL)animate {
 	%log;
-	id<BrowserPanel> panel = MSHookIvar<id>(self, "_browserPanel");
 	%orig;
+	id<BrowserPanel> panel = MSHookIvar<id>(self, "_browserPanel");
 	if([panel panelType] == SDPanelTypeDownloadManager) {
 		[MSHookIvar<id>(self, "_browserView") resignFirstResponder];
 		[self _setShowingDownloads:showing animate:animate];
 	} else if([panel panelType] == SDPanelTypeDownloadPrompt) {
 		if(showing) {
-			[(SDDownloadPromptView *)panel setVisible:YES animated:YES];
+			[MSHookIvar<UIViewController *>(self, "_rootViewController") presentModalViewController:panel animated:animate];
 		} else {
-			[(SDDownloadPromptView *)panel dismissWithCancel];
+			[self willHideBrowserPanel:panel];
+			[MSHookIvar<UIViewController *>(self, "_rootViewController") dismissModalViewControllerAnimated:animate];
 		}
 	}
 }
@@ -87,9 +89,9 @@
 	%orig;
 	if([panel panelType] == SDPanelTypeDownloadPrompt) {
 		if(showing) {
-			[(SDDownloadPromptView *)panel setVisible:YES animated:YES];
+//			[(SDDownloadPromptViewController *)panel setVisible:YES animated:YES];
 		} else {
-			[(SDDownloadPromptView *)panel dismissWithCancel];
+//			[(SDDownloadPromptViewController *)panel dismissWithCancel];
 		}
 	}
 }

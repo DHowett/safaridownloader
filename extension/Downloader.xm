@@ -2,8 +2,7 @@
 #import "SDMVersioning.h"
 #import "Safari/BrowserController.h"
 
-static bool _wildCat = NO;
-static bool _fourPointOh = NO;
+#import "SDDownloadManager.h"
 
 #import "SDFileType.h"
 #import "SDUserSettings.h"
@@ -11,7 +10,6 @@ static bool _fourPointOh = NO;
 Class SDM$BrowserController;
 Class SDM$SandCastle;
 bool SDM$WildCat = false;
-uint8_t SDM$EmbeddedUDID[20] __attribute__((section("__DATA,__polymorph_udid")));
 
 /* {{{ Private and Additional Categories */
 @interface UIActionSheet (SDMPrivate)
