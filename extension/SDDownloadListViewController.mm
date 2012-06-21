@@ -68,6 +68,10 @@
 - (void)dealloc {
 	[self _detachFromDownloadManager];
 	[_currentSelectedIndexPath release];
+	[_doneButton release];
+	[_cancelButton release];
+	[_clearButton release];
+
 	[super dealloc];
 }
 
@@ -138,19 +142,14 @@
 - (void)viewDidLoad {
 	[super viewDidLoad];
 
-	UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"---" 
-									 style:UIBarButtonItemStylePlain
-									target:self
-									action:NULL];
-	self.navigationItem.rightBarButtonItem = cancelButton;
-	self.navigationItem.rightBarButtonItem.enabled = YES;
+	_cancelButton = [[UIBarButtonItem alloc] initWithTitle:SDLocalizedString(@"CANCEL_ALL_SHORT") style:UIBarButtonItemStylePlain target:self action:@selector(cancelAllDownloads)];
+	_clearButton = [[UIBarButtonItem alloc] initWithTitle:SDLocalizedString(@"CLEAR_ALL_SHORT") style:UIBarButtonItemStylePlain target:self action:@selector(clearAllDownloads)];
 	
 	if(!SDM$WildCat) {
-		UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:SDLocalizedString(@"DONE")
-									 style:UIBarButtonItemStyleDone 
+		_doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
 									target:[self navigationController]
 									action:@selector(close)];
-		self.navigationItem.leftBarButtonItem = doneButton;
+		self.navigationItem.leftBarButtonItem = _doneButton;
 		self.navigationItem.leftBarButtonItem.enabled = YES;
 	}
 
@@ -158,6 +157,13 @@
 }
 
 - (void)viewDidUnload {
+	[_doneButton release];
+	_doneButton = nil;
+	[_cancelButton release];
+	_cancelButton = nil;
+	[_clearButton release];
+	_clearButton = nil;
+
 	[super viewDidUnload]; 
 }
 
@@ -229,11 +235,13 @@
 
 - (void)_updateRightButton {
 	if(_dataModel.runningDownloads.count > 0) {
-		self.navigationItem.rightBarButtonItem.title = SDLocalizedString(@"CANCEL_ALL_SHORT");
-		self.navigationItem.rightBarButtonItem.action = @selector(cancelAllDownloads);
+		[self.navigationItem setRightBarButtonItem:_cancelButton animated:YES];
 	} else {
-		self.navigationItem.rightBarButtonItem.title = SDLocalizedString(@"CLEAR_ALL_SHORT");
-		self.navigationItem.rightBarButtonItem.action = @selector(clearAllDownloads);
+		if(_dataModel.finishedDownloads.count > 0) {
+			[self.navigationItem setRightBarButtonItem:_clearButton animated:YES];
+		} else {
+			[self.navigationItem setRightBarButtonItem:nil animated:YES];
+		}
 	}
 }
 
