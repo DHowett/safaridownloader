@@ -23,7 +23,8 @@ _EXTERN NSString * const kSDMAssociatedBookmarksButton;
 
 typedef enum {
 	SDPanelTypeDownloadManager = 150,
-	SDPanelTypeDownloadPrompt = 151
+	SDPanelTypeDownloadPrompt = 151,
+	SDPanelTypeFileBrowser = 152
 } SDPanelTypes;
 
 typedef enum

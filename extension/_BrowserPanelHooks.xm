@@ -5,6 +5,7 @@
 #import "SDNavigationController.h"
 #import "SDDownloadListViewController.h"
 #import "SDDownloadPromptViewController.h"
+#import "SDFileBrowserNavigationController.h"
 
 #import "Safari/BrowserController.h"
 #import "Safari/RotatablePopoverController.h"
@@ -39,6 +40,11 @@
 		if(!req) return nil;
 		UIViewController *rootViewController = [[[SDDownloadPromptViewController alloc] initWithDownloadRequest:req delegate:[SDDownloadManager sharedManager]] autorelease];
 		return [[[SDNavigationController alloc] initWithRootViewController:rootViewController] autorelease];
+	} else if(type == SDPanelTypeFileBrowser) {
+		SDDownloadRequest *req = [SDDownloadRequest pendingRequestForContext:[[self tabController] activeTabDocument]];
+		SDFileBrowserNavigationController *fileBrowser = [[[SDFileBrowserNavigationController alloc] initWithMode:SDFileBrowserModeImmediateDownload] autorelease];
+		fileBrowser.downloadRequest = req;
+		return fileBrowser;
 	}
 	return %orig;
 }
@@ -60,7 +66,7 @@
 	if([panel panelType] == SDPanelTypeDownloadManager) {
 		[MSHookIvar<id>(self, "_browserView") resignFirstResponder];
 		[self _setShowingDownloads:showing animate:animate];
-	} else if([panel panelType] == SDPanelTypeDownloadPrompt) {
+	} else if([panel panelType] == SDPanelTypeDownloadPrompt || [panel panelType] == SDPanelTypeFileBrowser) {
 		if(showing) {
 			[MSHookIvar<UIViewController *>(self, "_rootViewController") presentModalViewController:panel animated:animate];
 		} else {

@@ -72,7 +72,8 @@ static BOOL alertViewShown;
            context:(id)ctx 
           delegate:(id)del {  
   NSString *messageString = [self resizeToFitCount:1];
-  if ((self = [super initWithTitle:@"Downloads\n\n\n\n" 
+  //if ((self = [super initWithTitle:@"Downloads\n\n\n\n" 
+  if ((self = [super initWithTitle:@"Downloads" 
 						   message:messageString 
 						  delegate:self 
 				 cancelButtonTitle:@"Cancel" 
