@@ -32,6 +32,12 @@ static NSString *_preferencesPath;
 	return [b integerValue];
 }
 
+- (NSObject *)objectForKey:(NSObject *)key default:(NSObject *)defaultValue {
+	NSObject *b = [_settings objectForKey:key];
+	if(!b) return defaultValue;
+	return b;
+}
+
 - (float)floatForKey:(NSString *)key default:(float)defaultValue {
 	NSNumber *b = [_settings objectForKey:key];
 	if(!b) return defaultValue;
