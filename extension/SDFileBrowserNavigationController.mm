@@ -14,6 +14,7 @@
 @synthesize downloadRequest = _downloadRequest;
 @synthesize path = _path;
 @synthesize fileBrowserDelegate = _fileBrowserDelegate;
+@synthesize browserToolbarItems = _browserToolbarItems;
 
 - (int)panelType { return SDPanelTypeFileBrowser; }
 
@@ -54,6 +55,23 @@
 	self.viewControllers = [self _viewControllersForPath:path rootedAt:NSHomeDirectory()];
 }
 
+- (void)viewDidLoad {
+	[super viewDidLoad];
+	NSString *doneButtonTitle = _mode == SDFileBrowserModeImmediateDownload ? SDLocalizedString(@"ACTION_SAVE_AS") : SDLocalizedString(@"ACTION_CHOOSE_DIRECTORY");
+
+	_browserToolbarItems = [[NSArray arrayWithObjects:
+		[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(_cancelButtonTapped:)] autorelease],
+		[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
+		[[[UIBarButtonItem alloc] initWithTitle:doneButtonTitle style:UIBarButtonItemStyleDone target:self action:@selector(_doneButtonTapped:)] autorelease],
+		nil] retain];
+}
+
+- (void)viewDidUnload {
+	[super viewDidUnload];
+	[_browserToolbarItems release];
+	_browserToolbarItems = nil;
+}
+
 - (NSArray *)_viewControllersForPath:(NSString *)path rootedAt:(NSString *)root {
 	NSMutableArray *a = [NSMutableArray array];
 	root = [root stringByStandardizingPath];
@@ -70,16 +88,6 @@
 	} while(![path isEqualToString:root]);
 
 	return a;
-}
-
-- (NSArray *)toolbarItems {
-	NSString *doneButtonTitle = _mode == SDFileBrowserModeImmediateDownload ? SDLocalizedString(@"ACTION_DOWNLOAD") : SDLocalizedString(@"ACTION_CHOOSE_DIRECTORY");
-
-	return _browserToolbarItems ?: (_browserToolbarItems = [[NSArray arrayWithObjects:
-		[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(_cancelButtonTapped:)] autorelease],
-		[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
-		[[[UIBarButtonItem alloc] initWithTitle:doneButtonTitle style:UIBarButtonItemStyleDone target:self action:@selector(_doneButtonTapped:)] autorelease],
-		nil] retain]);
 }
 
 - (void)_cancelButtonTapped:(id)sender {

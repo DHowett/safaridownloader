@@ -22,6 +22,7 @@ typedef enum {
 @property (nonatomic, assign) NSObject<SDFileBrowserDelegate> *fileBrowserDelegate;
 @property (nonatomic, retain) SDDownloadRequest *downloadRequest;
 @property (nonatomic, copy, readonly) NSString *path;
+@property (nonatomic, retain, readonly) NSArray *browserToolbarItems;
 - (id)initWithMode:(SDFileBrowserMode)mode;
 - (id)initWithMode:(SDFileBrowserMode)mode downloadRequest:(SDDownloadRequest *)downloadRequest;
 @end

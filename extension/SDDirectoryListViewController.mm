@@ -8,6 +8,7 @@
 #import "SDFileType.h"
 
 #import "SDNavigationController.h"
+#import "SDFileBrowserNavigationController.h"
 
 #import "SandCastle/SandCastle.h"
 
@@ -63,7 +64,7 @@ static NSComparisonResult _fileEntryComparator(id one, id two, void *context) {
 }
 
 - (NSArray *)toolbarItems {
-	return [[self navigationController] toolbarItems];
+	return [(SDFileBrowserNavigationController *)[self navigationController] browserToolbarItems];
 }
 
 - (id)initWithPath:(NSString *)path {

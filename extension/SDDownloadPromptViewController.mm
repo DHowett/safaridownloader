@@ -164,6 +164,7 @@
 - (void)fileBrowserDidCancel:(SDFileBrowserNavigationController *)fileBrowser {
 	[self dismissModalViewControllerAnimated:YES];
 	[(SDNavigationController *)self.navigationController setStandalone:NO];
+	[self.tableView deselectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1] animated:YES];
 }
 
 - (void)fileBrowser:(SDFileBrowserNavigationController *)fileBrowser didSelectPath:(NSString *)path {
