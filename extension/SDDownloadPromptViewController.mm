@@ -44,7 +44,7 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-	return indexPath.section == 0 ? 72.f : 44.f;
+	return indexPath.section == 0 ? 72.f : indexPath.section == 1 ? 54.f : 44.f;
 }
 
 - (int)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -85,6 +85,7 @@
 			break;
 		case 1:
 			reuseIdentifier = @"DestinationCell";
+			cellStyle = UITableViewCellStyleSubtitle;
 			break;
 		case 2:
 			reuseIdentifier = @"ActionCell";
@@ -101,12 +102,20 @@
 			cell.detailTextLabel.text = fileType.name;
 			cell.selectionStyle = UITableViewCellSelectionStyleNone;
 			break;
-		} case 1:
-			cell.imageView.image = [SDResources iconForFolder];
-			cell.textLabel.text = @"Downloads";
+		} case 1: {
+			NSString *savePath = _downloadRequest.savePath;
+			if([savePath isEqualToString:NSHomeDirectory()]) {
+				cell.imageView.image = [SDResources imageNamed:@"Icons/home.png"];
+				cell.textLabel.text = SDLocalizedString(@"HOME_FOLDER");
+				cell.detailTextLabel.text = nil;
+			} else {
+				cell.imageView.image = [SDResources iconForFolder];
+				cell.textLabel.text = [_downloadRequest.savePath lastPathComponent];
+				cell.detailTextLabel.text = [_downloadRequest.savePath stringByDeletingLastPathComponent];
+			}
 			cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 			break;
-		case 2:
+		} case 2:
 			cell.textLabel.textAlignment = UITextAlignmentCenter;
 			switch(indexPath.row) {
 				case 0:
