@@ -298,6 +298,8 @@ static id sharedManager = nil;
 
 - (void)fileBrowser:(SDFileBrowserNavigationController *)fileBrowser didSelectPath:(NSString *)path {
 	fileBrowser.downloadRequest.savePath = path;
+	[[SDUserSettings sharedInstance] setObject:path forKey:@"LastUsedImmediateDownloadDirectory"];
+	[[SDUserSettings sharedInstance] commit];
 	[self addDownloadFromDownloadRequest:fileBrowser.downloadRequest];
 	[fileBrowser.downloadRequest detachFromContext];
 	[fileBrowser close];

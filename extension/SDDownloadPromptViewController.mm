@@ -4,6 +4,7 @@
 #import "SDDownloadPromptViewController.h"
 #import "SDDownloadManager.h"
 
+#import "SDUserSettings.h"
 #import "SDResources.h"
 #import "SDFileType.h"
 
@@ -170,6 +171,8 @@
 - (void)fileBrowser:(SDFileBrowserNavigationController *)fileBrowser didSelectPath:(NSString *)path {
 	[self dismissModalViewControllerAnimated:YES];
 	[(SDNavigationController *)self.navigationController setStandalone:NO];
+	[[SDUserSettings sharedInstance] setObject:path forKey:@"DefaultDownloadDirectory"];
+	[[SDUserSettings sharedInstance] commit];
 	_downloadRequest.savePath = path;
 	[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
 }
