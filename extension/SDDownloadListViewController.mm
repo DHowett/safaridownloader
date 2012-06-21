@@ -9,7 +9,6 @@
 #import "SDDownloadManager.h"
 #import "SDDownloadListViewController.h"
 #import "SDDownloadCell.h"
-#import "ModalAlert.h"
 #import "SDResources.h"
 
 #import "SDFileType.h"

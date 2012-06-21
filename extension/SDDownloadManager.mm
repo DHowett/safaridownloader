@@ -11,7 +11,6 @@
 #import "Safari/BrowserController.h"
 #import "SDDownloadManager.h"
 #import "SDSafariDownload.h"
-#import "ModalAlert.h"
 #import "SDResources.h"
 
 #import "SDFileType.h"

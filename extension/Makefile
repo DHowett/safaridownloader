@@ -13,7 +13,7 @@ Downloader_FILES += Downloader.xm _WebPolicyDelegateHooks.xm _BrowserPanelHooks.
 Downloader_FILES += _CustomToolbar_Old.xm _Interaction_iOS3.xm
 Downloader_FILES += _CustomToolbar_iOS5.xm _Interaction_iOS5.xm
 
-Downloader_FILES += SDDownloadManager.mm ModalAlert.mm SDDownloadActionSheet.mm
+Downloader_FILES += SDDownloadManager.mm SDDownloadActionSheet.mm
 Downloader_FILES += SDDownloadModel.mm
 Downloader_FILES += SDNavigationController.mm
 Downloader_FILES += SDDownloadListViewController.mm
