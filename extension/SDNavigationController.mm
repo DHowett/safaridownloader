@@ -15,6 +15,7 @@
 @end
 
 @implementation SDNavigationController
+@synthesize standalone = _standalone;
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation {
 	return SDM$WildCat ? YES : (orientation != UIInterfaceOrientationPortraitUpsideDown);
 }
@@ -32,26 +33,30 @@
 - (BOOL)disablesStatusBarPress { return NO; }
 
 - (void)close {
-	[[SDM$BrowserController sharedBrowserController] hideBrowserPanelType:[[self rootViewController] panelType]];
+	[[SDM$BrowserController sharedBrowserController] hideBrowserPanelType:[self panelType]];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
-	[[SDM$BrowserController sharedBrowserController] didShowBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
+	if(!_standalone)
+		[[SDM$BrowserController sharedBrowserController] didShowBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
 }
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
-	[[SDM$BrowserController sharedBrowserController] willShowBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
+	if(!_standalone)
+		[[SDM$BrowserController sharedBrowserController] willShowBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
 }
 - (void)viewDidDisappear:(BOOL)animated {
 	[super viewDidDisappear:animated];
-	if ([[SDM$BrowserController sharedBrowserController] browserPanel] == self)
-		[[SDM$BrowserController sharedBrowserController] didHideBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
+	if(!_standalone)
+		if ([[SDM$BrowserController sharedBrowserController] browserPanel] == self)
+			[[SDM$BrowserController sharedBrowserController] didHideBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
 }
 - (void)viewWillDisappear:(BOOL)animated {
 	[super viewWillDisappear:animated];
-	if([[SDM$BrowserController sharedBrowserController] browserPanel] == self)
-		[[SDM$BrowserController sharedBrowserController] closeBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
+	if(!_standalone)
+		if([[SDM$BrowserController sharedBrowserController] browserPanel] == self)
+			[[SDM$BrowserController sharedBrowserController] closeBrowserPanel:[[SDM$BrowserController sharedBrowserController] browserPanel]];
 }
 
 - (void)didHideBrowserPanel {
