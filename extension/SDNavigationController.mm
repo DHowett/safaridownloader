@@ -31,6 +31,7 @@
 - (BOOL)shouldShowButtonBar { return SDM$WildCat ? YES : NO; }
 - (BOOL)isDismissible { return NO; } // Maybe?
 - (BOOL)disablesStatusBarPress { return NO; }
+- (BOOL)ignoresPrivateBrowsingStyle { return YES; }
 
 - (void)close {
 	[[SDM$BrowserController sharedBrowserController] hideBrowserPanelType:[self panelType]];
