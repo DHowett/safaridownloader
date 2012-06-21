@@ -28,6 +28,7 @@
 
 - (id)initWithMode:(SDFileBrowserMode)mode downloadRequest:(SDDownloadRequest *)downloadRequest {
 	if((self = [super init]) != nil) {
+		self.delegate = self;
 		self.downloadRequest = downloadRequest;
 		_mode = mode;
 
@@ -70,6 +71,15 @@
 	[super viewDidUnload];
 	[_browserToolbarItems release];
 	_browserToolbarItems = nil;
+}
+
+- (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+	if(_mode == SDFileBrowserModeImmediateDownload) {
+		if(_downloadRequest.filename)
+			viewController.navigationItem.prompt = [NSString stringWithFormat:SDLocalizedString(@"SAVE_AS_PROMPT_"), _downloadRequest.filename];
+		else
+			viewController.navigationItem.prompt = SDLocalizedString(@"SAVE_AS_PROMPT");
+	}
 }
 
 - (NSArray *)_viewControllersForPath:(NSString *)path rootedAt:(NSString *)root {

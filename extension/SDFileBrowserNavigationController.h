@@ -12,7 +12,7 @@ typedef enum {
 - (void)fileBrowser:(SDFileBrowserNavigationController *)fileBrowser didSelectPath:(NSString *)path;
 @end
 
-@interface SDFileBrowserNavigationController : SDNavigationController {
+@interface SDFileBrowserNavigationController : SDNavigationController <UINavigationControllerDelegate> {
 	SDFileBrowserMode _mode;
 	SDDownloadRequest *_downloadRequest;
 	NSString *_path;
