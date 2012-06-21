@@ -312,7 +312,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	self.downloader.deletesFileUponFailure = NO;
 	if(_filename && _useSuggestedFilename) {
 		self.temporaryPath = [self _temporaryPathForFilename:self.filename];
-		[_downloader setDestination:self.temporaryPath allowOverwrite:NO];
+		[_downloader setDestination:self.temporaryPath allowOverwrite:YES];
 	}
 
 	self.totalBytes = 0;
