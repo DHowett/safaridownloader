@@ -41,7 +41,7 @@ static NSMutableDictionary *_customExtensionMapping;
 
 	NSDictionary *fileTypeMaster = [NSDictionary dictionaryWithContentsOfFile:[[SDResources supportBundle] pathForResource:@"FileTypes" ofType:@"plist"]];
 	for(NSString *fileTypeName in [fileTypeMaster allKeys]) {
-		SDFileType *fileType = [[self alloc] initWithName:fileTypeName dictionary:[fileTypeMaster objectForKey:fileTypeName]];
+		SDFileType *fileType = [[self alloc] initWithName:SDLocalizedStringInTable(fileTypeName, @"FileTypes") dictionary:[fileTypeMaster objectForKey:fileTypeName]];
 		[self _registerFileType:fileType];
 		[fileType release];
 	}

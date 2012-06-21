@@ -1,4 +1,5 @@
 #define SDLocalizedString(key) NSLocalizedStringWithDefaultValue((key), nil, [SDResources supportBundle], (key), @"")
+#define SDLocalizedStringInTable(key, table) NSLocalizedStringWithDefaultValue((key), table, [SDResources supportBundle], (key), @"")
 @class SDFileType;
 @interface SDResources : NSObject
 + (NSBundle *)supportBundle;
