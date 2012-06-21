@@ -30,6 +30,9 @@
 @implementation SDDownloadListViewController
 @synthesize currentSelectedIndexPath = _currentSelectedIndexPath;
 
+#define kSDDownloadListViewControllerCancelAlertTag 1
+#define kSDDownloadListViewControllerClearAlertTag 2
+
 #pragma mark -
 
 - (int)panelType {
@@ -76,6 +79,7 @@
 						  delegate:self
 					 cancelButtonTitle:SDLocalizedString(@"NO")
 					 otherButtonTitles:SDLocalizedString(@"YES"), nil];
+		alert.tag = kSDDownloadListViewControllerCancelAlertTag;
 	} else {
 		alert = [[UIAlertView alloc] initWithTitle:SDLocalizedString(@"NOTHING_TO_CANCEL")
 						   message:nil
@@ -88,18 +92,40 @@
 	[alert release];
 }
 
+- (void)clearAllDownloads {
+	UIAlertView *alert = nil;
+	if(_dataModel.finishedDownloads.count > 0) {
+		alert = [[UIAlertView alloc] initWithTitle:SDLocalizedString(@"CLEAR_ALL_PROMPT")
+						   message:nil
+						  delegate:self
+					 cancelButtonTitle:SDLocalizedString(@"NO")
+					 otherButtonTitles:SDLocalizedString(@"YES"), nil];
+	} else {
+		alert = [[UIAlertView alloc] initWithTitle:SDLocalizedString(@"NOTHING_TO_CLEAR")
+						   message:nil
+						  delegate:self
+					 cancelButtonTitle:SDLocalizedString(@"OK")
+					 otherButtonTitles:nil];
+	}
+	alert.tag = kSDDownloadListViewControllerClearAlertTag;
+	[alert show];
+	[alert release];
+}
+
 - (void)alertView:(UIAlertView *)alert clickedButtonAtIndex:(NSInteger)buttonIndex {
-	if (buttonIndex == 1) {
-		[[SDDownloadManager sharedManager] cancelAllDownloads];
-	} 
+	if(alert.tag == kSDDownloadListViewControllerClearAlertTag) {
+		if (buttonIndex == 1) {
+			[_dataModel emptyList:SDDownloadModelFinishedList];
+		}
+	} else {
+		if (buttonIndex == 1) {
+			[[SDDownloadManager sharedManager] cancelAllDownloads];
+		}
+	}
 }
 
 - (SDDownloadCell*)_cellForDownload:(SDSafariDownload*)download {
 	return (SDDownloadCell *)[self.tableView cellForRowAtIndexPath:[_dataModel indexPathForDownload:download]];
-}
-
-- (void)clearAllDownloads {
-	[_dataModel emptyList:SDDownloadModelFinishedList];
 }
 
 #pragma mark -/*}}}*/
