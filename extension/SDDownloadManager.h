@@ -11,10 +11,10 @@
 #import "Safari/BrowserButtonBar.h"
 #import "WebPolicyDelegate.h"
 #import "UIKitExtra/UIToolbarButton.h"
-#import "FileBrowser.h"
 #import "SDDownloadActionSheet.h"
 
 #import "SDDownloadPromptViewController.h"
+#import "SDFileBrowserNavigationController.h"
 
 @interface WebView : NSObject 
 + (BOOL)canShowMIMEType:(NSString*)type;
@@ -23,7 +23,7 @@
 @class BrowserButtonBar;
 @class SDDownloadModel;
 
-@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UIAlertViewDelegate, SDDownloadPromptDelegate> {
+@interface SDDownloadManager : UIViewController <SDSafariDownloadDelegate, UIAlertViewDelegate, SDDownloadPromptDelegate, SDFileBrowserDelegate> {
 	NSOperationQueue *_downloadQueue;
 	BOOL _visible;
 	SDDownloadModel *_model;
@@ -49,11 +49,8 @@
             withListener:(id<WebPolicyDecisionListener>)listener
 		 context:(id)context;
 
-//- (BOOL)addDownloadWithInfo:(NSDictionary*)info browser:(BOOL)b;
-//- (BOOL)addDownloadWithURL:(NSURL*)url browser:(BOOL)b;
-//- (BOOL)addDownloadWithRequest:(NSURLRequest*)url browser:(BOOL)b;
-- (BOOL)addDownloadWithRequest:(NSURLRequest*)request andMimeType:(NSString *)mimeType browser:(BOOL)b;
-- (BOOL)addDownload:(SDSafariDownload *)download browser:(BOOL)b;
+- (SDDownloadRequest *)downloadRequestForImmediateURLRequest:(NSURLRequest *)request context:(id)context;
+- (void)addDownloadFromDownloadRequest:(SDDownloadRequest *)downloadRequest;
 - (BOOL)cancelDownload:(SDSafariDownload *)download;
 - (void)retryDownload:(SDSafariDownload *)download;
 - (void)deleteDownload:(SDSafariDownload *)download;

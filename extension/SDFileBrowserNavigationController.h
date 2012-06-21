@@ -23,5 +23,5 @@ typedef enum {
 @property (nonatomic, retain) SDDownloadRequest *downloadRequest;
 @property (nonatomic, copy, readonly) NSString *path;
 - (id)initWithMode:(SDFileBrowserMode)mode;
-- (id)initWithMode:(SDFileBrowserMode)mode path:(NSString *)path;
+- (id)initWithMode:(SDFileBrowserMode)mode downloadRequest:(SDDownloadRequest *)downloadRequest;
 @end

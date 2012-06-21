@@ -1,5 +1,6 @@
 #import "SDMCommon.h"
 #import "SDDownloadRequest.h"
+#import "SDFileBrowserNavigationController.h"
 
 @protocol SDDownloadPrompt <NSObject>
 @property (nonatomic, retain) SDDownloadRequest *downloadRequest;
@@ -9,7 +10,7 @@
 - (void)downloadPrompt:(NSObject<SDDownloadPrompt> *)downloadPrompt didCompleteWithAction:(SDActionType)action;
 @end
 
-@interface SDDownloadPromptViewController : UITableViewController <SDDownloadPrompt> {
+@interface SDDownloadPromptViewController : UITableViewController <SDDownloadPrompt, SDFileBrowserDelegate> {
 	NSObject<SDDownloadPromptDelegate> *_delegate;
 	SDDownloadRequest *_downloadRequest;
 	NSMutableArray *_supportedActions;

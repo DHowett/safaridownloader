@@ -42,8 +42,8 @@
 		return [[[SDNavigationController alloc] initWithRootViewController:rootViewController] autorelease];
 	} else if(type == SDPanelTypeFileBrowser) {
 		SDDownloadRequest *req = [SDDownloadRequest pendingRequestForContext:[[self tabController] activeTabDocument]];
-		SDFileBrowserNavigationController *fileBrowser = [[[SDFileBrowserNavigationController alloc] initWithMode:SDFileBrowserModeImmediateDownload] autorelease];
-		fileBrowser.downloadRequest = req;
+		SDFileBrowserNavigationController *fileBrowser = [[[SDFileBrowserNavigationController alloc] initWithMode:SDFileBrowserModeImmediateDownload downloadRequest:req] autorelease];
+		fileBrowser.fileBrowserDelegate = [SDDownloadManager sharedManager];
 		return fileBrowser;
 	}
 	return %orig;

@@ -22,19 +22,14 @@
 }
 
 - (id)initWithMode:(SDFileBrowserMode)mode {
-	return [self initWithMode:mode path:nil];
+	return [self initWithMode:mode downloadRequest:nil];
 }
 
-- (id)initWithMode:(SDFileBrowserMode)mode path:(NSString *)path {
+- (id)initWithMode:(SDFileBrowserMode)mode downloadRequest:(SDDownloadRequest *)downloadRequest {
 	if((self = [super init]) != nil) {
-		if(!path)
-			self.path = (NSString *)[[SDUserSettings sharedInstance] objectForKey:@"DefaultDownloadDirectory" default:[NSHomeDirectory() stringByAppendingPathComponent:@"Media/Downloads"]];
-		else
-			self.path = path;
-
+		self.downloadRequest = downloadRequest;
 		_mode = mode;
 
-		self.viewControllers = [self _viewControllersForPath:self.path rootedAt:NSHomeDirectory()];
 		[self setToolbarHidden:NO animated:NO];
 	} return self;
 }
@@ -56,6 +51,7 @@
 - (void)setPath:(NSString *)path {
 	[_path release];
 	_path = [[path stringByStandardizingPath] copy];
+	self.viewControllers = [self _viewControllersForPath:path rootedAt:NSHomeDirectory()];
 }
 
 - (NSArray *)_viewControllersForPath:(NSString *)path rootedAt:(NSString *)root {

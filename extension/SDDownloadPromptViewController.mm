@@ -130,9 +130,16 @@
 		case 0:
 			[tableView deselectRowAtIndexPath:indexPath animated:YES];
 			break;
-		case 1:
+		case 1: {
+			SDFileBrowserNavigationController *fileNavController = [[SDFileBrowserNavigationController alloc] initWithMode:SDFileBrowserModeSelectPath downloadRequest:_downloadRequest];
+			fileNavController.standalone = YES;
+			fileNavController.fileBrowserDelegate = self;
+			// The standalone toggle is a hack. We just don't want to send browserpanel messages when we're presented on-top-of.
+			[(SDNavigationController *)self.navigationController setStandalone:YES];
+			[self presentModalViewController:fileNavController animated:YES];
+			[fileNavController release];
 			break;
-		case 2:
+		} case 2:
 			[tableView deselectRowAtIndexPath:indexPath animated:YES];
 			[_delegate downloadPrompt:self didCompleteWithAction:(SDActionType)[[_supportedActions objectAtIndex:indexPath.row] integerValue]];
 			[(SDNavigationController *)[self navigationController] close];
@@ -143,6 +150,18 @@
 - (void)dismissWithCancel {
 	[_delegate downloadPrompt:self didCompleteWithAction:SDActionTypeNone];
 	[(SDNavigationController *)[self navigationController] close];
+}
+
+- (void)fileBrowserDidCancel:(SDFileBrowserNavigationController *)fileBrowser {
+	[self dismissModalViewControllerAnimated:YES];
+	[(SDNavigationController *)self.navigationController setStandalone:NO];
+}
+
+- (void)fileBrowser:(SDFileBrowserNavigationController *)fileBrowser didSelectPath:(NSString *)path {
+	[self dismissModalViewControllerAnimated:YES];
+	[(SDNavigationController *)self.navigationController setStandalone:NO];
+	_downloadRequest.savePath = path;
+	[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 @end

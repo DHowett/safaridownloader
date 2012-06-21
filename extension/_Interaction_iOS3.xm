@@ -75,7 +75,8 @@ static NSURL *interactionURL = nil;
 	if(index == 1336) {
 		if(interactionURL) {
 			NSURLRequest *request = [NSURLRequest requestWithURL:interactionURL];
-			[[SDDownloadManager sharedManager] addDownloadWithRequest:request andMimeType:nil browser:YES];
+			[[SDDownloadManager sharedManager] downloadRequestForImmediateURLRequest:request context:[[[SDM$BrowserController sharedBrowserController] tabController] activeTabDocument]];
+			[[SDM$BrowserController sharedBrowserController] showBrowserPanelType:SDPanelTypeFileBrowser];
 		}
 	}
 	%orig;

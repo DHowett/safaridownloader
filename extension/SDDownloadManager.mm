@@ -165,6 +165,7 @@ static id sharedManager = nil;
 		}
 		
 		SDDownloadRequest *downloadRequest = [[SDDownloadRequest alloc] initWithURLRequest:request filename:filename mimeType:mimeType webFrame:frame context:context];
+		downloadRequest.savePath = (NSString *)[[SDUserSettings sharedInstance] objectForKey:@"DefaultDownloadDirectory" default:[NSHomeDirectory() stringByAppendingPathComponent:@"Media/Downloads"]];
 		[downloadRequest attachToContext];
 
 		if(mimeType)
@@ -180,6 +181,18 @@ static id sharedManager = nil;
 	return YES;
 }
 
+- (SDDownloadRequest *)downloadRequestForImmediateURLRequest:(NSURLRequest *)request context:(id)context {
+	NSString *filename = [self fileNameForURL:[request URL]];
+	if (filename == nil) {
+		filename = [[request URL] absoluteString];
+	}
+	
+	SDDownloadRequest *downloadRequest = [[SDDownloadRequest alloc] initWithURLRequest:request filename:filename mimeType:nil webFrame:nil context:context];
+	downloadRequest.savePath = (NSString *)[[SDUserSettings sharedInstance] objectForKey:@"LastUsedImmediateDownloadDirectory" default:[NSHomeDirectory() stringByAppendingPathComponent:@"Media/Downloads"]];
+	[downloadRequest attachToContext];
+	return downloadRequest;
+}
+
 #pragma mark - SDDownloadPromptDelegate
 
 - (void)downloadPrompt:(NSObject<SDDownloadPrompt> *)downloadPrompt didCompleteWithAction:(SDActionType)action {
@@ -190,7 +203,7 @@ static id sharedManager = nil;
 			break;
 		case SDActionTypeDownload:
 		case SDActionTypeDownloadAs:
-			[self addDownloadWithRequest:req.urlRequest andMimeType:req.mimeType browser:action==SDActionTypeDownloadAs];
+			[self addDownloadFromDownloadRequest:req];
 			[req detachFromContext];
 			break;
 		default:
@@ -232,62 +245,18 @@ static id sharedManager = nil;
 	return [_model downloadWithURL:url];
 }
 
-- (void)fileBrowser:(YFFileBrowser*)browser 
-			didSelectPath:(NSString*)path 
-						forFile:(id)file 
-				withContext:(id)dl {
-	SDSafariDownload* download = (SDSafariDownload*)dl;
-	download.path = path;
-	download.filename = [SDDownloadManager uniqueFilenameForFilename:download.filename atPath:download.path];
+- (void)addDownloadFromDownloadRequest:(SDDownloadRequest *)downloadRequest {
+	SDSafariDownload *download = [[SDSafariDownload alloc] init];
+	download.URLRequest = downloadRequest.urlRequest;
+	download.mimeType = downloadRequest.mimeType;
+	download.path = downloadRequest.savePath;
+	download.filename = [SDDownloadManager uniqueFilenameForFilename:downloadRequest.filename atPath:downloadRequest.savePath];
+	download.delegate = self;
+
 	[_downloadQueue addOperation:download];
-	
 	[_model addDownload:download toList:SDDownloadModelRunningList];
 
-	// this should only be owned by the array
-#warning the fuck?
 	[download release];
-}
-
-- (void)fileBrowserDidCancel:(YFFileBrowser*)browser {
-	NSLog(@"fileBrowserDidCancel");
-}
-
-// everything eventually goes through this method
-- (BOOL)addDownload:(SDSafariDownload*)download browser:(BOOL)browser {
-	//if (![_currentDownloads containsObject:download]) {
-	if (browser) {
-		YFFileBrowser* f = [[YFFileBrowser alloc] initWithFile:download.filename 
-							       context:download
-							      delegate:self];
-		[f show];
-		[f release];
-	}
-	else {
-		[self fileBrowser:nil 
-		    didSelectPath:[NSHomeDirectory() stringByAppendingPathComponent:@"Media/Downloads"]
-				forFile:download.filename 
-			withContext:download];
-	}
-	
-		return YES;
-	//}
-	//return NO;
-}
-
-- (BOOL)addDownloadWithRequest:(NSURLRequest*)request 
-		   andMimeType:(NSString *)mimeType 
-		       browser:(BOOL)browser {
-	if ([self downloadWithURL:[request URL]] != nil)
-		return NO;
-
-	NSString *filename = [self fileNameForURL:[request URL]];
-	
-	SDSafariDownload *download = [[SDSafariDownload alloc] init];
-	download.URLRequest = request;
-	download.filename = filename;
-	download.mimeType = mimeType;
-	download.delegate = self;
-	return [self addDownload:download browser:browser];
 }
 
 // everything eventually goes through this method
@@ -321,10 +290,24 @@ static id sharedManager = nil;
 }
 
 #pragma mark -/*}}}*/
+#pragma mark SDFileBrowserDelegate Methods/*{{{*/
+
+- (void)fileBrowserDidCancel:(SDFileBrowserNavigationController *)fileBrowser {
+	[fileBrowser.downloadRequest detachFromContext];
+	[fileBrowser close];
+}
+
+- (void)fileBrowser:(SDFileBrowserNavigationController *)fileBrowser didSelectPath:(NSString *)path {
+	fileBrowser.downloadRequest.savePath = path;
+	[self addDownloadFromDownloadRequest:fileBrowser.downloadRequest];
+	[fileBrowser.downloadRequest detachFromContext];
+	[fileBrowser close];
+}
+
+#pragma mark -/*}}}*/
 #pragma mark SDSafariDownloadDelegate Methods/*{{{*/
 
 - (void)downloadDidChangeStatus:(SDSafariDownload *)download {
-	NSLog(@"Got status for download! %d", download.status);
 	if(download.status == SDDownloadStatusCompleted
 	   || download.status == SDDownloadStatusFailed) {
 		[_model moveDownload:download toList:SDDownloadModelFinishedList]; // Implicit save.

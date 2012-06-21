@@ -32,7 +32,8 @@
 		|| [scheme isEqualToString:@"ftp"]) {
 			[downloadActions addObject:[%c(UIWebElementAction) customElementActionWithTitle:SDLocalizedString(@"DOWNLOAD_TARGET") actionHandler:^{
 				NSURLRequest *request = [NSURLRequest requestWithURL:url];
-				[[SDDownloadManager sharedManager] addDownloadWithRequest:request andMimeType:nil browser:YES];
+				[[SDDownloadManager sharedManager] downloadRequestForImmediateURLRequest:request context:[[self tabController] activeTabDocument]];
+				[self showBrowserPanelType:SDPanelTypeFileBrowser];
 			}]];
 		}
 	}
@@ -40,7 +41,8 @@
 		[downloadActions addObject:[%c(UIWebElementAction) customElementActionWithTitle:SDLocalizedString(@"DOWNLOAD_IMAGE") actionHandler:^{
 			NSURL *url = [domElement absoluteImageURL];
 			NSURLRequest *request = [NSURLRequest requestWithURL:url];
-			[[SDDownloadManager sharedManager] addDownloadWithRequest:request andMimeType:nil browser:YES];
+			[[SDDownloadManager sharedManager] downloadRequestForImmediateURLRequest:request context:[[self tabController] activeTabDocument]];
+			[self showBrowserPanelType:SDPanelTypeFileBrowser];
 		}]];
 	}
 

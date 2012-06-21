@@ -5,6 +5,7 @@ static const NSString *const kSDMAssociatedDownloadRequestKey = @"kSDMAssociated
 
 @implementation SDDownloadRequest
 @synthesize urlRequest = _urlRequest, filename = _filename, mimeType = _mimeType, webFrame = _webFrame, supportsViewing = _supportsViewing;
+@synthesize savePath = _savePath;
 
 + (SDDownloadRequest *)pendingRequestForContext:(id)context {
 	return objc_getAssociatedObject(context, kSDMAssociatedDownloadRequestKey);
@@ -25,6 +26,7 @@ static const NSString *const kSDMAssociatedDownloadRequestKey = @"kSDMAssociated
 	[_filename release];
 	[_mimeType release];
 	[_webFrame release];
+	[_savePath release];
 	[super dealloc];
 }
 
