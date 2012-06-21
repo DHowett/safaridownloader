@@ -298,7 +298,7 @@ static BOOL _legacy = NO;
 }
 
 - (CFBooleanRef)get:(PSSpecifier *)spec {
-	if([_disabledItems containsObject:[[spec propertyForKey:@"fileType"] name]]) {
+	if([_disabledItems containsObject:[[spec propertyForKey:@"fileType"] primaryMIMEType]]) {
 		return kCFBooleanFalse;
 	} else {
 		return kCFBooleanTrue;
@@ -307,9 +307,9 @@ static BOOL _legacy = NO;
 
 - (void)set:(CFBooleanRef)enabled spec:(PSSpecifier *)spec {
 	if(enabled == kCFBooleanTrue) {
-		[_disabledItems removeObject:[[spec propertyForKey:@"fileType"] name]];
+		[_disabledItems removeObject:[[spec propertyForKey:@"fileType"] primaryMIMEType]];
 	} else {
-		[_disabledItems addObject:[[spec propertyForKey:@"fileType"] name]];
+		[_disabledItems addObject:[[spec propertyForKey:@"fileType"] primaryMIMEType]];
 	}
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:preferencesPath()] ?: [NSMutableDictionary dictionary];
 	[dict setObject:[_disabledItems allObjects] forKey:@"DisabledItems"];

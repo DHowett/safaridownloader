@@ -231,7 +231,7 @@ static id sharedManager = nil;
 		}
 	}
 	if (fileType) {
-		if ([[[SDUserSettings sharedInstance] arrayForKey:@"DisabledItems"] containsObject:fileType.name])
+		if ([[[SDUserSettings sharedInstance] arrayForKey:@"DisabledItems"] containsObject:[fileType primaryMIMEType]])
 			return NO;
 	}
 	return fileType != nil;
