@@ -1,6 +1,6 @@
 extern const NSString * const kSDUserSettingsReloadedNotification;
 @interface SDUserSettings : NSObject {
-	NSDictionary *_settings;
+	NSMutableDictionary *_settings;
 }
 + (id)sharedInstance;
 - (BOOL)boolForKey:(NSString *)key default:(BOOL)defaultValue;
@@ -9,7 +9,10 @@ extern const NSString * const kSDUserSettingsReloadedNotification;
 - (float)floatForKey:(NSString *)key default:(float)defaultValue;
 - (NSArray *)arrayForKey:(NSString *)key;
 
+- (void)setObject:(NSObject *)object forKey:(NSString *)key;
+
 - (void)reloadSettings;
+- (void)commit;
 - (NSArray *)disabledItemNames;
 - (NSDictionary *)customFileTypes;
 @end

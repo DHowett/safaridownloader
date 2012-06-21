@@ -48,10 +48,19 @@ static NSString *_preferencesPath;
 	return [_settings objectForKey:key];
 }
 
+- (void)setObject:(NSObject *)object forKey:(NSString *)key {
+	[_settings setObject:object forKey:key];
+}
+
 - (void)reloadSettings {
 	if(_settings) [_settings release];
-	_settings = [[NSDictionary dictionaryWithContentsOfFile:[[self class] preferencesPath]] retain];
+	_settings = [[NSMutableDictionary dictionaryWithContentsOfFile:[[self class] preferencesPath]] retain];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kSDUserSettingsReloadedNotification object:self];
+}
+
+- (void)commit {
+	[_settings writeToFile:[[self class] preferencesPath] atomically:YES];
+	[self reloadSettings];
 }
 
 - (NSArray *)disabledItemNames {
