@@ -49,6 +49,43 @@
 	return %orig;
 }
 
+static void _setShowingCurrentPanel_animate_core(id self, BOOL showing, BOOL animate) {
+	id<BrowserPanel> panel = MSHookIvar<id>(self, "_browserPanel");
+	if([panel panelType] == SDPanelTypeDownloadManager) {
+		if(SDMSystemVersionGE(_SDM_iOS_3_2))
+			[MSHookIvar<id>(self, "_browserView") resignFirstResponder];
+		if(SDMSystemVersionLT(_SDM_iOS_5_0))
+			[self _resizeNavigationController:panel small:NO];
+		[self _setShowingDownloads:showing animate:animate];
+	} else if([panel panelType] == SDPanelTypeDownloadPrompt || [panel panelType] == SDPanelTypeFileBrowser) {
+		UIViewController *presentationController = SDMSystemVersionLT(_SDM_iOS_5_0) ? [self _modalViewController] : MSHookIvar<UIViewController *>(self, "_rootViewController");
+		if(showing) {
+			if(SDMSystemVersionLT(_SDM_iOS_5_0))
+				[self _resizeNavigationController:panel small:NO];
+			[presentationController presentModalViewController:panel animated:animate];
+			//[self _presentModalViewController:panel fromRectInToolbar:CGRectZero];
+		} else {
+			[self willHideBrowserPanel:panel];
+			[presentationController dismissModalViewControllerAnimated:animate];
+			//[self _forceDismissModalViewController:animate]; // 3.2+
+		}
+	}
+}
+
+- (void)_setShowingCurrentPanel:(BOOL)showing animate:(BOOL)animate {
+	%log;
+	%orig;
+	_setShowingCurrentPanel_animate_core(self, showing, animate);
+}
+
+%group Firmware_lt_32
+- (void)_setShowingCurrentPanel:(BOOL)showing {
+	%log;
+	%orig;
+	_setShowingCurrentPanel_animate_core(self, showing, YES);
+}
+%end
+
 %group Firmware_ge_32
 %new(v@:)
 - (void)toggleDownloadManagerFromButtonBar {
@@ -58,23 +95,6 @@
 		[self showBrowserPanelType:SDPanelTypeDownloadManager];
 	}
 }
-
-- (void)_setShowingCurrentPanel:(BOOL)showing animate:(BOOL)animate {
-	%log;
-	%orig;
-	id<BrowserPanel> panel = MSHookIvar<id>(self, "_browserPanel");
-	if([panel panelType] == SDPanelTypeDownloadManager) {
-		[MSHookIvar<id>(self, "_browserView") resignFirstResponder];
-		[self _setShowingDownloads:showing animate:animate];
-	} else if([panel panelType] == SDPanelTypeDownloadPrompt || [panel panelType] == SDPanelTypeFileBrowser) {
-		if(showing) {
-			[MSHookIvar<UIViewController *>(self, "_rootViewController") presentModalViewController:panel animated:animate];
-		} else {
-			[self willHideBrowserPanel:panel];
-			[MSHookIvar<UIViewController *>(self, "_rootViewController") dismissModalViewControllerAnimated:animate];
-		}
-	}
-}
 %end
 
 %group Firmware_lt_32
@@ -82,34 +102,18 @@
 - (void)toggleDownloadManagerFromButtonBar {
 	if([[self browserPanel] panelType] == SDPanelTypeDownloadManager) {
 		[self hideBrowserPanelType:SDPanelTypeDownloadManager];
-		[self _setShowingDownloads:NO animate:YES];
 	} else {
 		[self showBrowserPanelType:SDPanelTypeDownloadManager];
-		[self _setShowingDownloads:YES animate:YES];
 	}
 }
-
-- (void)_setShowingCurrentPanel:(BOOL)showing {
-	%log;
-	id<BrowserPanel> panel = MSHookIvar<id>(self, "_browserPanel");
-	%orig;
-	if([panel panelType] == SDPanelTypeDownloadPrompt) {
-		if(showing) {
-//			[(SDDownloadPromptViewController *)panel setVisible:YES animated:YES];
-		} else {
-//			[(SDDownloadPromptViewController *)panel dismissWithCancel];
-		}
-	}
-}
-
 %end
 
 %new(v@:ii)
 - (void)_setShowingDownloads:(BOOL)showing animate:(BOOL)animate {
 	id controller = [self browserPanel];
 	if(showing) {
-		//[self _resizeNavigationController:controller small:NO];
-		//[MSHookIvar<UIViewController *>(self, "_buttonBar") presentModalViewController:controller animated:animate];
+		if(SDMSystemVersionLT(_SDM_iOS_5_0))
+			[self _resizeNavigationController:controller small:NO];
 		[self _presentModalViewControllerFromDownloadsButton:controller];
 	} else {
 		[self willHideBrowserPanel:controller];
@@ -118,9 +122,9 @@
 }
 
 %new(v@:@@)
-- (void)_presentModalViewController:(id)x fromButton:(UIToolbarButton *)button {
+- (void)_presentModalViewController:(id)viewController fromButton:(UIToolbarButton *)button {
 	if(SDM$WildCat) {
-		id rpc = [[%c(RotatablePopoverController) alloc] initWithContentViewController:x];
+		id rpc = [[%c(RotatablePopoverController) alloc] initWithContentViewController:viewController];
 		[rpc setPresentationRect:[button frame]];
 		[rpc setPresentationView:[self buttonBar]];
 		[rpc setPermittedArrowDirections:1];
@@ -130,9 +134,9 @@
 		[rpc release];
 	} else {
 		if(SDMSystemVersionLT(_SDM_iOS_5_0))
-			[[self _modalViewController] presentModalViewController:x animated:YES];
+			[[self _modalViewController] presentModalViewController:viewController animated:YES];
 		else
-			[MSHookIvar<UIViewController *>(self, "_rootViewController") presentModalViewController:x animated:YES];
+			[MSHookIvar<UIViewController *>(self, "_rootViewController") presentModalViewController:viewController animated:YES];
 	}
 }
 
