@@ -414,6 +414,9 @@ static BOOL _legacy = NO;
 		NSString *value = [spec propertyForKey:@"footerText"];
 		if(value)
 			[spec setProperty:[[self bundle] localizedStringForKey:value value:value table:nil] forKey:@"footerText"];
+		value = [spec propertyForKey:@"prompt"];
+		if(value)
+			[spec setProperty:[[self bundle] localizedStringForKey:value value:value table:nil] forKey:@"prompt"];
 		value = [spec propertyForKey:@"okTitle"];
 		if(value)
 			[spec setProperty:[[self bundle] localizedStringForKey:value value:value table:nil] forKey:@"okTitle"];
