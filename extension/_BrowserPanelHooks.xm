@@ -13,7 +13,7 @@
 /* {{{ Private and Additional Categories */
 @interface BrowserController (SDMAdditions)
 - (void)_setShowingDownloads:(BOOL)showing animate:(BOOL)animate;
-- (void)_presentModalViewController:(id)x fromButton:(UIToolbarButton *)button;
+- (void)_presentModalViewController:(id)viewController fromButton:(UIView *)button;
 - (void)_presentModalViewControllerFromDownloadsButton:(id)x;
 - (void)toggleDownloadManagerFromButtonBar;
 - (void)_setBrowserPanel:(id)panel;
@@ -122,7 +122,7 @@ static void _setShowingCurrentPanel_animate_core(id self, BOOL showing, BOOL ani
 }
 
 %new(v@:@@)
-- (void)_presentModalViewController:(id)viewController fromButton:(UIToolbarButton *)button {
+- (void)_presentModalViewController:(id)viewController fromButton:(UIView *)button {
 	if(SDM$WildCat) {
 		id rpc = [[%c(RotatablePopoverController) alloc] initWithContentViewController:viewController];
 		[rpc setPresentationRect:[button frame]];
@@ -150,8 +150,9 @@ static void _setShowingCurrentPanel_animate_core(id self, BOOL showing, BOOL ani
 %group Firmware_ge_50
 %new(v@:@)
 - (void)_presentModalViewControllerFromDownloadsButton:(id)x {
-	[self _presentModalViewController:x fromRectInToolbar:(CGRect)CGRectZero];
-	//[self _presentModalViewController:x fromButton:[[SDDownloadManager sharedManager] portraitDownloadButton]];
+	UIView *view = objc_getAssociatedObject(self, kSDMAssociatedPresentationViewKey);
+	[self _presentModalViewController:x fromButton:view];
+	objc_setAssociatedObject(self, kSDMAssociatedPresentationViewKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 %end
 

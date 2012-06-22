@@ -7,6 +7,10 @@
 #import "Safari/BrowserController.h"
 #import "UIKitExtra/UIToolbarButton.h"
 
+@interface BrowserController (SDMAdditions)
+- (void)toggleDownloadManagerFromButtonBar;
+@end
+
 %hook SpacedBarButtonItem
 - (id)init {
 	if((self = %orig) != nil) {
@@ -25,12 +29,17 @@
 }
 %end
 
-//@interface SpacedBarButtonItem (SDM)
-//- (void)destroyPrecedingSpace;
-//@end
+@interface UIBarButtonItem (SDMPrivate)
+- (void)destroyPrecedingSpace; // Actually in SpacedBarButtonItem
+- (id)view;
+@end
 
 %hook BrowserToolbar
-const NSString *const kSDMAssociatedDownloadButtonKey = @"kSDMAssociatedDownloadButtonKey";
+NSString * const kSDMAssociatedDownloadButtonKey = @"kSDMAssociatedDownloadButtonKey";
+NSString * const kSDMAssociatedPresentationViewKey = @"kSDMAssociatedPresentationViewKey";
+
+// Private
+NSString * const kSDMAssociatedButtonDictionaryKey = @"kSDMAssociatedButtonDictionaryKey";
 - (NSMutableArray *)_defaultSpacedItems {
 	NSMutableArray *orig = [%orig mutableCopy];
 	SpacedBarButtonItem *_tabExposeItem = MSHookIvar<SpacedBarButtonItem *>(self, "_tabExposeItem");
@@ -40,14 +49,16 @@ const NSString *const kSDMAssociatedDownloadButtonKey = @"kSDMAssociatedDownload
 	downloadButtonItem.landscapeImagePhone = [SDResources imageNamed:@"DownloadButtonSmall"];
 	downloadButtonItem.style = UIBarButtonItemStylePlain;
 	downloadButtonItem.target = [SDM$BrowserController sharedBrowserController];
-	downloadButtonItem.action = @selector(toggleDownloadManagerFromButtonBar);
-	objc_setAssociatedObject(self, kSDMAssociatedDownloadButtonKey, downloadButtonItem, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	downloadButtonItem.action = @selector(_downloadManagerButtonShim:);
+	objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedDownloadButtonKey, downloadButtonItem, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 	if(SDM$WildCat)
 		[orig addObject:downloadButtonItem];
 	else
 		[orig insertObject:downloadButtonItem atIndex:[orig indexOfObjectIdenticalTo:_tabExposeItem]];
 	[downloadButtonItem release];
 	[[orig objectAtIndex:0] destroyPrecedingSpace];
+
+	objc_setAssociatedObject(self, kSDMAssociatedButtonDictionaryKey, [NSMutableDictionary dictionary], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 	return [orig autorelease];
 }
 
@@ -55,18 +66,51 @@ const NSString *const kSDMAssociatedDownloadButtonKey = @"kSDMAssociatedDownload
 - (void)_updateFixedSpacing {
 	return;
 }
+
+%end
+
+%hook BrowserController
+%new(v@:@)
+- (void)_downloadManagerButtonShim:(UIBarButtonItem *)sender {
+	objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedPresentationViewKey, [(UIBarButtonItem *)sender view], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	[self toggleDownloadManagerFromButtonBar];
+}
 %end
 
 %group iPadHooks
-%hook BrowserButtonBar
-- (void)setFrame:(CGRect)frame {
-  %orig(CGRectMake(frame.origin.x, frame.origin.y, frame.size.width+24, frame.size.height));
+%hook BrowserToolbar
+- (void)layoutSubviews {
+	%orig;
+	NSMutableDictionary *buttonDictionary = objc_getAssociatedObject(self, kSDMAssociatedButtonDictionaryKey);
+	UIBarButtonItem *_backItem = MSHookIvar<UIBarButtonItem *>(self, "_backItem");
+	UIBarButtonItem *_forwardItem = MSHookIvar<UIBarButtonItem *>(self, "_forwardItem");
+	UIBarButtonItem *_actionItem = MSHookIvar<UIBarButtonItem *>(self, "_actionItem");
+	UIBarButtonItem *_bookmarksItem = MSHookIvar<UIBarButtonItem *>(self, "_bookmarksItem");
+
+	[buttonDictionary setObject:[_backItem view] forKey:@"_backItem"];
+	[buttonDictionary setObject:[_forwardItem view] forKey:@"_forwardItem"];
+	[buttonDictionary setObject:[_actionItem view] forKey:@"_actionItem"];
+	[buttonDictionary setObject:[_bookmarksItem view] forKey:@"_bookmarksItem"];
 }
-%end
-%hook AddressView
-- (CGRect)_fieldRect {
-  CGRect frame = %orig;
-  return CGRectMake(frame.origin.x+24, frame.origin.y, frame.size.width-24, frame.size.height);
+
+- (CGRect)actionPopoverPresentationRect {
+	NSMutableDictionary *buttonDictionary = objc_getAssociatedObject(self, kSDMAssociatedButtonDictionaryKey);
+	return [(UIView *)[buttonDictionary objectForKey:@"_actionItem"] frame];
+}
+
+- (CGRect)backPopoverPresentationRect {
+	NSMutableDictionary *buttonDictionary = objc_getAssociatedObject(self, kSDMAssociatedButtonDictionaryKey);
+	return [(UIView *)[buttonDictionary objectForKey:@"_backItem"] frame];
+}
+
+- (CGRect)bookmarksPopoverPresentationRect {
+	NSMutableDictionary *buttonDictionary = objc_getAssociatedObject(self, kSDMAssociatedButtonDictionaryKey);
+	return [(UIView *)[buttonDictionary objectForKey:@"_bookmarksItem"] frame];
+}
+
+- (CGRect)forwardPopoverPresentationRect {
+	NSMutableDictionary *buttonDictionary = objc_getAssociatedObject(self, kSDMAssociatedButtonDictionaryKey);
+	return [(UIView *)[buttonDictionary objectForKey:@"_forwardItem"] frame];
 }
 %end
 %end

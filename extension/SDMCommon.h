@@ -21,6 +21,10 @@ _EXTERN NSString * const kSDMAssociatedPortraitDownloadButton;
 _EXTERN NSString * const kSDMAssociatedActionButton;
 _EXTERN NSString * const kSDMAssociatedBookmarksButton;
 
+// Exported from _CustomToolbar_Old.xm
+_EXTERN NSString * const kSDMAssociatedDownloadButtonKey;
+_EXTERN NSString * const kSDMAssociatedPresentationViewKey;
+
 typedef enum {
 	SDPanelTypeDownloadManager = 150,
 	SDPanelTypeDownloadPrompt = 151,
