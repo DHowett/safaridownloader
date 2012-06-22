@@ -18,7 +18,7 @@
 	    <key>key</key>
 	    <string>AutoRetryDisabled</string>
 	    <key>label</key>
-	    <string>Auto-Retry Failed</string>
+	    <string>AUTO_RETRY_ENABLED</string>
 	    <key>negate</key>
 	    <true/>
 	</dict>
@@ -34,14 +34,14 @@
 	    <key>key</key>
 	    <string>AutoRetryCount</string>
 	    <key>label</key>
-	    <string>Retry Attempts</string>
+	    <string>RETRY_ATTEMPTS</string>
 	    <key>validTitles</key>
 	    <array>
-		<string>1 attempt</string>
-		<string>2 attempts</string>
-		<string>3 attempts</string>
-		<string>4 attempts</string>
-		<string>5 attempts</string>
+		<string>RETRY_ATTEMPTS_1</string>
+		<string>RETRY_ATTEMPTS_2</string>
+		<string>RETRY_ATTEMPTS_3</string>
+		<string>RETRY_ATTEMPTS_4</string>
+		<string>RETRY_ATTEMPTS_5</string>
 	    </array>
 	    <key>validValues</key>
 	    <array>
@@ -56,7 +56,7 @@
 	    <key>cell</key>
 	    <string>PSGroupCell</string>
 	    <key>label</key>
-	    <string>Auto-Retry Delay (Seconds)</string>
+	    <string>RETRY_DELAY</string>
 	</dict>
 	<dict>
 	    <key>cell</key>
@@ -78,6 +78,6 @@
 	</dict>
     </array>
     <key>title</key>
-    <string>Auto-Retry</string>
+    <string>AUTO_RETRY</string>
 </dict>
 </plist>

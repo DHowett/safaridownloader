@@ -23,7 +23,7 @@ static BOOL _legacy = NO;
 - (void)navigationBar:(id)bar buttonClicked:(int)clicked;
 @end
 
-@interface SDSettingsCustomFileTypeController : PSListController {
+@interface SDSettingsCustomFileTypeController : SDListController {
 	BOOL _deleted;
 	BOOL _isNewType;
 	NSString *_name;
@@ -68,8 +68,8 @@ static BOOL _legacy = NO;
 	[super viewDidLoad];
 	// Used on >= 3.2 to add navbar buttons. why do I need to do this myself? Why does it work for apple and not me?
 	if (![[PSViewController class] instancesRespondToSelector:@selector(showLeftButton:withStyle:rightButton:withStyle:)]) {
-		UIBarButtonItem *cancelButton([[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(navBarButtonClicked:)]);
-		UIBarButtonItem *saveButton([[UIBarButtonItem alloc] initWithTitle:@"Save" style:UIBarButtonItemStyleDone target:self action:@selector(navBarButtonClicked:)]);
+		UIBarButtonItem *cancelButton([[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringFromTableInBundle(@"CANCEL", nil, [self bundle], @"") style:UIBarButtonItemStylePlain target:self action:@selector(navBarButtonClicked:)]);
+		UIBarButtonItem *saveButton([[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringFromTableInBundle(@"SAVE", nil, [self bundle], @"") style:UIBarButtonItemStyleDone target:self action:@selector(navBarButtonClicked:)]);
 		cancelButton.tag = 0;
 		saveButton.tag = 1;
 		[[self navigationItem] setLeftBarButtonItem:cancelButton];
@@ -174,7 +174,7 @@ static BOOL _legacy = NO;
 			NSLog(@"%@", _mimetypes);
 			[self loadExtraItemsAtIndex:mimIdx fromArray:_mimetypes];
 		}
-		self.title = _isNewType ? @"New File Type" : _name;
+		self.title = _isNewType ? NSLocalizedStringFromTableInBundle(@"NEW_FILE_TYPE", nil, [self bundle], @"") : _name;
 	}
 	if(_isNewType) {
 		// remove the delete button and its group if we're a new type.
@@ -202,7 +202,8 @@ static BOOL _legacy = NO;
 									       cell:c
 									       edit:nil];
 	if(contents) [spec setProperty:contents forKey:@"valueCopy"];
-	[spec setPlaceholder:(extension ? @"Extension" : @"Mimetype")];
+	NSString *placeholder = (extension ? @"EXTENSIONS_PLACEHOLDER" : @"MIMETYPES_PLACEHOLDER");
+	[spec setPlaceholder:NSLocalizedStringFromTableInBundle(placeholder, nil, [self bundle], @"")];
 	[spec setKeyboardType:0 autoCaps:0 autoCorrection:0];
 	[spec setProperty:[NSNumber numberWithBool:(contents == nil)] forKey:@"new"];
 	[spec setProperty:(extension ? @"extension" : @"mimetype") forKey:@"itemType"];
@@ -249,7 +250,7 @@ static BOOL _legacy = NO;
 }
 @end
 
-@interface SDSettingsFileTypeListController : PSListController {
+@interface SDSettingsFileTypeListController : SDListController {
 	int _type;
 	NSMutableSet *_disabledItems;
 }
@@ -317,7 +318,7 @@ static BOOL _legacy = NO;
 }
 @end
 
-@interface SDSettingsFileClassListController : PSListController {
+@interface SDSettingsFileClassListController : SDListController {
 	NSMutableArray *_customTypeSpecifiers;
 }
 //- (id)initForContentSize:(CGSize)size;
@@ -327,7 +328,7 @@ static BOOL _legacy = NO;
 - (id)specifiers;
 @end
 
-@implementation SDSettingsFileClassListController : PSListController
+@implementation SDSettingsFileClassListController
 - (void)viewWillRedisplay {
 	[self reloadSpecifiers];
 }
@@ -346,18 +347,12 @@ static BOOL _legacy = NO;
 	if(!_specifiers) {
 		_specifiers = [[self loadSpecifiersFromPlistName:@"FileClass" target:self] retain];
 
-		NSMutableArray *removals = [NSMutableArray array];
-		for(PSSpecifier *s in _specifiers) {
-			if([[s propertyForKey:@"legacy"] boolValue] && !_legacy) [removals addObject:s];
-		}
-		[(NSMutableArray*)_specifiers removeObjectsInArray:removals];
-
 		NSArray *customTypes = [[[NSDictionary dictionaryWithContentsOfFile:preferencesPath()] objectForKey:@"CustomItems"] allKeys] ?: [NSArray array];
 
 		int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
 		int index = _legacy ? 3 : 2;
 		for(NSString *fileClass in [[SDFileType allCategories] allKeys]) {
-			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileClass
+			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:SDLocalizedStringInTable(fileClass, @"FileTypes")
 									   target:self
 									      set:nil
 									      get:nil
@@ -380,33 +375,68 @@ static BOOL _legacy = NO;
 									     edit:nil];
 			[spec setProperty:customType forKey:@"typename"];
 			[spec setProperty:@"SDSettingsCustomFileTypeController" forKey:@"customControllerClass"];
-			[spec setProperty:@"Save" forKey:@"okTitle"];
-			[spec setProperty:@"Cancel" forKey:@"cancelTitle"];
-			[spec setProperty:@"Edit this File Type information." forKey:@"prompt"];
+			[spec setProperty:NSLocalizedStringFromTableInBundle(@"SAVE", nil, [self bundle], @"") forKey:@"okTitle"];
+			[spec setProperty:NSLocalizedStringFromTableInBundle(@"CANCEL", nil, [self bundle], @"") forKey:@"cancelTitle"];
+			[spec setProperty:NSLocalizedStringFromTableInBundle(@"EDIT_FILE_TYPE_PROMPT", nil, [self bundle], @"") forKey:@"prompt"];
 			[_customTypeSpecifiers addObject:spec];
 			[(NSMutableArray *)_specifiers addObject:spec];
 		}
-		self.title = @"Filetypes";
+		self.title = NSLocalizedStringFromTableInBundle(@"FILE_TYPES", nil, [self bundle], @"");
 	}
 	return _specifiers;
 }
 @end
 
 @implementation SDListController
-- (id)specifiers {
-	NSString *plist = [self.specifier propertyForKey:@"plist"] ?: @"SafariDownloader";
-	if(_specifiers == nil) {
-		_specifiers = [[self loadSpecifiersFromPlistName:plist target:self] retain];
-//	[specifiers addObjectsFromArray:extraSpecs];
-		NSMutableArray *removals = [NSMutableArray array];
-		for(PSSpecifier *s in _specifiers) {
-			if([[s propertyForKey:@"legacy"] boolValue] && !_legacy) [removals addObject:s];
+- (id)bundle {
+	return [NSBundle bundleWithPath:BUNDLE_PATH];
+}
+
+- (id)navigationTitle {
+	return [[self bundle] localizedStringForKey:[super navigationTitle] value:[super navigationTitle] table:nil];
+}
+
+- (id)loadSpecifiersFromPlistName:(NSString *)plistName target:(id)target {
+	NSMutableArray *specifiers = [super loadSpecifiersFromPlistName:plistName target:target];
+	NSMutableArray *removals = [NSMutableArray array];
+	for(PSSpecifier *spec in specifiers) {
+		if([[spec propertyForKey:@"legacy"] boolValue] && !_legacy) [removals addObject:spec];
+
+		if([spec name]) [spec setName:[[self bundle] localizedStringForKey:[spec name] value:[spec name] table:nil]];
+		if([spec titleDictionary]) {
+			NSMutableDictionary *newTitles = [NSMutableDictionary dictionary];
+			for(NSString *key in [spec titleDictionary]) {
+				NSString *value = [[spec titleDictionary] objectForKey:key];
+				[newTitles setObject:[[self bundle] localizedStringForKey:value value:value table:nil] forKey:key];
+			}
+			[spec setTitleDictionary:newTitles];
 		}
-		[(NSMutableArray*)_specifiers removeObjectsInArray:removals];
+		NSString *value = [spec propertyForKey:@"footerText"];
+		if(value)
+			[spec setProperty:[[self bundle] localizedStringForKey:value value:value table:nil] forKey:@"footerText"];
+		value = [spec propertyForKey:@"okTitle"];
+		if(value)
+			[spec setProperty:[[self bundle] localizedStringForKey:value value:value table:nil] forKey:@"okTitle"];
+		value = [spec propertyForKey:@"cancelTitle"];
+		if(value)
+			[spec setProperty:[[self bundle] localizedStringForKey:value value:value table:nil] forKey:@"cancelTitle"];
+		if([spec isKindOfClass:[PSTextFieldSpecifier class]]) {
+			value = [(PSTextFieldSpecifier *)spec placeholder];
+			if(value)
+				[(PSTextFieldSpecifier *)spec setPlaceholder:[[self bundle] localizedStringForKey:value value:value table:nil]];
+		}
+	}
+	[(NSMutableArray*)specifiers removeObjectsInArray:removals];
+	return specifiers;
+}
+
+- (id)specifiers {
+	if(!_specifiers) {
+		NSString *plist = [self.specifier propertyForKey:@"plist"] ?: @"SafariDownloader";
+		_specifiers = [[self loadSpecifiersFromPlistName:plist target:self] retain];
 	}
 	return _specifiers;
 }
-
 @end
 
 @implementation SDSettingsController

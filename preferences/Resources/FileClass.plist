@@ -10,26 +10,26 @@
 	    <key>isStaticText</key>
 	    <true/>
 	    <key>footerText</key>
-	    <string>Disabling a file type will cause Safari to not prompt you with regards to downloading a file of that type, and instead behave normally.</string>
+	    <string>FILE_TYPE_DISABLE_EXPLANATION</string>
 	</dict>
 	<dict>
 	    <key>cell</key>
 	    <string>PSStaticTextCell</string>
 	    <key>label</key>
-	    <string>Disabling a file type will cause Safari to not prompt you with regards to downloading a file of that type, and instead behave normally.</string>
+	    <string>FILE_TYPE_DISABLE_EXPLANATION</string>
 	    <key>legacy</key><true/>
 	</dict>
 	<dict>
 	    <key>cell</key>
 	    <string>PSGroupCell</string>
 	    <key>label</key>
-	    <string>Built-In Types</string>
+	    <string>BUILT_IN_TYPES</string>
 	</dict>
 	<dict>
 	    <key>cell</key>
 	    <string>PSGroupCell</string>
 	    <key>label</key>
-	    <string>Custom</string>
+	    <string>CUSTOM</string>
 	</dict>
 	<dict>
 		<key>cell</key>
@@ -39,11 +39,11 @@
 	    <key>detail</key>
 	    <string>SDFileTypeSetupController</string>
 	    <key>label</key>
-	    <string>Add File Type...</string>
+	    <string>ADD_FILE_TYPE</string>
 	    <key>prompt</key>
-	    <string>Enter new File Type information.</string>
-	    <key>okTitle</key><string>Save</string>
-	    <key>cancelTitle</key><string>Cancel</string>
+	    <string>ADD_FILE_TYPE_PROMPT</string>
+	    <key>okTitle</key><string>SAVE</string>
+	    <key>cancelTitle</key><string>CANCEL</string>
 	</dict>
     </array>
 </dict>
