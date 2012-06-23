@@ -252,6 +252,7 @@ static BOOL _legacy = NO;
 
 @interface SDSettingsFileTypeListController : SDListController {
 	int _type;
+	NSMutableDictionary *_fileActions;
 	NSMutableSet *_disabledItems;
 }
 - (id)initForContentSize:(CGSize)size;
@@ -262,8 +263,8 @@ static BOOL _legacy = NO;
 @implementation SDSettingsFileTypeListController
 - (id)initForContentSize:(CGSize)size {
 	if((self = [super initForContentSize:size])) {
-		NSArray *disabledItemsArray = [[NSDictionary dictionaryWithContentsOfFile:preferencesPath()] objectForKey:@"DisabledItems"] ?: [NSArray array];
-		_disabledItems = [[NSMutableSet alloc] initWithArray:disabledItemsArray];
+		_fileActions = [[NSMutableDictionary dictionaryWithContentsOfFile:preferencesPath()] objectForKey:@"FileActions"] ?: [NSMutableDictionary dictionary];
+		[_fileActions retain];
 	}
 	return self;
 }
@@ -271,7 +272,7 @@ static BOOL _legacy = NO;
 - (BOOL)canBeShownFromSuspendedState { return NO; }
 
 - (void)dealloc {
-	[_disabledItems release];
+	[_fileActions release];
 	[super dealloc];
 }
 
@@ -299,21 +300,23 @@ static BOOL _legacy = NO;
 }
 
 - (CFBooleanRef)get:(PSSpecifier *)spec {
-	if([_disabledItems containsObject:[[spec propertyForKey:@"fileType"] primaryMIMEType]]) {
-		return kCFBooleanFalse;
-	} else {
-		return kCFBooleanTrue;
-	}
+	SDFileType *fileType = [spec propertyForKey:@"fileType"];
+	NSNumber *preferredAction = [_fileActions objectForKey:[fileType primaryMIMEType]];
+	SDFileTypeAction fileAction;
+	if(!preferredAction) fileAction = [fileType defaultAction];
+	else fileAction = (SDFileTypeAction)[preferredAction intValue];
+	return fileAction == SDFileTypeActionDownload ? kCFBooleanTrue : kCFBooleanFalse;
 }
 
 - (void)set:(CFBooleanRef)enabled spec:(PSSpecifier *)spec {
-	if(enabled == kCFBooleanTrue) {
-		[_disabledItems removeObject:[[spec propertyForKey:@"fileType"] primaryMIMEType]];
-	} else {
-		[_disabledItems addObject:[[spec propertyForKey:@"fileType"] primaryMIMEType]];
+	SDFileType *fileType = [spec propertyForKey:@"fileType"];
+	SDFileTypeAction fileAction = SDFileTypeActionDownload;
+	if(enabled == kCFBooleanFalse) {
+		fileAction = SDFileTypeActionView;
 	}
+	[_fileActions setObject:[NSNumber numberWithInt:fileAction] forKey:[fileType primaryMIMEType]];
 	NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:preferencesPath()] ?: [NSMutableDictionary dictionary];
-	[dict setObject:[_disabledItems allObjects] forKey:@"DisabledItems"];
+	[dict setObject:_fileActions forKey:@"FileActions"];
 	[dict writeToFile:preferencesPath() atomically:NO];
 }
 @end

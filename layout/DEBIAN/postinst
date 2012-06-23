@@ -1,13 +1,5 @@
 #!/bin/bash
 if [[ $1 == configure ]]; then
-	if [[ ! -e /var/mobile/Library/Application\ Support ]]; then
-		mkdir /var/mobile/Library/Application\ Support
-		chown -R mobile:mobile /var/mobile/Library/Application\ Support
-	fi
-	if [[ ! -f /var/mobile/Library/Preferences/net.howett.safaridownloader.plist ]]; then
-		cp "/Library/Application Support/Safari Downloader/DefaultPrefs.plist" /var/mobile/Library/Preferences/net.howett.safaridownloader.plist
-		chown mobile.mobile /var/mobile/Library/Preferences/net.howett.safaridownloader.plist
-	fi
 	if [[ -e /var/mobile/Media/Downloads ]]; then
 		chown -R mobile.mobile /var/mobile/Media/Downloads
 	else

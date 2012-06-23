@@ -236,8 +236,11 @@ static id sharedManager = nil;
 		}
 	}
 	if (fileType) {
-		if ([[[SDUserSettings sharedInstance] arrayForKey:@"DisabledItems"] containsObject:[fileType primaryMIMEType]])
-			return NO;
+		NSNumber *preferredAction = [[[SDUserSettings sharedInstance] objectForKey:@"FileActions" default:nil] objectForKey:[fileType primaryMIMEType]];
+		SDFileTypeAction fileAction;
+		if(!preferredAction) fileAction = [fileType defaultAction];
+		else fileAction = (SDFileTypeAction)[preferredAction intValue];
+		return fileAction == SDFileTypeActionDownload;
 	}
 	return fileType != nil;
 }

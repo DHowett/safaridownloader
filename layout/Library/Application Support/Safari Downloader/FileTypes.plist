@@ -12,12 +12,14 @@
 		);
 		GenericType = "package/x-generic";
 		Category = "Archives";
+		DefaultAction = 1;
 	};
 	"Android package" = {
 		Extensions = (apk);
 		Mimetypes = ("application/vnd.android.package-archive");
 		GenericType = "package/x-generic";
 		Category = "Archives";
+		DefaultAction = 1;
 	};
 	"Debian package" = {
 		Extensions = (
@@ -29,6 +31,7 @@
 		);
 		GenericType = "package/x-generic";
 		Category = "Archives";
+		DefaultAction = 1;
 	};
 	"gzip archive" = {
 		Extensions = (
@@ -40,6 +43,7 @@
 		);
 		GenericType = "package/x-generic";
 		Category = "Archives";
+		DefaultAction = 1;
 	};
 	"RAR archive" = {
 		Extensions = (
@@ -50,6 +54,7 @@
 		);
 		GenericType = "package/x-generic";
 		Category = "Archives";
+		DefaultAction = 1;
 	};
 	"Tape archive" = {
 		Extensions = (
@@ -62,6 +67,7 @@
 		);
 		GenericType = "package/x-generic";
 		Category = "Archives";
+		DefaultAction = 1;
 	};
 	"ZIP archive" = {
 		Extensions = (
@@ -72,6 +78,7 @@
 		);
 		GenericType = "package/x-generic";
 		Category = "Archives";
+		DefaultAction = 1;
 	};
 	"Microsoft Word Document" = {
 		ForceExtension = YES;
@@ -87,6 +94,7 @@
 		);
 		GenericType = "x-office/document";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"Microsoft Excel Document" = {
 		ForceExtension = YES;
@@ -107,6 +115,7 @@
 		);
 		GenericType = "x-office/spreadsheet";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"Microsoft PowerPoint Document" = {
 		ForceExtension = YES;
@@ -126,6 +135,7 @@
 		);
 		GenericType = "x-office/presentation";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"OpenDocument Text" = {
 		Extensions = (
@@ -136,6 +146,7 @@
 		);
 		GenericType = "x-office/document";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"OpenDocument Spreadsheet" = {
 		Extensions = (
@@ -146,6 +157,7 @@
 		);
 		GenericType = "x-office/spreadsheet";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"OpenDocument Presentation" = {
 		Extensions = (
@@ -156,6 +168,7 @@
 		);
 		GenericType = "x-office/presentation";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"OpenDocument Graphics" = {
 		Extensions = (
@@ -166,6 +179,7 @@
 		);
 		GenericType = "x-office/drawing";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"PDF document" = {
 		Extensions = (
@@ -179,6 +193,7 @@
 			"text/pdf",
 		);
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"Text document" = {
 		Mimetypes = (
@@ -188,6 +203,7 @@
 		);
 		GenericType = "text/x-generic";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	Torrent = {
 		Extensions = (
@@ -197,6 +213,7 @@
 			"application/x-bittorrent",
 		);
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	vCard = {
 		Extensions = (
@@ -207,6 +224,7 @@
 		);
 		GenericType = "x-office/address-book";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	iCalendar = {
 		Extensions = (
@@ -220,6 +238,7 @@
 		);
 		GenericType = "x-office/calendar";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"XML document" = {
 		Mimetypes = (
@@ -227,6 +246,7 @@
 			"text/xml",
 		);
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"CSV document" = {
 		Extensions = (csv);
@@ -235,6 +255,7 @@
 		);
 		GenericType = "x-office/spreadsheet";
 		Category = "Documents";
+		DefaultAction = 1;
 	};
 	"GIF image" = {
 		Extensions = (
@@ -245,6 +266,7 @@
 		);
 		GenericType = "image/x-generic";
 		Category = "Images";
+		DefaultAction = 0;
 	};
 	"JPEG image" = {
 		Extensions = (
@@ -261,6 +283,7 @@
 		);
 		GenericType = "image/x-generic";
 		Category = "Images";
+		DefaultAction = 0;
 	};
 	"PNG image" = {
 		Extensions = (
@@ -271,6 +294,7 @@
 		);
 		GenericType = "image/x-generic";
 		Category = "Images";
+		DefaultAction = 0;
 	};
 	"TIFF image" = {
 		Extensions = (
@@ -283,6 +307,7 @@
 		);
 		GenericType = "image/x-generic";
 		Category = "Images";
+		DefaultAction = 0;
 	};
 	"Targa image" = {
 		Extensions = (
@@ -295,6 +320,7 @@
 		);
 		GenericType = "image/x-generic";
 		Category = "Images";
+		DefaultAction = 0;
 	};
 	"Windows Icon" = {
 		Extensions = (
@@ -306,6 +332,7 @@
 		);
 		GenericType = "image/x-generic";
 		Category = "Images";
+		DefaultAction = 0;
 	};
 	"3GPP video" = {
 		Extensions = (
@@ -317,6 +344,7 @@
 		);
 		GenericType = "video/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	"AAC, M4* audio" = {
 		Extensions = (
@@ -335,6 +363,7 @@
 		);
 		GenericType = "video/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	"AVI video" = {
 		Extensions = (
@@ -347,6 +376,7 @@
 		);
 		GenericType = "video/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	"Flash, MP4 video" = {
 		Extensions = (
@@ -363,6 +393,7 @@
 		);
 		GenericType = "video/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	"MPEG audio" = {
 		Extensions = (
@@ -377,6 +408,7 @@
 		);
 		GenericType = "audio/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	"MPEG video" = {
 		Extensions = (
@@ -392,6 +424,7 @@
 		);
 		GenericType = "video/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	"OGG" = {
 		Extensions = (
@@ -410,6 +443,7 @@
 		);
 		GenericType = "audio/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	"Quicktime video" = {
 		Extensions = (
@@ -421,6 +455,7 @@
 		);
 		GenericType = "video/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	"WAVE audio" = {
 		Extensions = (
@@ -435,6 +470,7 @@
 		);
 		GenericType = "audio/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	WMA = {
 		Extensions = (
@@ -445,6 +481,7 @@
 		);
 		GenericType = "audio/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	WMV = {
 		Extensions = (
@@ -455,12 +492,14 @@
 		);
 		GenericType = "video/x-generic";
 		Category = "Media";
+		DefaultAction = 1;
 	};
 	"Apple Disk Image" = {
 		Extensions = ( dmg );
 		Mimetypes = ( "application/x-apple-diskimage" );
 		GenericType = "disk-image";
 		Category = "Miscellaneous";
+		DefaultAction = 1;
 	};
 	"Binary data" = {
 		Mimetypes = (
@@ -472,6 +511,7 @@
 		);
 		GenericType = "application/x-executable";
 		Category = "Miscellaneous";
+		DefaultAction = 1;
 	};
 	"Perl script" = {
 		Extensions = (
@@ -482,6 +522,7 @@
 		);
 		GenericType = "text/x-script";
 		Category = "Miscellaneous";
+		DefaultAction = 1;
 	};
 	"Shell script" = {
 		Extensions = (
@@ -493,12 +534,14 @@
 		);
 		GenericType = "text/x-script";
 		Category = "Miscellaneous";
+		DefaultAction = 1;
 	};
 	"Patch file" = {
 		Extensions = (patch, diff);
 		Mimetypes = ("text/x-diff");
 		GenericType = "text/x-script";
 		Category = "Miscellaneous";
+		DefaultAction = 1;
 	};
 	"Windows executable" = {
 		Extensions = (
@@ -516,5 +559,6 @@
 		);
 		GenericType = "application/x-executable";
 		Category = "Miscellaneous";
+		DefaultAction = 1;
 	};
 }

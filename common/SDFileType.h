@@ -1,3 +1,8 @@
+typedef enum {
+	SDFileTypeActionView = 0,
+	SDFileTypeActionDownload = 1
+} SDFileTypeAction;
+
 @interface SDFileType : NSObject {
 	NSArray *_MIMETypes;
 	NSArray *_extensions;
@@ -13,6 +18,7 @@
 @property (nonatomic, readonly, retain) NSString *category;
 @property (nonatomic, readonly, assign) BOOL forceExtensionUse;
 @property (nonatomic, readonly) NSString *primaryMIMEType;
+@property (nonatomic, readonly, assign) SDFileTypeAction defaultAction;
 + (void)loadAllFileTypes;
 + (void)unloadAllFileTypes;
 #ifndef SDFILETYPE_NO_CUSTOM
