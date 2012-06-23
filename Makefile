@@ -1,4 +1,5 @@
-export DEBUG=1
+#export TARGET=simulator
+#export DEBUG=1
 include framework/makefiles/common.mk
 
 export ADDITIONAL_CFLAGS = -include $(THEOS_PROJECT_DIR)/release.h
@@ -8,8 +9,6 @@ ifneq ($(THEOS_TARGET_NAME),iphone_simulator)
 endif
 
 export RELEASE.CFLAGS = -DRELEASE
-
-export GO_EASY_ON_ME = 1
 
 include framework/makefiles/aggregate.mk
 

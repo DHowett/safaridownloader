@@ -15,6 +15,11 @@ static NSMutableDictionary *_launchActions;
 - (id)localizedName;
 @end
 
+@interface UIDocumentInteractionController (Private)
+- (NSArray *)_applications:(BOOL)unknown;
+- (void)_openDocumentWithApplication:(id)application;
+@end
+
 @implementation SDDownloadActionSheet
 @synthesize download = _download;
 

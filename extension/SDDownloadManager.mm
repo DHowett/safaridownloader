@@ -23,6 +23,11 @@
 static const NSString *const kSDMAssociatedIgnoreRequestKey = @"kSDMAssociatedIgnoreRequestKey";
 NSString * const kSDMAssociatedOverrideAuthenticationChallenge = @"kSDMAssociatedOverrideAuthenticationChallenge";
 
+@interface BrowserController (Additions)
+- (void)_addAuthenticationChallenge:(id)challenge displayNow:(BOOL)now;
+- (void)_sdmUpdateBadge:(NSString *)badge;
+@end
+
 @interface SDDownloadManager ()
 - (void)_updateBadges;
 @end
@@ -122,7 +127,6 @@ static id sharedManager = nil;
 	 inFrame:(WebFrame *)frame
     withListener:(id<WebPolicyDecisionListener>)listener
 	 context:(id)context {
-	NSString *url = [[request URL] absoluteString];
 	NSString *scheme = [[request URL] scheme];
 
 	NSNumber *navigationTypeObject = [action objectForKey:WebActionNavigationTypeKey];
@@ -236,7 +240,7 @@ static id sharedManager = nil;
 		}
 	}
 	if (fileType) {
-		NSNumber *preferredAction = [[[SDUserSettings sharedInstance] objectForKey:@"FileActions" default:nil] objectForKey:[fileType primaryMIMEType]];
+		NSNumber *preferredAction = [(NSDictionary *)[[SDUserSettings sharedInstance] objectForKey:@"FileActions" default:nil] objectForKey:[fileType primaryMIMEType]];
 		SDFileTypeAction fileAction;
 		if(!preferredAction) fileAction = [fileType defaultAction];
 		else fileAction = (SDFileTypeAction)[preferredAction intValue];
@@ -396,6 +400,10 @@ static id sharedManager = nil;
 }
 
 #pragma mark -/*}}}*/
+
+- (int)downloadsRunning {
+	return _model.runningDownloads.count;
+}
 
 - (void)_updateBadges {
 	NSString *valueString = nil;

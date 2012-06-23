@@ -6,6 +6,9 @@
 #import "UIKitExtra/UIWebDocumentView.h"
 #import "UIKitExtra/UIWebViewWebViewDelegate.h"
 
+#import "Safari/BrowserController.h"
+#import "Safari/TabController.h"
+
 @interface UIActionSheet (SDMPrivate)
 - (NSMutableArray *)buttons;
 @end

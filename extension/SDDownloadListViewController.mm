@@ -189,6 +189,7 @@
 - (void)viewWillDisappear:(BOOL)animated {
 	[_updateTimer invalidate];
 	[_updateTimer release];
+	_updateTimer = nil;
 	[self _detachFromDownloadManager];
 	[super viewWillDisappear:animated];
 }

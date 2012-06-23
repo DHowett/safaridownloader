@@ -4,6 +4,10 @@
 #import "common/SDResources.h"
 #import "common/SDFileType.h"
 
+@interface PSTextViewTableCell: NSObject
+- (NSString *)value;
+@end
+
 static NSString *_preferencesPath;
 static NSString *preferencesPath() {
 	return _preferencesPath ?: _preferencesPath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/net.howett.safaridownloader.plist"] retain];
@@ -100,7 +104,7 @@ static BOOL _legacy = NO;
 }
 
 - (NSString *)getTextFromSpecifier:(PSSpecifier *)spec {
-	return [[spec propertyForKey:@"cellObject"] value];
+	return [(PSTextViewTableCell *)[spec propertyForKey:@"cellObject"] value];
 }
 
 - (void)updatePreferencesFile {

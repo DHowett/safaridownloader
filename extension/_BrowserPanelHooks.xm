@@ -8,6 +8,7 @@
 #import "SDFileBrowserNavigationController.h"
 
 #import "Safari/BrowserController.h"
+#import "Safari/TabController.h"
 #import "Safari/RotatablePopoverController.h"
 
 /* {{{ Private and Additional Categories */
@@ -24,6 +25,10 @@
 
 @interface BrowserController (SafariFour)
 - (void)setCurrentPopoverController:(UIPopoverController *)p;
+@end
+
+@interface UIActionSheet (Private2)
+- (void)presentFromRect:(CGRect)rect inView:(UIView *)view direction:(NSInteger)direction allowInteractionWithViews:(NSArray *)views backgroundStyle:(NSInteger)backgroundStyle animated:(BOOL)animated;
 @end
 /* }}} */
 
@@ -62,7 +67,7 @@ static void _setShowingCurrentPanel_animate_core(id self, BOOL showing, BOOL ani
 		if(showing) {
 			if(SDMSystemVersionLT(_SDM_iOS_5_0))
 				[self _resizeNavigationController:panel small:NO];
-			[presentationController presentModalViewController:panel animated:animate];
+			[presentationController presentModalViewController:(UIViewController *)panel animated:animate];
 			//[self _presentModalViewController:panel fromRectInToolbar:CGRectZero];
 		} else {
 			[self willHideBrowserPanel:panel];

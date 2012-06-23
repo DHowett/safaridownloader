@@ -8,6 +8,9 @@
 #import "SDResources.h"
 #import "SDDownloadManager.h"
 
+#import "Safari/BrowserController.h"
+#import "Safari/TabController.h"
+
 @interface DOMNode: NSObject
 - (DOMNode *)parentNode;
 - (NSURL *)absoluteImageURL;

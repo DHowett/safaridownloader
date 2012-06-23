@@ -158,7 +158,6 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 - (void)downloadDidBegin:(NSURLDownload *)download {
 	self.startDate = [NSDate date];
 	self.status = SDDownloadStatusWaiting;
-#warning progress heartbeat timer.
 }
 
 - (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path {

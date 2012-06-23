@@ -12,6 +12,10 @@
 
 #import "SandCastle/SandCastle.h"
 
+@interface UIAlertView (TextField)
+- (int)addTextFieldWithValue:(NSString *)value label:(NSString *)label;
+@end
+
 @interface _SDFileEntry: NSObject {
 	BOOL _isDir;
 	NSString *_path;
