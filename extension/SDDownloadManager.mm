@@ -23,6 +23,10 @@
 static const NSString *const kSDMAssociatedIgnoreRequestKey = @"kSDMAssociatedIgnoreRequestKey";
 NSString * const kSDMAssociatedOverrideAuthenticationChallenge = @"kSDMAssociatedOverrideAuthenticationChallenge";
 
+@interface SDDownloadManager ()
+- (void)_updateBadges;
+@end
+
 @implementation SDDownloadManager
 @synthesize dataModel = _model, downloadObserver = _downloadObserver, authenticationManager = _authenticationManager;
 
@@ -70,6 +74,7 @@ static id sharedManager = nil;
 			if(dl.status != SDDownloadStatusFailed) // Don't re-enqueue failed downloads.
 				[_downloadQueue addOperation:dl];
 		}
+		[self _updateBadges];
 	}
 	return self;
 }
@@ -254,6 +259,7 @@ static id sharedManager = nil;
 
 	[_downloadQueue addOperation:download];
 	[_model addDownload:download toList:SDDownloadModelRunningList];
+	[self _updateBadges];
 
 	[download release];
 }
@@ -263,7 +269,7 @@ static id sharedManager = nil;
 	if (download != nil) {
 		[download cancel];
 		[_model removeDownload:download fromList:SDDownloadModelRunningList];
-		[self updateBadges];
+		[self _updateBadges];
 	}
 	return NO;
 }
@@ -320,6 +326,7 @@ static id sharedManager = nil;
 		[_model saveData];
 	}
 	[_downloadObserver downloadDidChangeStatus:download];
+	[self _updateBadges];
 	//[_model downloadUpdated:download];
 	// waiting, authenticationwaiting, running, paused, completed, cancelled, failed
 	// auth challenge handled by other delegate method
@@ -387,14 +394,10 @@ static id sharedManager = nil;
 
 #pragma mark -/*}}}*/
 
-- (void)updateBadges {
-	/*
-	NSString *val = nil;
-	if(_currentDownloads.count > 0) val = [NSString stringWithFormat:@"%d", _currentDownloads.count];
-	[_portraitDownloadButton _setBadgeValue:val];
-	[_landscapeDownloadButton _setBadgeValue:val];
-	*/
-	//[[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+- (void)_updateBadges {
+	NSString *valueString = nil;
+	if(_model.runningDownloads.count > 0) valueString = [NSString stringWithFormat:@"%d", _model.runningDownloads.count];
+	[[SDM$BrowserController sharedBrowserController] _sdmUpdateBadge:valueString];
 }
 @end
 

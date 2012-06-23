@@ -8,6 +8,7 @@
 #import "UIKitExtra/UIToolbarButton.h"
 
 NSString * const kSDMAssociatedPortraitDownloadButton = @"kSDMAssociatedPortraitDownloadButton";
+NSString * const kSDMAssociatedLandscapeDownloadButton = @"kSDMAssociatedLandscapeDownloadButton";
 NSString * const kSDMAssociatedActionButton = @"kSDMAssociatedActionButton";
 NSString * const kSDMAssociatedBookmarksButton = @"kSDMAssociatedBookmarksButton";
 
@@ -124,6 +125,8 @@ static void initCustomToolbar(void) {
 		int tag = button.tag;
 		if(tag == 61)
 			objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedPortraitDownloadButton, button, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+		else if(tag == 62)
+			objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedLandscapeDownloadButton, button, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 		else if(tag == 1)
 			objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedBookmarksButton, button, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 		else if(tag == 15)
@@ -132,6 +135,16 @@ static void initCustomToolbar(void) {
 		curButton++;
 	}
 	return;
+}
+%end
+
+%hook BrowserController
+%new(v@:@)
+- (void)_sdmUpdateBadge:(NSString *)value {
+	UIToolbarButton *portraitButton = objc_getAssociatedObject(self, kSDMAssociatedPortraitDownloadButton);
+	UIToolbarButton *landscapeButton = objc_getAssociatedObject(self, kSDMAssociatedLandscapeDownloadButton);
+	[portraitButton _setBadgeValue:value];
+	[landscapeButton _setBadgeValue:value];
 }
 %end
 

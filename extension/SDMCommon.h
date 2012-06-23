@@ -21,8 +21,7 @@ _EXTERN NSString * const kSDMAssociatedPortraitDownloadButton;
 _EXTERN NSString * const kSDMAssociatedActionButton;
 _EXTERN NSString * const kSDMAssociatedBookmarksButton;
 
-// Exported from _CustomToolbar_Old.xm
-_EXTERN NSString * const kSDMAssociatedDownloadButtonKey;
+// Exported from _CustomToolbar_iOS5.xm
 _EXTERN NSString * const kSDMAssociatedPresentationViewKey;
 
 typedef enum {

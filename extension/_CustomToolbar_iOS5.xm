@@ -6,10 +6,34 @@
 
 #import "Safari/BrowserController.h"
 #import "UIKitExtra/UIToolbarButton.h"
+#import "SDDownloadButtonItem.h"
+
+@interface BrowserToolbar: UIToolbar
+- (SDDownloadButtonItem *)_downloadButtonItem;
+@end
 
 @interface BrowserController (SDMAdditions)
 - (void)toggleDownloadManagerFromButtonBar;
+- (BrowserToolbar *)buttonBar;
 @end
+
+@interface UIBarButtonItem (SDMPrivate)
+- (UIToolbarButton *)view;
+@end
+
+%subclass SDDownloadButtonItem: SpacedBarButtonItem
+static NSString * const kSDDownloadButtonItemAssociatedBadgeKey = @"kSDDownloadButtonItemAssociatedBadgeKey";
+%new(v@:@)
+- (void)setBadge:(NSString *)badge {
+	objc_setAssociatedObject(self, kSDDownloadButtonItemAssociatedBadgeKey, badge, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	[(UIToolbarButton *)[self view] _setBadgeValue:badge];
+}
+
+%new(@@:)
+- (NSString *)badge {
+	return objc_getAssociatedObject(self, kSDDownloadButtonItemAssociatedBadgeKey);
+}
+%end
 
 %hook SpacedBarButtonItem
 - (id)init {
@@ -29,28 +53,21 @@
 }
 %end
 
-@interface UIBarButtonItem (SDMPrivate)
-- (void)destroyPrecedingSpace; // Actually in SpacedBarButtonItem
-- (id)view;
-@end
-
 %hook BrowserToolbar
-NSString * const kSDMAssociatedDownloadButtonKey = @"kSDMAssociatedDownloadButtonKey";
 NSString * const kSDMAssociatedPresentationViewKey = @"kSDMAssociatedPresentationViewKey";
 
 // Private
-NSString * const kSDMAssociatedButtonDictionaryKey = @"kSDMAssociatedButtonDictionaryKey";
+static NSString * const kSDMAssociatedButtonDictionaryKey = @"kSDMAssociatedButtonDictionaryKey";
 - (NSMutableArray *)_defaultSpacedItems {
 	NSMutableArray *orig = [%orig mutableCopy];
 	SpacedBarButtonItem *_tabExposeItem = MSHookIvar<SpacedBarButtonItem *>(self, "_tabExposeItem");
 
-	UIBarButtonItem *downloadButtonItem = [[%c(SpacedBarButtonItem) alloc] init];
+	UIBarButtonItem *downloadButtonItem = [[%c(SDDownloadButtonItem) alloc] init];
 	downloadButtonItem.image = [SDResources imageNamed:@"DownloadButton"];
 	downloadButtonItem.landscapeImagePhone = [SDResources imageNamed:@"DownloadButtonSmall"];
 	downloadButtonItem.style = UIBarButtonItemStylePlain;
 	downloadButtonItem.target = [SDM$BrowserController sharedBrowserController];
 	downloadButtonItem.action = @selector(_downloadManagerButtonShim:);
-	objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedDownloadButtonKey, downloadButtonItem, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 	if(SDM$WildCat)
 		[orig addObject:downloadButtonItem];
 	else
@@ -67,20 +84,24 @@ NSString * const kSDMAssociatedButtonDictionaryKey = @"kSDMAssociatedButtonDicti
 	return;
 }
 
-%end
-
-%hook BrowserController
-%new(v@:@)
-- (void)_downloadManagerButtonShim:(UIBarButtonItem *)sender {
-	objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedPresentationViewKey, [(UIBarButtonItem *)sender view], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-	[self toggleDownloadManagerFromButtonBar];
+%new(@@:)
+- (SDDownloadButtonItem *)_downloadButtonItem {
+	NSArray *items = [self items];
+	NSInteger index = [items indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop) {
+		if([obj isKindOfClass:%c(SDDownloadButtonItem)]) {
+			*stop = YES;
+			return YES;
+		}
+		return NO;
+	}];
+	return index != NSNotFound ? [items objectAtIndex:index] : nil;
 }
-%end
 
-%group iPadHooks
-%hook BrowserToolbar
 - (void)layoutSubviews {
-	%orig;
+	SDDownloadButtonItem *downloadButton = [self _downloadButtonItem];
+	NSLog(@"Setting badge %@ on view %@", [downloadButton badge], [downloadButton view]);
+	[[downloadButton view] _setBadgeValue:[downloadButton badge]];
+
 	NSMutableDictionary *buttonDictionary = objc_getAssociatedObject(self, kSDMAssociatedButtonDictionaryKey);
 	UIBarButtonItem *_backItem = MSHookIvar<UIBarButtonItem *>(self, "_backItem");
 	UIBarButtonItem *_forwardItem = MSHookIvar<UIBarButtonItem *>(self, "_forwardItem");
@@ -91,8 +112,27 @@ NSString * const kSDMAssociatedButtonDictionaryKey = @"kSDMAssociatedButtonDicti
 	[buttonDictionary setObject:[_forwardItem view] forKey:@"_forwardItem"];
 	[buttonDictionary setObject:[_actionItem view] forKey:@"_actionItem"];
 	[buttonDictionary setObject:[_bookmarksItem view] forKey:@"_bookmarksItem"];
+
+	%orig;
+}
+%end
+
+%hook BrowserController
+%new(v@:@)
+- (void)_downloadManagerButtonShim:(UIBarButtonItem *)sender {
+	objc_setAssociatedObject([SDM$BrowserController sharedBrowserController], kSDMAssociatedPresentationViewKey, [(UIBarButtonItem *)sender view], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	[self toggleDownloadManagerFromButtonBar];
 }
 
+%new(v@:@)
+- (void)_sdmUpdateBadge:(NSString *)value {
+	SDDownloadButtonItem *downloadButton = [[self buttonBar] _downloadButtonItem];
+	[downloadButton setBadge:value];
+}
+%end
+
+%group iPadHooks
+%hook BrowserToolbar
 - (CGRect)actionPopoverPresentationRect {
 	NSMutableDictionary *buttonDictionary = objc_getAssociatedObject(self, kSDMAssociatedButtonDictionaryKey);
 	return [(UIView *)[buttonDictionary objectForKey:@"_actionItem"] frame];
