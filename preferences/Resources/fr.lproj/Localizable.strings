@@ -1,35 +1,35 @@
-"DOWNLOADER_ENABLED" = "Télécharger de Fichiers";
+"DOWNLOADER_ENABLED" = "Télécharger les Fichiers";
 "FILE_TYPES" = "Types de Fichiers";
 "AUTO_RETRY" = "Auto-Réessayer";
 "AUTO_RETRY_SETTINGS" = "Auto-Réessayer Paramètres";
-"MAX_CONCURRENT_DOWNLOADS" = "Maximum de Téléchargements Simultanés";
+"MAX_CONCURRENT_DOWNLOADS" = "Max. de Téléchargements Simultanés";
 
-"AUTO_RETRY_ENABLED" = "Auto-Rééssayé a échoué";
-"RETRY_ATTEMPTS" = "Réessayer Tentatives";
+"AUTO_RETRY_ENABLED" = "Auto-Réessayé a échoué";
+"RETRY_ATTEMPTS" = "Tentatives de Relance";
 
-"RETRY_ATTEMPTS_1" = "1 Tentatives";
+"RETRY_ATTEMPTS_1" = "1 Tentative";
 "RETRY_ATTEMPTS_2" = "2 Tentatives";
 "RETRY_ATTEMPTS_3" = "3 Tentatives";
 "RETRY_ATTEMPTS_4" = "4 Tentatives";
 "RETRY_ATTEMPTS_5" = "5 Tentatives";
 
-"RETRY_DELAY" = "Retard de Auto-Réessayer (Seconds)";
+"RETRY_DELAY" = "Délai de Auto-Réessayer (Seconds)";
 
-"FILE_TYPE_DISABLE_EXPLANATION" = "Si vous désactivez d'un type de fichier, Safari ne vous demandera pas a télécharger d'un fichier de ce type, et au lieu se comportera normalement.";
+"FILE_TYPE_DISABLE_EXPLANATION" = "Si vous désactivez un type de fichier, Safari ne vous demandera pas de télécharger un fichier de ce type, et au lieu se comportera normalement.";
 "BUILT_IN_TYPES" = "Types de Fichiers Inclus";
 "CUSTOM" = "Custom";
-"ADD_FILE_TYPE" = "Ajouter Type de Fichier ...";
+"ADD_FILE_TYPE" = "Ajouter un Type de Fichier ...";
 "NEW_FILE_TYPE" = "Nouveau Type de Fichier";
-"ADD_FILE_TYPE_PROMPT" = "Entrez des informations de le nouveau type de fichier";
-"EDIT_FILE_TYPE_PROMPT" = "Entrez des informations pour ce type de fichier";
+"ADD_FILE_TYPE_PROMPT" = "Entrez les informations du nouveau type de fichier";
+"EDIT_FILE_TYPE_PROMPT" = "Entrez les informations pour ce type de fichier";
 "SAVE" = "Enregistrer";
 "CANCEL" = "Annuler";
 
 "DETAILS" = "Détails";
 "NAME" = "Nom";
-"NAME_PLACEHOLDER" = "Nom de Type";
+"NAME_PLACEHOLDER" = "Nom du Type";
 "EXTENSIONS_GROUP" = "Extensions";
-"EXTENSIONS_PLACEHOLDER" = "Extension";
+"EXTENSIONS_PLACEHOLDER" = "Extensions";
 "MIMETYPES_GROUP" = "MIME Types";
 "MIMETYPES_PLACEHOLDER" = "MIME Type";
-"DELETE_FILE_TYPE" = "Annuler Type de Fichier";
+"DELETE_FILE_TYPE" = "Supprimer le type de fichier";

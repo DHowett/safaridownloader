@@ -11,15 +11,15 @@
 "CANCEL_ALL_PROMPT" = "Annuler tous les Téléchargements?";
 "CLEAR_ALL_PROMPT" = "Effacer tous les Téléchargements?";
 "YES" = "Oui";
-"NO" = "No";
+"NO" = "Non";
 "OK" = "OK";
 "RETRY" = "Réessayer";
 "DELETE" = "Supprimer";
 "CANCEL" = "Annuler";
-"CLEAR" = "Effacerr";
+"CLEAR" = "Effacer";
 "DONE" = "OK";
-"CANCEL_ALL_SHORT" = "Annuler tous";
-"CLEAR_ALL_SHORT" = "Effacer tous";
+"CANCEL_ALL_SHORT" = "Annuler tout";
+"CLEAR_ALL_SHORT" = "Effacer tout";
 "NOTHING_TO_CANCEL" = "Rien à Annuler";
 "NOTHING_TO_CLEAR" = "Rien à Effacer";
 "SIZE_BYTES" = "%.1lf B";
@@ -39,9 +39,9 @@
 "OPEN_WITH_" = "Ouvrir avec %@";
 
 // Other
-"SAVE_AS_PROMPT_" = "Choisir un destination pour \"%@\".";
-"SAVE_AS_PROMPT" = "Choisir un destination for le ficher.";
+"SAVE_AS_PROMPT_" = "Choisir une destination pour \"%@\".";
+"SAVE_AS_PROMPT" = "Choisir une destination pour le ficher.";
 "NEW_DIRECTORY_TITLE" = "Nouveau dossier";
-"NEW_DIRECTORY_NAME_PLACEHOLDER" = "Nom de dossier";
+"NEW_DIRECTORY_NAME_PLACEHOLDER" = "Nom du dossier";
 "ACTION_CREATE_DIRECTORY" = "Créer";
 "HOME_FOLDER" = "Dossier d'accueil";
