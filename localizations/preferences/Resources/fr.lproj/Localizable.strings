@@ -2,7 +2,7 @@
 "FILE_TYPES" = "Types de Fichiers";
 "AUTO_RETRY" = "Auto-Réessayer";
 "AUTO_RETRY_SETTINGS" = "Auto-Réessayer Paramètres";
-"MAX_CONCURRENT_DOWNLOADS" = "Max. de Téléchargements Simultanés";
+"MAX_CONCURRENT_DOWNLOADS" = "Max. de Téléchgs. Simultanés";
 
 "AUTO_RETRY_ENABLED" = "Auto-Réessayé a échoué";
 "RETRY_ATTEMPTS" = "Tentatives de Relance";
