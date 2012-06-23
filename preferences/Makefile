@@ -3,7 +3,7 @@ include ../framework/makefiles/common.mk
 BUNDLE_NAME := SDSettings
 SDSettings_FILES = SDSettings.mm common/SDFileType.mm common/SDResources.mm
 
-SDSettings_INSTALL_PATH = /System/Library/PreferenceBundles
+SDSettings_INSTALL_PATH = /Library/PreferenceBundles
 
 SDSettings_FRAMEWORKS = UIKit CoreGraphics
 SDSettings_PRIVATE_FRAMEWORKS = Preferences
