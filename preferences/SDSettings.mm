@@ -178,7 +178,7 @@ static BOOL _legacy = NO;
 			NSLog(@"%@", _mimetypes);
 			[self loadExtraItemsAtIndex:mimIdx fromArray:_mimetypes];
 		}
-		self.title = _isNewType ? NSLocalizedStringFromTableInBundle(@"NEW_FILE_TYPE", nil, [self bundle], @"") : _name;
+		self.title = _isNewType ? @"NEW_FILE_TYPE" : _name;
 	}
 	if(_isNewType) {
 		// remove the delete button and its group if we're a new type.
@@ -388,7 +388,7 @@ static BOOL _legacy = NO;
 			[_customTypeSpecifiers addObject:spec];
 			[(NSMutableArray *)_specifiers addObject:spec];
 		}
-		self.title = NSLocalizedStringFromTableInBundle(@"FILE_TYPES", nil, [self bundle], @"");
+		self.title = @"FILE_TYPES";
 	}
 	return _specifiers;
 }
@@ -397,6 +397,10 @@ static BOOL _legacy = NO;
 @implementation SDListController
 - (id)bundle {
 	return [NSBundle bundleWithPath:BUNDLE_PATH];
+}
+
+- (void)setTitle:(NSString *)title {
+	[super setTitle:NSLocalizedStringFromTableInBundle(title, nil, [self bundle], @"")];
 }
 
 - (id)navigationTitle {
