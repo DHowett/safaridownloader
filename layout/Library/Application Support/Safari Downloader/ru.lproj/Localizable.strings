@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ACTION_CANCEL</key>
+	<string>Отмена</string>
+	<key>ACTION_CHOOSE_DIRECTORY</key>
+	<string>Выбрать папку</string>
+	<key>ACTION_CREATE_DIRECTORY</key>
+	<string>Создать папку</string>
+	<key>ACTION_DOWNLOAD</key>
+	<string>Сохранить</string>
+	<key>ACTION_SAVE_AS</key>
+	<string>Сохранить как</string>
+	<key>ACTION_VIEW</key>
+	<string>Показать</string>
+	<key>CANCEL</key>
+	<string>Отмена</string>
+	<key>CANCEL_ALL_PROMPT</key>
+	<string>Отменить все загрузки?</string>
+	<key>CANCEL_ALL_SHORT</key>
+	<string>Отменить все</string>
+	<key>CLEAR</key>
+	<string>Очистить</string>
+	<key>CLEAR_ALL_PROMPT</key>
+	<string>Очистить список загрузок?</string>
+	<key>CLEAR_ALL_SHORT</key>
+	<string>Очистить все</string>
+	<key>DELETE</key>
+	<string>Удалить</string>
+	<key>DONE</key>
+	<string>Готово</string>
+	<key>DOWNLOADS_TITLE</key>
+	<string>Загрузки</string>
+	<key>DOWNLOAD_IMAGE</key>
+	<string>Загрузить изобр.</string>
+	<key>DOWNLOAD_PROMPT_TITLE</key>
+	<string>Загрузить</string>
+	<key>DOWNLOAD_TARGET</key>
+	<string>Загрузить выбранное</string>
+	<key>HOME_FOLDER</key>
+	<string>Корневая папка</string>
+	<key>NEW_DIRECTORY_NAME_PLACEHOLDER</key>
+	<string>Имя папки</string>
+	<key>NEW_DIRECTORY_TITLE</key>
+	<string>Новая папка</string>
+	<key>NO</key>
+	<string>Нет</string>
+	<key>NOTHING_TO_CANCEL</key>
+	<string>Нечего отменять</string>
+	<key>NOTHING_TO_CLEAR</key>
+	<string>Нечего очищать</string>
+	<key>OK</key>
+	<string>OK</string>
+	<key>OPEN_WITH_</key>
+	<string>Открыть в %@</string>
+	<key>PERCENTAGE</key>
+	<string>%u%%</string>
+	<key>RETRY</key>
+	<string>Повторить</string>
+	<key>SAVE_AS_PROMPT</key>
+	<string>Выберите место для сохранения файла</string>
+	<key>SAVE_AS_PROMPT_</key>
+	<string>Выберите место для сохранения "%@".</string>
+	<key>SAVE_INTO</key>
+	<string>Сохранить в</string>
+	<key>SIZE_BYTES</key>
+	<string>%.1lf б</string>
+	<key>SIZE_KILOBYTES</key>
+	<string>%.1lf кб</string>
+	<key>SIZE_MEGABYTES</key>
+	<string>%.1lf мб</string>
+	<key>STATUS_CANCELLED</key>
+	<string>Отменено</string>
+	<key>STATUS_DOWNLOADING_SPEED</key>
+	<string>Загружается @ %@/с</string>
+	<key>STATUS_FAILED</key>
+	<string>Ошибка: попробуйте еще раз.</string>
+	<key>STATUS_RETRYING</key>
+	<string>Повтор...</string>
+	<key>STATUS_WAITING</key>
+	<string>Ожидание...</string>
+	<key>STATUS_WAITING_AUTH</key>
+	<string>Ожидание аутентификации...</string>
+	<key>YES</key>
+	<string>Да</string>
+</dict>
+</plist>

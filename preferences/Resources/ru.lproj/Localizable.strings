@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ADD_FILE_TYPE</key>
+	<string>Добавить тип файлов...</string>
+	<key>ADD_FILE_TYPE_PROMPT</key>
+	<string>Введите информацию для нового типа файлов</string>
+	<key>AUTO_RETRY</key>
+	<string>Автоповтор при ошибке</string>
+	<key>AUTO_RETRY_ENABLED</key>
+	<string>Автоповтор</string>
+	<key>AUTO_RETRY_SETTINGS</key>
+	<string>Настройки автоповтора</string>
+	<key>BUILT_IN_TYPES</key>
+	<string>Встроенные типы файлов</string>
+	<key>CANCEL</key>
+	<string>Отмена</string>
+	<key>CUSTOM</key>
+	<string>Пользовательские типы</string>
+	<key>DELETE_FILE_TYPE</key>
+	<string>Удалить тип файлов</string>
+	<key>DETAILS</key>
+	<string>Подробно</string>
+	<key>DOWNLOADER_ENABLED</key>
+	<string>Загружать файлы</string>
+	<key>EDIT_FILE_TYPE_PROMPT</key>
+	<string>Введите информацию для этого типа файлов</string>
+	<key>EXTENSIONS_GROUP</key>
+	<string>Расширение</string>
+	<key>EXTENSIONS_PLACEHOLDER</key>
+	<string>Расширение</string>
+	<key>FILE_TYPES</key>
+	<string>Типы файлов</string>
+	<key>FILE_TYPE_DISABLE_EXPLANATION</key>
+	<string>При отключении загрузки для типа файлов Safari не будет выдавать запрос на загрузку этого типа файлов и будет вести себя по умолчанию.</string>
+	<key>MAX_CONCURRENT_DOWNLOADS</key>
+	<string>Макс. кол-во загрузок</string>
+	<key>MIMETYPES_GROUP</key>
+	<string>Тип MIME</string>
+	<key>MIMETYPES_PLACEHOLDER</key>
+	<string>Тип MIME</string>
+	<key>NAME</key>
+	<string>Название</string>
+	<key>NAME_PLACEHOLDER</key>
+	<string>Введите название</string>
+	<key>NEW_FILE_TYPE</key>
+	<string>Новый тип файлов</string>
+	<key>RETRY_ATTEMPTS</key>
+	<string>Кол-во повторов</string>
+	<key>RETRY_ATTEMPTS_1</key>
+	<string>1</string>
+	<key>RETRY_ATTEMPTS_2</key>
+	<string>2</string>
+	<key>RETRY_ATTEMPTS_3</key>
+	<string>3</string>
+	<key>RETRY_ATTEMPTS_4</key>
+	<string>4</string>
+	<key>RETRY_ATTEMPTS_5</key>
+	<string>5</string>
+	<key>RETRY_DELAY</key>
+	<string>Задержка автоповтора (сек)</string>
+	<key>SAVE</key>
+	<string>Сохранить</string>
+</dict>
+</plist>
