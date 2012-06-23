@@ -1,8 +1,8 @@
 "ADD_FILE_TYPE" = "Voeg bestandstype toe...";
 "ADD_FILE_TYPE_PROMPT" = "Voer nieuw bestandstype informatie in";
-"AUTO_RETRY" = "Automatisch opnieuw proberen";
-"AUTO_RETRY_ENABLED" = "Automatisch opnieuw proberen mislukt";
-"AUTO_RETRY_SETTINGS" = "Instellingen automatisch opnieuw proberen";
+"AUTO_RETRY" = "Auto-Retry";
+"AUTO_RETRY_ENABLED" = "Auto-Retry mislukt";
+"AUTO_RETRY_SETTINGS" = "Instellingen Auto-Retry";
 "BUILT_IN_TYPES" = "Ingebouwde Types";
 "CANCEL" = "Annuleer";
 "CUSTOM" = "Aangepast";
