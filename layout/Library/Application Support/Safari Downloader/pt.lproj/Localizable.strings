@@ -1,0 +1,47 @@
+"DOWNLOADS_TITLE" = "Downloads";
+"DOWNLOAD_TARGET" = "Baixar objeto";
+"DOWNLOAD_IMAGE" = "Baixar imagem";
+"STATUS_RETRYING" = "Tentando de novo...";
+"STATUS_FAILED" = "Falha - Toque para tentar de novo.";
+"STATUS_CANCELLED" = "Cancelado";
+"STATUS_WAITING_AUTH" = "Esperando autenticação...";
+"STATUS_WAITING" = "Esperando...";
+"STATUS_DOWNLOADING_SPEED" = "Baixando a %@/s";
+"PERCENTAGE" = "%u%%";
+"CANCEL_ALL_PROMPT" = "Cancelar todos os downloads?";
+"CLEAR_ALL_PROMPT" = "Limpar todos os downloads?";
+"YES" = "Sim";
+"NO" = "Não";
+"OK" = "OK";
+"RETRY" = "Tentar de novo";
+"DELETE" = "Deletar";
+"CANCEL" = "Cancelar";
+"CLEAR" = "Limpar";
+"DONE" = "OK"; // not a mistake; this is how apple does it with the Done UIBarButtonItems
+"CANCEL_ALL_SHORT" = "Cancelar Todos";
+"CLEAR_ALL_SHORT" = "Limpar Todos";
+"NOTHING_TO_CANCEL" = "Nada para cancelar";
+"NOTHING_TO_CLEAR" = "Nada para limpar";
+"SIZE_BYTES" = "%.1lf B";
+"SIZE_KILOBYTES" = "%.1lf KB";
+"SIZE_MEGABYTES" = "%.1lf MB";
+
+// Download Prompt
+"DOWNLOAD_PROMPT_TITLE" = "Download";
+"SAVE_INTO" = "Destino";
+"ACTION_DOWNLOAD" = "Baixar";
+"ACTION_VIEW" = "Ver";
+"ACTION_CANCEL" = "Cancelar";
+"ACTION_CHOOSE_DIRECTORY" = "Escolher";
+"ACTION_SAVE_AS" = "Salvar aqui";
+
+// Download Actions
+"OPEN_WITH_" = "Abrir com %@";
+
+// Other
+"SAVE_AS_PROMPT_" = "Escolha um destino para \"%@\".";
+"SAVE_AS_PROMPT" = "Escolha um destino para o arquivo.";
+"NEW_DIRECTORY_TITLE" = "Nova pasta";
+"NEW_DIRECTORY_NAME_PLACEHOLDER" = "Pasta";
+"ACTION_CREATE_DIRECTORY" = "Criar";
+"HOME_FOLDER" = "Diretório Home";

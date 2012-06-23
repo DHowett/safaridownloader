@@ -1,0 +1,47 @@
+"DOWNLOADS_TITLE" = "下载";
+"DOWNLOAD_TARGET" = "下载目标";
+"DOWNLOAD_IMAGE" = "下载图片";
+"STATUS_RETRYING" = "正在重试…";
+"STATUS_FAILED" = "失败 - 点击以重试";
+"STATUS_CANCELLED" = "已取消";
+"STATUS_WAITING_AUTH" = "等待验证…";
+"STATUS_WAITING" = "等待…";
+"STATUS_DOWNLOADING_SPEED" = "以 %@/s 的速度下载中";
+"PERCENTAGE" = "%u%%";
+"CANCEL_ALL_PROMPT" = "取消全部下载？";
+"CLEAR_ALL_PROMPT" = "清理全部下载？";
+"YES" = "是";
+"NO" = "否";
+"OK" = "确定";
+"RETRY" = "重试";
+"DELETE" = "删除";
+"CANCEL" = "取消";
+"CLEAR" = "清理";
+"DONE" = "完成";
+"CANCEL_ALL_SHORT" = "取消全部";
+"CLEAR_ALL_SHORT" = "清理全部";
+"NOTHING_TO_CANCEL" = "不可取消";
+"NOTHING_TO_CLEAR" = "不可清理";
+"SIZE_BYTES" = "%.1lf B";
+"SIZE_KILOBYTES" = "%.1lf KB";
+"SIZE_MEGABYTES" = "%.1lf MB";
+
+// Download Prompt
+"DOWNLOAD_PROMPT_TITLE" = "下载";
+"SAVE_INTO" = "保存位置";
+"ACTION_DOWNLOAD" = "下载";
+"ACTION_VIEW" = "查看";
+"ACTION_CANCEL" = "取消";
+"ACTION_CHOOSE_DIRECTORY" = "选择";
+"ACTION_SAVE_AS" = "保存到这里";
+
+// Download Actions
+"OPEN_WITH_" = "在 %@ 中打开";
+
+// Other
+"SAVE_AS_PROMPT_" = "选择“%@”的保存位置。";
+"SAVE_AS_PROMPT" = "选择文件的保存位置。";
+"NEW_DIRECTORY_TITLE" = "新文件夹";
+"NEW_DIRECTORY_NAME_PLACEHOLDER" = "文件夹名称";
+"ACTION_CREATE_DIRECTORY" = "新建";
+"HOME_FOLDER" = "主文件夹";

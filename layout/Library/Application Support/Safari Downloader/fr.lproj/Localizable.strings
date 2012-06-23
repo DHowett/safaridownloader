@@ -1,0 +1,47 @@
+"DOWNLOADS_TITLE" = "Téléchargements";
+"DOWNLOAD_TARGET" = "Télécharger Fichier";
+"DOWNLOAD_IMAGE" = "Télécharger Image";
+"STATUS_RETRYING" = "Nouvelle tentative...";
+"STATUS_FAILED" = "Échoué  - Appuyez pour réessayer.";
+"STATUS_CANCELLED" = "Annulé";
+"STATUS_WAITING_AUTH" = "Attente pour l'authentification...";
+"STATUS_WAITING" = "Attente...";
+"STATUS_DOWNLOADING_SPEED" = "Téléchargement @ %@/s";
+"PERCENTAGE" = "%u%%";
+"CANCEL_ALL_PROMPT" = "Annuler tous les Téléchargements?";
+"CLEAR_ALL_PROMPT" = "Effacer tous les Téléchargements?";
+"YES" = "Oui";
+"NO" = "No";
+"OK" = "OK";
+"RETRY" = "Réessayer";
+"DELETE" = "Supprimer";
+"CANCEL" = "Annuler";
+"CLEAR" = "Effacerr";
+"DONE" = "OK";
+"CANCEL_ALL_SHORT" = "Annuler tous";
+"CLEAR_ALL_SHORT" = "Effacer tous";
+"NOTHING_TO_CANCEL" = "Rien à Annuler";
+"NOTHING_TO_CLEAR" = "Rien à Effacer";
+"SIZE_BYTES" = "%.1lf B";
+"SIZE_KILOBYTES" = "%.1lf KB";
+"SIZE_MEGABYTES" = "%.1lf MB";
+
+// Download Prompt
+"DOWNLOAD_PROMPT_TITLE" = "Télécharger";
+"SAVE_INTO" = "Destination";
+"ACTION_DOWNLOAD" = "Télécharger";
+"ACTION_VIEW" = "Voir";
+"ACTION_CANCEL" = "Annuler";
+"ACTION_CHOOSE_DIRECTORY" = "Choisir";
+"ACTION_SAVE_AS" = "Télécharger Ici";
+
+// Download Actions
+"OPEN_WITH_" = "Ouvrir avec %@";
+
+// Other
+"SAVE_AS_PROMPT_" = "Choisir un destination pour \"%@\".";
+"SAVE_AS_PROMPT" = "Choisir un destination for le ficher.";
+"NEW_DIRECTORY_TITLE" = "Nouveau dossier";
+"NEW_DIRECTORY_NAME_PLACEHOLDER" = "Nom de dossier";
+"ACTION_CREATE_DIRECTORY" = "Créer";
+"HOME_FOLDER" = "Dossier d'accueil";

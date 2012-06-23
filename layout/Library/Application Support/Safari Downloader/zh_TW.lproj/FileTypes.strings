@@ -1,0 +1,53 @@
+
+// Categories
+"Archives" = "壓縮包";
+"Documents" = "文件";
+"Images" = "圖像";
+"Media" = "多媒體";
+"Miscellaneous" = "雜項";
+
+// Types
+"PNG image" = "PNG 圖像";
+"ZIP archive" = "ZIP 壓縮包";
+"Apple Disk Image" = "Apple 磁盤鏡像";
+"3GPP video" = "3GPP 視訊";
+"PDF document" = "PDF 文件";
+"Android package" = "Android 套件";
+"Tape archive" = "Tape 存檔";
+"JPEG image" = "JPEG 圖像";
+"WAVE audio" = "WAVE 音訊";
+"bzip2 Archive" = "bzip2 壓縮包";
+"AVI video" = "AVI 視訊";
+"Microsoft PowerPoint Document" = "Microsoft PowerPoint 文件";
+"TIFF image" = "TIFF 圖像";
+"OGG" = "OGG";
+"WMA" = "WMA";
+"iCalendar" = "iCalendar";
+"Perl script" = "Perl 腳本";
+"AAC, M4* audio" = "AAC 及 M4* 音訊";
+"Windows executable" = "Windows 可執行檔案";
+"Quicktime video" = "Quicktime 視訊";
+"OpenDocument Text" = "OpenDocument 文本";
+"Shell script" = "Shell 腳本";
+"CSV document" = "CSV 文件";
+"gzip archive" = "gzip 壓縮包";
+"Binary data" = "二進制資料";
+"OpenDocument Presentation" = "OpenDocument 演示";
+"vCard" = "vCard";
+"Targa image" = "Targa 圖像";
+"Torrent" = "Torrent";
+"XML document" = "XML 文件";
+"MPEG audio" = "MPEG 音訊";
+"OpenDocument Spreadsheet" = "OpenDocument 表格";
+"Flash, MP4 video" = "Flash 及 MP4 視訊";
+"Windows Icon" = "Windows 圖示";
+"Text document" = "文本文件";
+"GIF image" = "GIF 圖像";
+"MPEG video" = "MPEG 視訊";
+"Debian package" = "Debian 套件";
+"Microsoft Word Document" = "Microsoft Word 文件";
+"WMV" = "WMV";
+"Patch file" = "補丁檔案";
+"RAR archive" = "RAR 壓縮包";
+"Microsoft Excel Document" = "Microsoft Excel 文件";
+"OpenDocument Graphics" = "OpenDocument 圖表";
