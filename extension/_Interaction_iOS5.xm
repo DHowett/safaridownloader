@@ -19,14 +19,6 @@
 %hook BrowserController
 - (NSMutableArray *)_actionsForElement:(DOMNode *)domElement withTargetURL:(NSURL *)url suggestedActions:(NSArray *)suggestedActions {
 	NSMutableArray *actions = %orig;
-	DOMNode *anchorNode = domElement;
-	while(anchorNode && ![anchorNode isKindOfClass:%c(DOMHTMLAnchorElement)]) {
-		anchorNode = [anchorNode parentNode];
-	}
-
-	if(anchorNode) {
-		domElement = anchorNode;
-	}
 
 	NSMutableArray *downloadActions = [NSMutableArray array];
 	if(url) {
