@@ -4,7 +4,7 @@
 "AUTO_RETRY_SETTINGS" = "Ajustes de tentativas automáticas";
 "MAX_CONCURRENT_DOWNLOADS" = "Máx. de downloads simultâneos";
 
-"AUTO_RETRY_ENABLED" = "Tentativa automática falhou."; // Auto-retry failed??
+"AUTO_RETRY_ENABLED" = "Tentativas automáticas"; // Auto-retry failed??
 "RETRY_ATTEMPTS" = "Número de tentativas";
 
 "RETRY_ATTEMPTS_1" = "1 tentativa";
@@ -13,7 +13,7 @@
 "RETRY_ATTEMPTS_4" = "4 tentativas";
 "RETRY_ATTEMPTS_5" = "5 tentativas";
 
-"RETRY_DELAY" = "Atraso de tentativas automáticas (em segundos)";
+"RETRY_DELAY" = "Atraso em tentativas automáticas (em segundos)";
 
 "FILE_TYPE_DISABLE_EXPLANATION" = "Desativar um tipo de arquivo vai causar com que o Safari não faça pedidos em relação a baixar um arquivo de tal tipo, e então realizar o comportamento padrão.";
 "BUILT_IN_TYPES" = "Tipos padrão";
