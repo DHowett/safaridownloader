@@ -15,7 +15,7 @@
 
 "RETRY_DELAY" = "Verzögerung (Sekunden)";
 
-"FILE_TYPE_DISABLE_EXPLANATION" = "Bei dem Deaktivieren eines Dateitypens wird Safari Sie nicht auffordern, die gewählte Datei herunterzuladen, sondern sich normal benehmen."
+"FILE_TYPE_DISABLE_EXPLANATION" = "Bei deaktivierten Dateitypen wird Safari Sie nicht auffordern, die gewählte Datei herunterzuladen. Safari wird sich wie ohne den installierten SDM verhalten.";
 "BUILT_IN_TYPES" = "Eingebaute Dateitypen";
 "CUSTOM" = "Benutzerdefiniert";
 "ADD_FILE_TYPE" = "Dateityp hinzufügen...";

@@ -4,24 +4,24 @@
 "STATUS_RETRYING" = "Wiederversuchen...";
 "STATUS_FAILED" = "Fehlgeschlagen - Tippen um Vorgang zu wiederholen...";
 "STATUS_CANCELLED" = "Abgebrochen";
-"STATUS_WAITING_AUTH" = "Erwarte Autorisierung...";
+"STATUS_WAITING_AUTH" = "Erwarte Authorisierung...";
 "STATUS_WAITING" = "Warten...";
 "STATUS_DOWNLOADING_SPEED" = "Ladet... @ %@/s";
 "PERCENTAGE" = "%u%%";
 "CANCEL_ALL_PROMPT" = "Alle Downloads abbrechen?";
-"CLEAR_ALL_PROMPT" = "Alle Downloads leeren?";
+"CLEAR_ALL_PROMPT" = "Alle Downloads entfernen?";
 "YES" = "Ja";
 "NO" = "Nein";
 "OK" = "OK";
 "RETRY" = "Wiederholen";
 "DELETE" = "Löschen";
 "CANCEL" = "Abbrechen";
-"CLEAR" = "Leeren";
+"CLEAR" = "Entfernen";
 "DONE" = "Fertig";
 "CANCEL_ALL_SHORT" = "Alle Abbrechen";
-"CLEAR_ALL_SHORT" = "Alle Leeren";
+"CLEAR_ALL_SHORT" = "Alle entfernen";
 "NOTHING_TO_CANCEL" = "Nichts zum Abbrechen vorhanden.";
-"NOTHING_TO_CLEAR" = "Nichts zum Leeren vorhanden.";
+"NOTHING_TO_CLEAR" = "Nichts zum Entfernen vorhanden.";
 "SIZE_BYTES" = "%.1lf B";
 "SIZE_KILOBYTES" = "%.1lf KB";
 "SIZE_MEGABYTES" = "%.1lf MB";
@@ -33,7 +33,7 @@
 "ACTION_VIEW" = "Ansehen";
 "ACTION_CANCEL" = "Abbrechen";
 "ACTION_CHOOSE_DIRECTORY" = "Auswählen";
-"ACTION_SAVE_AS" = "Hier Speichern";
+"ACTION_SAVE_AS" = "Hier speichern";
 
 // Download Actions
 "OPEN_WITH_" = "Mit %@ öffnen";
@@ -44,4 +44,4 @@
 "NEW_DIRECTORY_TITLE" = "Neuer Ordner";
 "NEW_DIRECTORY_NAME_PLACEHOLDER" = "Ordner Name";
 "ACTION_CREATE_DIRECTORY" = "Erstellen";
-"HOME_FOLDER" = "Home Order";
+"HOME_FOLDER" = "Home-Order";
