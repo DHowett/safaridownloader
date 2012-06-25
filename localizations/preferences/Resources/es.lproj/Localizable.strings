@@ -1,0 +1,35 @@
+"DOWNLOADER_ENABLED" = "Descargar archivos";
+"FILE_TYPES" = "Tipos de archivo";
+"AUTO_RETRY" = "Auto-Reintentar";
+"AUTO_RETRY_SETTINGS" = "Configuración de Auto-Reintentar";
+"MAX_CONCURRENT_DOWNLOADS" = "Descargas Simultáneas Máx.";
+
+"AUTO_RETRY_ENABLED" = "Falló Auto-Reintento";
+"RETRY_ATTEMPTS" = "Reintentos";
+
+"RETRY_ATTEMPTS_1" = "1 intento";
+"RETRY_ATTEMPTS_2" = "2 intentos";
+"RETRY_ATTEMPTS_3" = "3 intentos";
+"RETRY_ATTEMPTS_4" = "4 intentos";
+"RETRY_ATTEMPTS_5" = "5 intentos";
+
+"RETRY_DELAY" = "Demora de Auto-Reintento (Segundos)";
+
+"FILE_TYPE_DISABLE_EXPLANATION" = "Deshabilitar un tipo de archivo causará que Safari no avise respecto a la descarga de un archivo de ese tipo, y en cambio se comportará normalmente.";
+"BUILT_IN_TYPES" = "Tipos incorporados";
+"CUSTOM" = "Personalizado";
+"ADD_FILE_TYPE" = "Añadir tipo de archivo...";
+"NEW_FILE_TYPE" = "Nuevo tipo de archivo";
+"ADD_FILE_TYPE_PROMPT" = "Introduzca información de nuevo tipo de archivo";
+"EDIT_FILE_TYPE_PROMPT" = "Introduzca la información para éste tipo de archivo";
+"SAVE" = "Guardar";
+"CANCEL" = "Cancelar";
+
+"DETAILS" = "Detalles";
+"NAME" = "Nombre";
+"NAME_PLACEHOLDER" = "Nombre de tipo";
+"EXTENSIONS_GROUP" = "Extensiones";
+"EXTENSIONS_PLACEHOLDER" = "Extensión";
+"MIMETYPES_GROUP" = "Tipos MIME";
+"MIMETYPES_PLACEHOLDER" = "Tipo MIME";
+"DELETE_FILE_TYPE" = "Eliminar tipo de archivo";
