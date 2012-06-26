@@ -108,7 +108,7 @@ static BOOL _legacy = NO;
 }
 
 - (void)updatePreferencesFile {
-	NSMutableDictionary *prefsDict = [NSMutableDictionary dictionaryWithContentsOfFile:preferencesPath()];
+	NSMutableDictionary *prefsDict = [NSMutableDictionary dictionaryWithContentsOfFile:preferencesPath()] ?: [NSMutableDictionary dictionary];
 	NSMutableDictionary *customItems = [prefsDict objectForKey:@"CustomItems"] ?: [NSMutableDictionary dictionary];
 
 	_name = [self getTextFromSpecifier:_nameSpec];
