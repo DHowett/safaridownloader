@@ -16,11 +16,9 @@
 	    <key>defaults</key>
 	    <string>net.howett.safaridownloader</string>
 	    <key>key</key>
-	    <string>Disabled</string>
+	    <string>Enabled</string>
 	    <key>label</key>
 	    <string>DOWNLOADER_ENABLED</string>
-	    <key>negate</key>
-	    <true/>
 	</dict>
 	<dict>
 	    <key>cell</key>

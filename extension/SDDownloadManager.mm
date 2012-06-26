@@ -226,7 +226,7 @@ static id sharedManager = nil;
 #pragma mark Filetype Support Management/*{{{*/
 
 - (BOOL)supportedRequest:(NSURLRequest *)request withMimeType:(NSString *)mimeType {
-	if([[SDUserSettings sharedInstance] boolForKey:@"Disabled" default:NO]) return NO;
+	if(![[SDUserSettings sharedInstance] boolForKey:@"Enabled" default:YES]) return NO;
 	SDFileType *fileType = nil;
 	NSLog(@"mimetype is %@", mimeType);
 	if (mimeType != nil)
@@ -354,7 +354,7 @@ static id sharedManager = nil;
 }
 
 - (BOOL)downloadShouldRetry:(SDSafariDownload *)download {
-	return !([[SDUserSettings sharedInstance] boolForKey:@"AutoRetryDisabled" default:NO])
+	return ([[SDUserSettings sharedInstance] boolForKey:@"AutoRetryEnabled" default:YES])
 	       && (unsigned int)[[SDUserSettings sharedInstance] integerForKey:@"AutoRetryCount" default:3] > download.retryCount;	
 }
 

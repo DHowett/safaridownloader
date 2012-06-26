@@ -12,15 +12,13 @@
 	    <key>cell</key>
 	    <string>PSSwitchCell</string>
 	    <key>default</key>
-	    <false/>
+	    <true/>
 	    <key>defaults</key>
 	    <string>net.howett.safaridownloader</string>
 	    <key>key</key>
-	    <string>AutoRetryDisabled</string>
+	    <string>AutoRetryEnabled</string>
 	    <key>label</key>
 	    <string>AUTO_RETRY_ENABLED</string>
-	    <key>negate</key>
-	    <true/>
 	</dict>
 	<dict>
 	    <key>cell</key>
