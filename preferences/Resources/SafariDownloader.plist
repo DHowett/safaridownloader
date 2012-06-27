@@ -32,7 +32,7 @@
 	    <key>label</key>
 	    <string>FILE_TYPES</string>
 	</dict>
-	<dict>
+	<!--dict>
 	    <key>cell</key>
 	    <string>PSLinkCell</string>
 	    <key>detail</key>
@@ -41,7 +41,7 @@
 	    <string>AUTO_RETRY_SETTINGS</string>
 	    <key>plist</key>
 	    <string>AutoRetry</string>
-	</dict>
+	</dict-->
 	<dict>
 	    <key>cell</key>
 	    <string>PSLinkListCell</string>
