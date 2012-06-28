@@ -288,6 +288,7 @@ static BOOL _legacy = NO;
 		NSArray *category = [[SDFileType allCategories] objectForKey:fileClass];
 		category = [category sortedArrayUsingDescriptors:[NSArray arrayWithObject:[[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES] autorelease]]];
 		for(SDFileType *fileType in category) {
+			if(fileType.hidden) continue;
 			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileType.name
 									   target:self
 									      set:@selector(set:spec:)
