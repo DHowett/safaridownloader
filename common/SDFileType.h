@@ -19,6 +19,7 @@ typedef enum {
 @property (nonatomic, readonly, assign) BOOL forceExtensionUse;
 @property (nonatomic, readonly) NSString *primaryMIMEType;
 @property (nonatomic, readonly, assign) SDFileTypeAction defaultAction;
+@property (nonatomic, readonly, assign) BOOL hidden;
 + (void)loadAllFileTypes;
 + (void)unloadAllFileTypes;
 #ifndef SDFILETYPE_NO_CUSTOM

@@ -27,11 +27,12 @@ static NSMutableDictionary *_customExtensionMapping;
 @property (nonatomic, retain) NSString *category;
 @property (nonatomic, assign) BOOL forceExtensionUse;
 @property (nonatomic, assign) SDFileTypeAction defaultAction;
+@property (nonatomic, assign) BOOL hidden;
 + (void)_registerFileType:(SDFileType *)fileType;
 @end
 
 @implementation SDFileType
-@synthesize MIMETypes = _MIMETypes, extensions = _extensions, name = _name, genericType = _genericType, category = _category, forceExtensionUse = _forceExtensionUse, defaultAction = _defaultAction;
+@synthesize MIMETypes = _MIMETypes, extensions = _extensions, name = _name, genericType = _genericType, category = _category, forceExtensionUse = _forceExtensionUse, defaultAction = _defaultAction, hidden = _hidden;
 
 + (void)loadAllFileTypes {
 	_MIMEMapping = [[NSMutableDictionary alloc] init];
@@ -143,6 +144,7 @@ static NSMutableDictionary *_customExtensionMapping;
 		self.category = [dictionary valueForKey:@"Category"];
 		self.forceExtensionUse = [[dictionary valueForKey:@"ForceExtension"] boolValue];
 		self.defaultAction = (SDFileTypeAction)[[dictionary valueForKey:@"DefaultAction"] intValue];
+		self.hidden = [[dictionary valueForKey:@"Hidden"] boolValue];
 	} return self;
 }
 
