@@ -496,7 +496,7 @@
 		Category = "Media";
 		DefaultAction = 1;
 	};
-	"Quicktime video" = {
+	"QuickTime video" = {
 		Extensions = (
 			mov,
 			qt,

@@ -25,7 +25,7 @@
 "Perl script" = "Perl script";
 "AAC, M4* audio" = "AAC, M4* audio";
 "Windows executable" = "Windows executable";
-"Quicktime video" = "Quicktime video";
+"QuickTime video" = "QuickTime video";
 "OpenDocument Text" = "OpenDocument Text";
 "Shell script" = "Shell script";
 "CSV document" = "CSV document";
@@ -50,3 +50,10 @@
 "RAR archive" = "RAR archive";
 "Microsoft Excel Document" = "Microsoft Excel Document";
 "OpenDocument Graphics" = "OpenDocument Graphics";
+
+"7zip archive" = "7zip archive";
+"Matroska audio" = "Matroska audio";
+"Matroska video" = "Matroska video";
+"Dynamic library" = "Dynamic library";
+"iPhone application" = "iPhone application";
+"iPhone/iPod software update" = "iPhone/iPod software update";
