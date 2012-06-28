@@ -359,7 +359,8 @@ static BOOL _legacy = NO;
 
 		int c = [PSTableCell cellTypeFromString:@"PSLinkCell"];
 		int index = _legacy ? 3 : 2;
-		for(NSString *fileClass in [[SDFileType allCategories] allKeys]) {
+		NSArray *classes = [[[SDFileType allCategories] allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+		for(NSString *fileClass in classes) {
 			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:SDLocalizedStringInTable(fileClass, @"FileTypes")
 									   target:self
 									      set:nil
