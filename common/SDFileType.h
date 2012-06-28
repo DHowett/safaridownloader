@@ -31,5 +31,5 @@ typedef enum {
 #if SDFILETYPE_MAP_CATEGORIES == 1
 + (NSDictionary *)allCategories;
 #endif
-- (id)initWithName:(NSString *)name dictionary:(NSString *)dictionary;
+- (id)initWithName:(NSString *)name dictionary:(NSDictionary *)dictionary;
 @end

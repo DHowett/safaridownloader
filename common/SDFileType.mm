@@ -135,16 +135,16 @@ static NSMutableDictionary *_customExtensionMapping;
 }
 #endif
 
-- (id)initWithName:(NSString *)name dictionary:(NSString *)dictionary {
+- (id)initWithName:(NSString *)name dictionary:(NSDictionary *)dictionary {
 	if((self = [super init]) != nil) {
 		self.name = name;
-		self.MIMETypes = [dictionary valueForKey:@"Mimetypes"];
-		self.extensions = [dictionary valueForKey:@"Extensions"];
-		self.genericType = [dictionary valueForKey:@"GenericType"];
-		self.category = [dictionary valueForKey:@"Category"];
-		self.forceExtensionUse = [[dictionary valueForKey:@"ForceExtension"] boolValue];
-		self.defaultAction = (SDFileTypeAction)[[dictionary valueForKey:@"DefaultAction"] intValue];
-		self.hidden = [[dictionary valueForKey:@"Hidden"] boolValue];
+		self.MIMETypes = [dictionary objectForKey:@"Mimetypes"];
+		self.extensions = [dictionary objectForKey:@"Extensions"];
+		self.genericType = [dictionary objectForKey:@"GenericType"];
+		self.category = [dictionary objectForKey:@"Category"];
+		self.forceExtensionUse = [[dictionary objectForKey:@"ForceExtension"] boolValue];
+		self.defaultAction = (SDFileTypeAction)[[dictionary objectForKey:@"DefaultAction"] intValue];
+		self.hidden = [[dictionary objectForKey:@"Hidden"] boolValue];
 	} return self;
 }
 
