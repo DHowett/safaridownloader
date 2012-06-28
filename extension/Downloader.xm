@@ -45,26 +45,29 @@ void _reloadPreferences(void);
 %end
 #pragma mark -/*}}}*/
 
+/*
 %hook Application
 %group Backgrounding
 - (BOOL)_suspendForEventsOnly:(BOOL)x {
-	return [[SDDownloadManager sharedManager] downloadsRunning] > 0 ? YES : %orig;
+	return %orig;
+	//return [[SDDownloadManager sharedManager] downloadsRunning] > 0 ? YES : %orig;
 }
 - (void)applicationWillSuspend {
-	if([[SDDownloadManager sharedManager] downloadsRunning] == 0) %orig;
+	%orig;//if([[SDDownloadManager sharedManager] downloadsRunning] == 0) %orig;
 }
 %end
 
 - (void)applicationSuspend:(void *)event {
-	if([[SDDownloadManager sharedManager] downloadsRunning] == 0) %orig;
+	%orig;//if([[SDDownloadManager sharedManager] downloadsRunning] == 0) %orig;
 	return;
 }
 
 - (void)applicationSuspend:(void *)event settings:(id)settings {
-	if([[SDDownloadManager sharedManager] downloadsRunning] == 0) %orig;
+	%orig;//if([[SDDownloadManager sharedManager] downloadsRunning] == 0) %orig;
 	return;
 }
 %end
+*/
 
 %group OldAuthenticationHooks
 %hook AuthenticationView
@@ -126,7 +129,7 @@ void _init_webPolicyDelegate(void);
 	dlopen("/Library/MobileSubstrate/DynamicLibraries/sandcastleclient.dylib", RTLD_NOW);
 
 	%init;
-	%init(Backgrounding);
+	//%init(Backgrounding);
 	if(%c(AuthenticationView) != nil) {
 		%init(OldAuthenticationHooks);
 	}
