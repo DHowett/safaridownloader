@@ -69,12 +69,41 @@
 		Category = "Archives";
 		DefaultAction = 1;
 	};
+	"iPhone/iPod software update" = {
+		Extensions = (
+			ipsw,
+		);
+		Mimetypes = ();
+		GenericType = "package/x-generic";
+		Category = "Archives";
+		DefaultAction = 1;
+	};
+	"iPhone application" = {
+		Extensions = (
+			ipa,
+		);
+		Mimetypes = ();
+		GenericType = "package/x-generic";
+		Category = "Archives";
+		DefaultAction = 1;
+	};
 	"ZIP archive" = {
 		Extensions = (
 			zip,
 		);
 		Mimetypes = (
 			"application/zip",
+		);
+		GenericType = "package/x-generic";
+		Category = "Archives";
+		DefaultAction = 1;
+	};
+	"7zip archive" = {
+		Extensions = (
+			7z,
+		);
+		Mimetypes = (
+			"application/x-7z-compressed",
 		);
 		GenericType = "package/x-generic";
 		Category = "Archives";
@@ -203,7 +232,7 @@
 		);
 		GenericType = "text/x-generic";
 		Category = "Documents";
-		DefaultAction = 1;
+		DefaultAction = 0;
 	};
 	Torrent = {
 		Extensions = (
@@ -334,6 +363,28 @@
 		Category = "Images";
 		DefaultAction = 0;
 	};
+	"Matroska video" = {
+		Extensions = (
+			mkv,
+		);
+		Mimetypes = (
+			"video/x-matroska",
+		);
+		GenericType = "video/x-generic";
+		Category = "Media";
+		DefaultAction = 1;
+	};
+	"Matroska audio" = {
+		Extensions = (
+			mka,
+		);
+		Mimetypes = (
+			"audio/x-matroska",
+		);
+		GenericType = "audio/x-generic";
+		Category = "Media";
+		DefaultAction = 1;
+	};
 	"3GPP video" = {
 		Extensions = (
 			3gp,
@@ -361,7 +412,7 @@
 			"audio/aacp",
 			"audio/mp4",
 		);
-		GenericType = "video/x-generic";
+		GenericType = "audio/x-generic";
 		Category = "Media";
 		DefaultAction = 1;
 	};
@@ -552,6 +603,8 @@
 			ocx,
 			sys,
 			drv,
+			bat,
+			cmd,
 		);
 		Mimetypes = (
 			"application/x-msdos-program",
@@ -560,5 +613,22 @@
 		GenericType = "application/x-executable";
 		Category = "Miscellaneous";
 		DefaultAction = 1;
+	};
+	"Dynamic library" = {
+		Extensions = (
+			dylib,
+		);
+		Mimetypes = ();
+		GenericType = "application/x-executable";
+		Category = "Miscellaneous";
+		DefaultAction = 1;
+	};
+	"Forced download" = {
+		Extensions = ();
+		Mimetypes = ("application/force-download");
+		GenericType = "application/x-executable";
+		Category = "Miscellaneous";
+		DefaultAction = 1;
+		Hidden = 1;
 	};
 }
