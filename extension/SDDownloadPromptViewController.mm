@@ -112,7 +112,7 @@
 			} else {
 				cell.imageView.image = [SDResources iconForFolder];
 				cell.textLabel.text = [_downloadRequest.savePath lastPathComponent];
-				cell.detailTextLabel.text = [_downloadRequest.savePath stringByDeletingLastPathComponent];
+				cell.detailTextLabel.text = [[_downloadRequest.savePath stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath];
 			}
 			cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 			break;
