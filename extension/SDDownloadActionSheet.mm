@@ -24,9 +24,8 @@ static NSMutableDictionary *_launchActions;
 @synthesize download = _download;
 
 + (void)initialize {
-	Class $SandCastle = objc_getClass("SandCastle");
 	_launchActions = [[NSMutableDictionary alloc] init];
-	if ([[$SandCastle sharedInstance] fileExistsAtPath:@"/Applications/iFile.app"]) {
+	if ([SandCastle fileExistsAtPath:@"/Applications/iFile.app"]) {
 		[_launchActions setObject:@"ifile://" forKey:[NSString stringWithFormat:SDLocalizedString(@"OPEN_WITH_"), @"iFile"]];
 	}
 }

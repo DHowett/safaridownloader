@@ -39,7 +39,8 @@
 	if((self = [super init]) != nil) {
 		self.path = path;
 		self.name = name;
-		self.isDir = [[SDM$SandCastle sharedInstance] pathIsDir:[path stringByAppendingPathComponent:name]];
+		NSDictionary *attributes = [SandCastle attributesForItemAtPath:[path stringByAppendingPathComponent:name]];
+		self.isDir = [[attributes objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory];
 	} return self;
 }
 
@@ -91,7 +92,7 @@ static NSComparisonResult _fileEntryComparator(id one, id two, void *context) {
 }
 
 - (void)reloadData {
-	NSArray *fileList = [[SDM$SandCastle sharedInstance] directoryContentsAtPath:self.currentPath];
+	NSArray *fileList = [SandCastle directoryContentsAtPath:self.currentPath];
 	NSMutableArray *entries = [NSMutableArray arrayWithCapacity:fileList.count];
 	for(NSString *file in fileList) {
 		if([file hasPrefix:@"."]) continue;
@@ -171,7 +172,7 @@ static NSComparisonResult _fileEntryComparator(id one, id two, void *context) {
 
 	if(directoryName.length <= 0) return;
 	NSString *newPath = [self.currentPath stringByAppendingPathComponent:directoryName];
-	[[SDM$SandCastle sharedInstance] createDirectoryAtResolvedPath:newPath];
+	[SandCastle createDirectoryAtResolvedPath:newPath];
 	[self reloadData];
 
 	SDDirectoryListViewController *newDirectoryViewController = [[[SDDirectoryListViewController alloc] initWithPath:newPath] autorelease];

@@ -8,7 +8,6 @@
 #import "SDUserSettings.h"
 
 Class SDM$BrowserController;
-Class SDM$SandCastle;
 bool SDM$WildCat = false;
 
 /* {{{ Private and Additional Categories */
@@ -126,8 +125,6 @@ void _init_webPolicyDelegate(void);
 %ctor {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-	dlopen("/Library/MobileSubstrate/DynamicLibraries/sandcastleclient.dylib", RTLD_NOW);
-
 	%init;
 	//%init(Backgrounding);
 	if(%c(AuthenticationView) != nil) {
@@ -135,7 +132,6 @@ void _init_webPolicyDelegate(void);
 	}
 
 	SDM$BrowserController = %c(BrowserController);
-	SDM$SandCastle = %c(SandCastle);
 	if([UIDevice instancesRespondToSelector:@selector(isWildcat)] && [[UIDevice currentDevice] isWildcat]) {
 		SDM$WildCat = true;
 	}

@@ -37,12 +37,11 @@ NSString * const kSDMAssociatedOverrideAuthenticationChallenge = @"kSDMAssociate
 
 #pragma mark -
 + (id)uniqueFilenameForFilename:(NSString *)filename atPath:(NSString *)path {
-	SandCastle *sc = [SDM$SandCastle sharedInstance];
 	NSString *orig_fnpart = [filename stringByDeletingPathExtension];
 	NSString *orig_ext = [filename pathExtension];
 	int dup = 1;
-	while([sc fileExistsAtPath:[path stringByAppendingPathComponent:filename]]
-	      || [sc fileExistsAtPath:[kSDSafariDownloadTemporaryDirectory stringByAppendingPathComponent:filename]]) {
+	while([SandCastle fileExistsAtPath:[path stringByAppendingPathComponent:filename]]
+	      || [SandCastle fileExistsAtPath:[kSDSafariDownloadTemporaryDirectory stringByAppendingPathComponent:filename]]) {
 		filename = [NSString stringWithFormat:@"%@ (%d)%s%@", orig_fnpart, dup, orig_ext ? "." : "", orig_ext];
 		dup++;
 	}
@@ -292,7 +291,7 @@ static id sharedManager = nil;
 - (void)deleteDownload:(SDSafariDownload*)download {
 	[download retain];
 	[_model removeDownload:download fromList:SDDownloadModelFinishedList];
-	[[objc_getClass("SandCastle") sharedInstance] removeItemAtResolvedPath:[download.path stringByAppendingPathComponent:download.filename]];
+	[SandCastle removeItemAtResolvedPath:[download.path stringByAppendingPathComponent:download.filename]];
 	[download release];
 }
 

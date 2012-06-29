@@ -259,8 +259,8 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
 - (void)downloadDidFinish:(NSURLDownload *)download {
 	NSString *finalDestination4 = [self.path stringByAppendingPathComponent:self.filename];
-	[[SDM$SandCastle sharedInstance] createDirectoryAtResolvedPath:self.path];
-	[[SDM$SandCastle sharedInstance] moveTemporaryFile:self.temporaryPath toResolvedPath:finalDestination4];
+	[SandCastle createDirectoryAtResolvedPath:self.path];
+	[SandCastle moveTemporaryFile:self.temporaryPath toResolvedPath:finalDestination4];
 	self.resumeData = nil;
 	self.status = SDDownloadStatusCompleted;
 	self.finished = YES;

@@ -28,8 +28,8 @@ static NSString *_archivePath;
 
 - (void)loadData {
 	NSString *path = @"/tmp/.sdm.plist";
-	[[SDM$SandCastle sharedInstance] removeItemAtResolvedPath:path];
-	[[SDM$SandCastle sharedInstance] copyItemAtPath:[[self class] archivePath] toPath:path];
+	[SandCastle removeItemAtResolvedPath:path];
+	[SandCastle copyTemporaryFile:[[self class] archivePath] toResolvedPath:path];
 	NSDictionary *loaded = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
 	if(loaded) {
 		[_runningDownloads addObjectsFromArray:[loaded objectForKey:@"running"]];
@@ -45,8 +45,8 @@ static NSString *_archivePath;
 								_finishedDownloads, @"finished", nil]];
 	if(data) {
 		[data writeToFile:path atomically:YES];
-		[[SDM$SandCastle sharedInstance] removeItemAtResolvedPath:[[self class] archivePath]];
-		[[SDM$SandCastle sharedInstance] copyItemAtPath:path toPath:[[self class] archivePath]];
+		[SandCastle removeItemAtResolvedPath:[[self class] archivePath]];
+		[SandCastle copyTemporaryFile:path toResolvedPath:[[self class] archivePath]];
 	}
 }
 

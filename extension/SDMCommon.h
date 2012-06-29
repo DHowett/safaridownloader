@@ -8,7 +8,6 @@
 
 // Exported from Downloader*.xm
 _EXTERN Class SDM$BrowserController;
-_EXTERN Class SDM$SandCastle;
 
 // Exported from Downloader*.xm
 _EXTERN bool SDM$WildCat;

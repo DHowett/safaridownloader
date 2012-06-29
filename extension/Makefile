@@ -23,6 +23,7 @@ Downloader_FILES += SDFileBrowserNavigationController.mm
 Downloader_FILES += SDDownloadRequest.mm
 Downloader_FRAMEWORKS = UIKit CoreGraphics QuartzCore
 Downloader_PRIVATE_FRAMEWORKS = WebUI WebKit
+Downloader_LIBRARIES = SandCastle
 Downloader_CFLAGS = -I$(THEOS_PROJECT_DIR) -I$(THEOS_PROJECT_DIR)/common -mthumb
 Downloader_SUBPROJECTS = ../common
 Downloader_LDFLAGS = -mthumb -weak-lSystem
