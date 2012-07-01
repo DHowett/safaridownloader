@@ -289,6 +289,7 @@ static BOOL _legacy = NO;
 		category = [category sortedArrayUsingDescriptors:[NSArray arrayWithObject:[[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES] autorelease]]];
 		for(SDFileType *fileType in category) {
 			if(fileType.hidden) continue;
+			if(!fileType.primaryMIMEType) continue;
 			PSSpecifier *spec = [PSSpecifier preferenceSpecifierNamed:fileType.name
 									   target:self
 									      set:@selector(set:spec:)
