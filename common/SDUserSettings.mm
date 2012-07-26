@@ -54,7 +54,7 @@ static NSString *_preferencesPath;
 
 - (void)reloadSettings {
 	if(_settings) [_settings release];
-	_settings = [[NSMutableDictionary dictionaryWithContentsOfFile:[[self class] preferencesPath]] retain];
+	_settings = [([NSMutableDictionary dictionaryWithContentsOfFile:[[self class] preferencesPath]] ?: [NSMutableDictionary dictionary]) retain];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kSDUserSettingsReloadedNotification object:self];
 }
 
