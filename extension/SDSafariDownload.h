@@ -102,6 +102,7 @@ extern NSString * const kSDSafariDownloadTemporaryDirectory;
 
 @property (nonatomic, assign) NSObject<SDSafariDownloadDelegate> *delegate;
 
++ (NSFileManager*)fileManager;
 - (id)initWithDownload:(SDSafariDownload *)download;
 
 /*
