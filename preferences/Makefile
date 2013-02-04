@@ -1,7 +1,8 @@
 include ../framework/makefiles/common.mk
 
 BUNDLE_NAME := SDSettings
-SDSettings_FILES = SDSettings.mm common/SDFileType.mm common/SDResources.mm
+SDSettings_FILES = SDSettings.mm
+SDSettings_SUBPROJECTS = ../common:filetypes
 
 SDSettings_INSTALL_PATH = /Library/PreferenceBundles
 

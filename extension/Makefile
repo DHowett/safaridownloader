@@ -25,7 +25,7 @@ Downloader_FRAMEWORKS = UIKit CoreGraphics QuartzCore
 Downloader_PRIVATE_FRAMEWORKS = WebUI WebKit
 Downloader_LIBRARIES = SandCastle
 Downloader_CFLAGS = -I$(THEOS_PROJECT_DIR) -I$(THEOS_PROJECT_DIR)/common -mthumb
-Downloader_SUBPROJECTS = ../common
+Downloader_SUBPROJECTS = ../common:common
 Downloader_LDFLAGS = -mthumb -weak-lSystem
 
 include ../framework/makefiles/common.mk
