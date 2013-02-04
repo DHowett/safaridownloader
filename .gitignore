@@ -9,3 +9,10 @@ framework
 *.deb
 _
 .theos
+
+extension/OLD
+uikit5
+uikit3
+safari3.1
+safari4.3
+safari5
