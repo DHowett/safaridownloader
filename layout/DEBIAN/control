@@ -4,7 +4,7 @@ Pre-Depends: firmware (>= 3.0)
 Depends: mobilesubstrate, preferenceloader, co.cocoanuts.sandcastle (>> 2.0-1), net.howett.safaridownloader-lproj
 Conflicts: net.howett.downloader, com.bigboss.patchsafari2 (<= 2.0.2587-1)
 Replaces: net.howett.downloader
-Version: 2.1~beta1
+Version: 2.1
 Architecture: iphoneos-arm
 Description: A full download manager for Safari.
 Maintainer: Dustin Howett <dustin@howett.net>
