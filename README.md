@@ -2,7 +2,7 @@
 
 This is the [official open-source release](http://blog.howett.net/2015/11/safari-download-manager-the-end-of-an-era/) of Safari Download Manager.
 
-Safari Download Manager is a reasonably complex tweak that adds a desktop-class download manager to Safari.app on iPhoneOS 3.1 to iOS 6.x.
+[Safari Download Manager](http://howett.net/cydia/depict/sdm/) is a reasonably complex tweak that adds a desktop-class download manager to Safari.app on iPhoneOS 3.1 to iOS 6.x.
 
 If you learn something great from this code, or write anything cool using it, you 
 should [send me an e-mail](mailto:dustin@howett.net)! I'd be happy to answer any 
