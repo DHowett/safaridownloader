@@ -23,7 +23,10 @@ SDM was historically compiled using [Theos](http://iphonedevwiki.net/index.php/T
 
 Safari Download Manager is available under the 3-Clause BSD License.
 
-In short, you can do pretty much anything you want with it: bundle it in a closed-source project, modify it without releasing your changes, and so on. Your end of the bargain, however, is that you must include the license/copyright notice in binary and source redistributions, and that you can't use SDM, my name, francis's name, or the name of Cocoanuts, LLC to endorse or promote your project.
+In short, you can do pretty much anything you want with it: bundle it in a closed-source project, modify it without releasing your changes, and so on. Your end of the bargain, however, is that you must include the license/copyright notice in binary and source redistributions, and that you can't use the Safari Download Manager name, "SDM", my name, francis's name, or the name of Cocoanuts, LLC to endorse or promote your project.
+
+Additionally, if you do release a derivative on Cydia, I ask that you choose 
+another bundle identifier. `net.howett.safaridownloader` is forever retired.
 
 For more details, check out `LICENSE` in the root of this repository!
 
