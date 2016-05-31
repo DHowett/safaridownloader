@@ -260,7 +260,9 @@ static id sharedManager = nil;
 	download.URLRequest = downloadRequest.urlRequest;
 	download.mimeType = downloadRequest.mimeType;
 	download.path = downloadRequest.savePath;
-	download.filename = [SDDownloadManager uniqueFilenameForFilename:downloadRequest.filename atPath:downloadRequest.savePath];
+	@synchronized([SDSafariDownload fileManager]) {
+		download.filename = [SDDownloadManager uniqueFilenameForFilename:downloadRequest.filename atPath:downloadRequest.savePath];
+	}
 	download.delegate = self;
 
 	[_downloadQueue addOperation:download];

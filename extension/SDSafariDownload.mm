@@ -44,6 +44,19 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	useSuggestedFilename = _useSuggestedFilename, mimeType = _mimeType,
 	downloader = _downloader, delegate = _delegate;
 
+static NSFileManager* fileManager_;
+
++ (void)initialize {
+	// should probably move this to dispatch_once when we can
+	if (self == [SDSafariDownload class]) {
+		fileManager_ = [[NSFileManager alloc] init];
+	}
+}
+
++ (NSFileManager*)fileManager {
+	return fileManager_;
+}
+
 - (id)init {
 	if((self = [super init]) != nil) {
 		
@@ -137,7 +150,7 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 }
 
 - (void)_createTemporaryDirectory {
-	[[NSFileManager defaultManager] createDirectoryAtPath:kSDSafariDownloadTemporaryDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
+	[fileManager_ createDirectoryAtPath:kSDSafariDownloadTemporaryDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
 }
 
 /* {{{ NSURLDownloadDelegate */
@@ -149,9 +162,16 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 - (void)download:(NSURLDownload *)download decideDestinationWithSuggestedFilename:(NSString *)filename {
 	if(_useSuggestedFilename && _filename) return;
 	if(_startedFromByte > 0) return; // Do not rename resumed files.
-	self.filename = [_delegate uniqueFilenameForDownload:self withSuggestion:filename];
-	self.temporaryPath = [self _temporaryPathForFilename:_filename];
-	[download setDestination:_temporaryPath allowOverwrite:NO];
+
+	@synchronized(fileManager_) {
+		self.filename = [_delegate uniqueFilenameForDownload:self withSuggestion:filename];
+		self.temporaryPath = [self _temporaryPathForFilename:_filename];
+		// write out immediately to lock the destination, and let NSURLDownload
+		// overwrite it at its own leisure when its ready
+		[fileManager_ createFileAtPath:_temporaryPath contents:nil attributes:nil];
+		[download setDestination:_temporaryPath allowOverwrite:YES];
+	}
+
 	[_delegate downloadDidUpdateMetadata:self];
 }
 
@@ -259,8 +279,10 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
 - (void)downloadDidFinish:(NSURLDownload *)download {
 	NSString *finalDestination4 = [self.path stringByAppendingPathComponent:self.filename];
-	[SandCastle createDirectoryAtResolvedPath:self.path];
-	[SandCastle moveTemporaryFile:self.temporaryPath toResolvedPath:finalDestination4];
+	@synchronized(fileManager_) {
+		[SandCastle createDirectoryAtResolvedPath:self.path];
+		[SandCastle moveTemporaryFile:self.temporaryPath toResolvedPath:finalDestination4];
+	}
 	self.resumeData = nil;
 	self.status = SDDownloadStatusCompleted;
 	self.finished = YES;
@@ -269,8 +291,11 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 
 - (void)_deleteData {
 	self.resumeData = nil;
-	if(self.temporaryPath)
-		[[NSFileManager defaultManager] removeItemAtPath:self.temporaryPath error:NULL];
+	if(self.temporaryPath) {
+		@synchronized(fileManager_) {
+			[fileManager_ removeItemAtPath:self.temporaryPath error:NULL];
+		}
+	}
 }
 
 - (BOOL)_resume {
@@ -310,8 +335,11 @@ NSString * const kSDSafariDownloadTemporaryDirectory = @"/tmp/.partial";
 	if(!self.downloader) return NO;
 	self.downloader.deletesFileUponFailure = NO;
 	if(_filename && _useSuggestedFilename) {
-		self.temporaryPath = [self _temporaryPathForFilename:self.filename];
-		[_downloader setDestination:self.temporaryPath allowOverwrite:YES];
+		@synchronized(fileManager_) {
+			self.temporaryPath = [self _temporaryPathForFilename:self.filename];
+			[fileManager_ createFileAtPath:_temporaryPath contents:nil attributes:nil];
+			[_downloader setDestination:self.temporaryPath allowOverwrite:YES];
+		}
 	}
 
 	self.totalBytes = 0;
